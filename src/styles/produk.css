@@ -1,0 +1,199 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.produk {
+  min-height: 400px;
+  background-color: var(--bg-light);
+  padding: 80px 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  transition: background-color 0.3s ease;
+}
+
+.produk-judul {
+  margin-top: 50px;
+  font-size: clamp(32px, 5vw, 48px);
+  margin-bottom: 60px;
+  color: var(--primary);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+  text-align: center;
+  font-weight: 700;
+}
+
+.produk-judul.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s;
+}
+
+.produk-konten {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  width: 100%;
+  justify-content: center;
+}
+
+.produk-konten-card {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--secondary) 100%);
+  padding: 35px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px var(--shadow);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 280px;
+}
+
+.produk-konten-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.produk-konten-card:hover::before {
+  opacity: 1;
+}
+
+.produk-konten-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(82, 183, 136, 0.3);
+}
+
+.produk-konten-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.produk-konten-card:nth-child(1).visible { 
+  transition-delay: 0.1s; 
+}
+
+.produk-konten-card:nth-child(2).visible { 
+  transition-delay: 0.2s; 
+}
+
+.produk-konten-card:nth-child(3).visible { 
+  transition-delay: 0.3s; 
+}
+
+.produk-konten-card:nth-child(4).visible { 
+  transition-delay: 0.4s; 
+}
+
+.card-judul {
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+  font-size: clamp(18px, 3vw, 22px);
+  font-weight: 700;
+}
+
+.card-isi {
+  text-align: justify;
+  font-size: clamp(14px, 2vw, 16px);
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.7;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.card-button {
+  z-index: 1;
+  padding: 12px 30px;
+  background-color: white;
+  color: var(--primary);
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: clamp(14px, 2vw, 16px);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  align-self: center;
+}
+
+.card-button:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .produk {
+    padding: 60px 4%;
+  }
+
+  .produk-konten {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+
+  .produk-konten-card {
+    padding: 30px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .produk {
+    padding: 50px 5%;
+  }
+
+  .produk-judul {
+    margin-top: 30px;
+    margin-bottom: 40px;
+  }
+
+  .produk-konten {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .produk-konten-card {
+    padding: 25px;
+    min-height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .produk {
+    padding: 40px 5%;
+  }
+
+  .produk-judul {
+    margin-top: 20px;
+    margin-bottom: 30px;
+  }
+
+  .produk-konten-card {
+    padding: 20px;
+  }
+
+  .card-button {
+    padding: 10px 25px;
+    width: 100%;
+  }
+}

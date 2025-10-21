@@ -1,0 +1,160 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.ResearchBenefit {
+  min-height: 400px;
+  background-color: var(--card-light);
+  padding: 80px 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  transition: background-color 0.3s ease;
+}
+
+.ResearchBenefit-judul {
+  margin-top: 50px;
+  font-size: clamp(32px, 5vw, 48px);
+  margin-bottom: 60px;
+  color: var(--primary);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+  text-align: center;
+  font-weight: 700;
+}
+
+.ResearchBenefit-judul.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s;
+}
+
+.ResearchBenefit-konten {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  width: 100%;
+  justify-content: center;
+}
+
+.ResearchBenefit-konten-card {
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+  padding: 35px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px var(--shadow);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.ResearchBenefit-konten-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.ResearchBenefit-konten-card:hover::before {
+  opacity: 1;
+}
+
+.ResearchBenefit-konten-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 40px rgba(45, 106, 79, 0.3);
+}
+
+.ResearchBenefit-konten-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ResearchBenefit-konten-card:nth-child(1).visible { 
+  transition-delay: 0.1s; 
+}
+
+.ResearchBenefit-konten-card:nth-child(2).visible { 
+  transition-delay: 0.2s; 
+}
+
+.ResearchBenefit-konten-card:nth-child(3).visible { 
+  transition-delay: 0.3s; 
+}
+
+.card-judul {
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+  font-size: clamp(20px, 3vw, 24px);
+  font-weight: 700;
+}
+
+.card-isi {
+  text-align: justify;
+  font-size: clamp(15px, 2vw, 18px);
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.7;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .ResearchBenefit {
+    padding: 60px 4%;
+  }
+
+  .ResearchBenefit-konten {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+  }
+
+  .ResearchBenefit-konten-card {
+    padding: 30px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .ResearchBenefit {
+    padding: 50px 5%;
+  }
+
+  .ResearchBenefit-judul {
+    margin-top: 30px;
+    margin-bottom: 40px;
+  }
+
+  .ResearchBenefit-konten {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .ResearchBenefit-konten-card {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ResearchBenefit {
+    padding: 40px 5%;
+  }
+
+  .ResearchBenefit-judul {
+    margin-top: 20px;
+    margin-bottom: 30px;
+  }
+
+  .ResearchBenefit-konten-card {
+    padding: 20px;
+  }
+}
