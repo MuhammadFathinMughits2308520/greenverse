@@ -3,11 +3,10 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 5173
-  },
+  cacheDir: "/tmp/vite-cache",
   preview: {
-    port: process.env.PORT || 8080, // penting untuk Railway
+    port: process.env.PORT || 8080,
+    host: true,
   },
-  base: "./" // biar asset bisa di-load dari semua path
+  base: "./",
 });
