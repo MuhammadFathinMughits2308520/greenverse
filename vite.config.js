@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   cacheDir: "/tmp/vite-cache",
   preview: {
-    port: process.env.PORT || 8080,
+    port: parseInt(process.env.PORT) || 8080,
     host: true,
   },
   base: "./",
