@@ -77,6 +77,9 @@ function ProtectedRoute({ children }) {
     };
 
     verifyToken();
+    const handleLogout = () => setIsAuth(false);
+    window.addEventListener("logout", handleLogout);
+    return () => window.removeEventListener("logout", handleLogout);
   }, []);
 
   // Loading state dengan spinner

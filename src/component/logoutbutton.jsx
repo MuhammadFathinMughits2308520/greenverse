@@ -1,7 +1,10 @@
 import React from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function LogoutButton() {
+  const navigate = useNavigate();
+
   const handleLogout = async () => {
     const accessToken = localStorage.getItem("access");
     const refreshToken = localStorage.getItem("refresh");
@@ -21,16 +24,24 @@ function LogoutButton() {
           },
         }
       );
-
-      // Hapus token dari localStorage
+    } catch (err) {
+      console.warn("Gagal logout di server (kemungkinan token sudah kedaluwarsa).");
+    } finally {
+      // Hapus semua data auth dari localStorage
       localStorage.removeItem("access");
       localStorage.removeItem("refresh");
 
-      alert("Berhasil logout!");
-      window.location.href = "/login";
-    } catch (err) {
-      console.error("Gagal logout:", err);
-      alert("Gagal logout, silakan coba lagi.");
+      // Kirim event global agar ProtectedRoute tahu user logout
+      window.dispatchEvent(new Event("logout"));
+
+      // Navigasi ke halaman login tanpa bisa kembali
+      navigate("/login", { replace: true });
+
+      // Opsional: mencegah user tekan tombol back untuk kembali
+      setTimeout(() => {
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = () => window.history.go(1);
+      }, 0);
     }
   };
 
