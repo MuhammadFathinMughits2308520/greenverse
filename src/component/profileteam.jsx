@@ -22,7 +22,7 @@ function ProfileTeam() {
     { foto: '/item/team3.png', nama: 'Desi Fauza Nurjanah', peran: 'Pendidikan Kimia', tugas: 'Content Developer'},
     { foto: '/item/team1.png', nama: 'Defrizal Yahdiyan Risyad', peran: 'Ilmu Komputer', tugas: 'AI & Virtual Robot Engineer'},
     { foto: '/item/team4.png', nama: 'Muhammad Ridho Fajri', peran: 'Pendidikan Ilmu Komputer', tugas: 'Visual Designer'},
-    { foto: '/item/team5.png', nama: 'Muhammad Fathin Mughits', peran: 'Penddidikan Ilmu Komputer', tugas: 'Web Developer' },
+    { foto: '/item/team5.png', nama: 'Muhammad Fathin Mughits', peran: 'Pendidikan Ilmu Komputer', tugas: 'Web Developer' },
   ];
 
   return (
