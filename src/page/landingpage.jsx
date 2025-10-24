@@ -7,15 +7,12 @@ import AboutMedia from '../component/aboutmedia';
 import ResearchBenefit from '../component/researchbenefit';
 import UrgensiKontribusi from '../component/urgensikontribusi';
 import Produk from '../component/produk';
+import FeedbackPage from '../component/feedback';
 
 function LandingPage() {
   return (
     <div className='landingpage'>
       <div id='beranda'><Beranda /></div>
-      <div id='team'>
-        <AboutTeam />
-        <Team />
-        </div>
       <div id='konten1'>
         <AboutMedia />
         <UrgensiKontribusi />
@@ -24,6 +21,11 @@ function LandingPage() {
         <ResearchBenefit />
         <Produk />
       </div>
+      <div id='team'>
+        <AboutTeam />
+        <Team />
+      </div>
+      <FeedbackPage />
       <Footer />
     </div>
   );

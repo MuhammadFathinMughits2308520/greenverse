@@ -29,9 +29,9 @@
   transition: background 0.3s ease;
 }
 
-.subcard h4 {
+.subcard h5 {
   color: rgba(255, 255, 255, 0.35);
-  font-size: clamp(30px, 2vw, 40px);
+  font-size: clamp(15px, 1.5vw, 20px);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 2px;

@@ -17,11 +17,12 @@ function ProfileTeam() {
   }, []);
 
   const anggota = [
-    { foto: '/item/team2.png', nama: 'Nasrul Adadi', peran: 'Ketua', tugas: 'Project Leader' },
-    { foto: '/item/team3.png', nama: 'Desi Fauza Nurjanah', peran: 'Anggota', tugas: 'Content Developer' },
-    { foto: '/item/team1.png', nama: 'Defrizal Yahdiyan Risyad', peran: 'Anggota', tugas: 'AI & Virtual Robot Engineer' },
-    { foto: '/item/team4.png', nama: 'Muhammad Ridho Fajri', peran: 'Anggota', tugas: 'Visual Designer' },
-    { foto: '/item/team5.png', nama: 'Muhammad Fathin Mughits', peran: 'Anggota', tugas: 'Web Developer' },
+    { foto: '/item/dospem.png', nama: 'Triannisa Rahmawati S. Pd., M.Si', peran: 'Dosen Pembimbing', tugas: "Supervisor" },
+    { foto: '/item/team2.png', nama: 'Nasrul Adadi', peran: 'Pendidikan Kimia', tugas: 'Project Leader' },
+    { foto: '/item/team3.png', nama: 'Desi Fauza Nurjanah', peran: 'Pendidikan Kimia', tugas: 'Content Developer'},
+    { foto: '/item/team1.png', nama: 'Defrizal Yahdiyan Risyad', peran: 'Ilmu Komputer', tugas: 'AI & Virtual Robot Engineer'},
+    { foto: '/item/team4.png', nama: 'Muhammad Ridho Fajri', peran: 'Pendidikan Ilmu Komputer', tugas: 'Visual Designer'},
+    { foto: '/item/team5.png', nama: 'Muhammad Fathin Mughits', peran: 'Pendedidikan Ilmu Komputer', tugas: 'Web Developer' },
   ];
 
   return (

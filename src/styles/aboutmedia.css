@@ -6,7 +6,7 @@
 
 .AboutMedia {
   min-height: 400px;
-  background-color: var(--bg-light);
+  background-color: var(--card-light);
   padding: 80px 5%;
   display: flex;
   justify-content: center;

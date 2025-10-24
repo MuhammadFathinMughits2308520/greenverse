@@ -64,14 +64,14 @@ function Navbar({ scrollToSection }) {
         <a onClick={() => handleNavClick('beranda')} className='link-beranda'>
           Beranda
         </a>
-        <a onClick={() => handleNavClick('team')} className='link-konten1'>
-          Our Team
-        </a>
         <a onClick={() => handleNavClick('konten1')} className='link-konten2'>
           Media
         </a>
         <a onClick={() => handleNavClick('konten2')} className='link-team'>
           Riset
+        </a>
+        <a onClick={() => handleNavClick('team')} className='link-konten1'>
+          Our Team
         </a>
         <button className="tombol-produk" onClick={() => navigate('/ecomic')}>
           Get Started

@@ -2,37 +2,51 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import '../styles/beranda.css';
 
-
 function Beranda() {
   const navigate  = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
 
-  // Array gambar background (ganti dengan URL gambar Anda)
+  // Slides dengan opsi background khusus desktop & mobile
   const slides = [
     {
-      bg: '/item/gambar-beranda1.JPG',
-      title: 'PKM - RSH',
-      subtitle: 'E-Comic Berbasis Robot Virtual Bermuatan Kearifan Lokal Mapag Hujan dengan Pendekatan STREAM sebagai Sarana Literasi Lingkungan untuk Mendukung Program Prioritas'
+      // Slide 1: tampilkan 3 baris (small title, big product, deskripsi)
+      titleSmall: 'PKM AMLI-RSH 2025',
+      produk: 'ECOMBOT',
+      subtitle: `E-Comic Berbasis Robot Virtual Bermuatan Kearifan Lokal Mapag Hujan dengan Pendekatan STREAM untuk Mendukung Program Prioritas`,
+      // background khusus: gunakan gambar untuk desktop, gambar lebih kecil atau berbeda untuk mobile
+      desktopBg: '/item/laptop/gambar-beranda1.png',
+      mobileBg: '/item/mobile/gambar-beranda1.png' // sediakan image mobile atau fallback ke desktop jika tidak ada
     },
     {
-      bg: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      title: 'Inovasi Teknologi',
-      subtitle: 'Solusi Masa Depan'
+      title: 'Inovasi Media Pembelajaran Digital',
+      subtitle: 'Solusi Masa Depan',
+      desktopBg: '/item/laptop/gambar-beranda2.png',
+      mobileBg: '/item/mobile/gambar-beranda2.png'
     },
     {
-      bg: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-      title: 'Ramah Lingkungan',
-      subtitle: 'Menuju Masa Depan Hijau'
+      title: 'Sarana Penguatan Literasi Lingkungan',
+      subtitle: 'Bersama Membangun',
+      desktopBg: '/item/laptop/gambar-beranda3.png',
+      mobileBg: '/item/mobile/gambar-beranda3.png'
     },
     {
-      bg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-      title: 'Pengembangan Berkelanjutan',
-      subtitle: 'Bersama Membangun'
+      title: 'Bermuatan Kearifan Lokal',
+      subtitle: 'Menuju Masa Depan Hijau',
+      desktopBg: '/item/laptop/gambar-beranda4.png',
+      mobileBg: '/item/mobile/gambar-beranda4.png'
     }
   ];
 
-  // Auto slide setiap 5 detik
+  // Update isMobile saat resize
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  // Auto slide setiap 10 detik (sebelumnya 5 detik; di kode awal interval 10000ms)
   useEffect(() => {
     if (!isAutoPlay) return;
 
@@ -45,8 +59,8 @@ function Beranda() {
 
   const goToSlide = (index) => {
     setCurrentSlide(index);
-    setIsAutoPlay(false); // Pause auto-play saat manual click
-    setTimeout(() => setIsAutoPlay(true), 10000); // Resume setelah 10 detik
+    setIsAutoPlay(false); // pause auto-play saat manual click
+    setTimeout(() => setIsAutoPlay(true), 10000); // resume setelah 10 detik
   };
 
   const nextSlide = () => {
@@ -57,49 +71,88 @@ function Beranda() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  // helper: pilih background berdasarkan device & format string
+  const getBackgroundStyle = (slide) => {
+    const bgSource = isMobile ? (slide.mobileBg ?? slide.desktopBg ?? slide.bg) : (slide.desktopBg ?? slide.bg ?? slide.mobileBg);
+    if (!bgSource) return {};
+    const bgValue = String(bgSource).trim();
+    const isGradient = bgValue.startsWith('linear-gradient') || bgValue.startsWith('radial-gradient');
+    return {
+      backgroundImage: isGradient ? bgValue : `url(${bgValue})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    };
+  };
+
   return (
-    <div className="carousel-container" id='beranda'>
-        {slides.map((slide, index) => (
+    <div className="carousel-container" id="beranda">
+      {slides.map((slide, index) => {
+        const isActive = index === currentSlide;
+        return (
           <div
             key={index}
-            className={`carousel-slide ${index === currentSlide ? 'active' : ''}`}
-            style={{
-              backgroundImage: slide.bg.startsWith('linear-gradient')
-                ? slide.bg
-                : `url(${slide.bg})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }}
+            className={`carousel-slide ${isActive ? 'active' : ''}`}
+            style={getBackgroundStyle(slide)}
           >
-            <div className="overlay"></div>
+            <div className="overlay" />
             <div className="slide-content">
-              <h1 className="slide-title">{slide.title}</h1>
-              <p className="slide-subtitle">{slide.subtitle}</p>
-              <button className="produk-btn" onClick={() => navigate('/ecomic')}>Get Started</button>
+              {/* Jika slide memiliki struktur produk (slide pertama), render format khusus */}
+              {slide.produk ? (
+                <>
+                  <div className="slide-meta">
+                    {/* judul kecil */}
+                    <div className="slide-title-small">{slide.titleSmall}</div>
+                    {/* produk besar */}
+                    <div className="slide-produk">{slide.produk}</div>
+                  </div>
+
+                  {/* deskripsi panjang */}
+                  <p className="slide-subtitle slide-subtitle-long">{slide.subtitle}</p>
+                </>
+              ) : (
+                <>
+                  {/* slide biasa */}
+                  <h2 className="slide-title">{slide.title}</h2>
+                  <p className="slide-subtitle">{slide.subtitle}</p>
+                </>
+              )}
+
+              <button
+                className="produk-btn"
+                onClick={() => navigate('/ecomic')}
+                aria-label="Get Started ECOMBOT"
+              >
+                Get Started
+              </button>
             </div>
           </div>
+        );
+      })}
+
+      {/* Arrow Navigation */}
+      <button className="carousel-arrow arrow-left" onClick={prevSlide} aria-label="previous slide">
+        ‹
+      </button>
+      <button className="carousel-arrow arrow-right" onClick={nextSlide} aria-label="next slide">
+        ›
+      </button>
+
+      {/* Indicators */}
+      <div className="carousel-indicators">
+        {slides.map((_, index) => (
+          <div
+            key={index}
+            className={`indicator ${index === currentSlide ? 'active' : ''}`}
+            onClick={() => goToSlide(index)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') goToSlide(index); }}
+            aria-label={`Go to slide ${index + 1}`}
+          />
         ))}
-
-        {/* Arrow Navigation */}
-        <button className="carousel-arrow arrow-left" onClick={prevSlide}>
-          ‹
-        </button>
-        <button className="carousel-arrow arrow-right" onClick={nextSlide}>
-          ›
-        </button>
-
-        {/* Indicators */}
-        <div className="carousel-indicators">
-          {slides.map((_, index) => (
-            <div
-              key={index}
-              className={`indicator ${index === currentSlide ? 'active' : ''}`}
-              onClick={() => goToSlide(index)}
-            />
-          ))}
-        </div>
       </div>
+    </div>
   );
 }
 

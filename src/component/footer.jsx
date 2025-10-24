@@ -14,16 +14,16 @@ function Footer() {
         <div className="footer-links">
           <h3>Tautan Cepat</h3>
           <ul>
-            <li><a href="/about">Tentang</a></li>
-            <li><a href="/contact">Kontak</a></li>
-            <li><a href="/privacy">Kebijakan Privasi</a></li>
+            <li><a href="">Tentang</a></li>
+            <li><a href="">Kontak</a></li>
+            <li><a href="">Kebijakan Privasi</a></li>
           </ul>
         </div>
 
         <div className="footer-social">
           <h3>Ikuti Kami</h3>
           <a href="https://www.instagram.com/pkmamli.greenverse/" target="_blank" rel="noreferrer">Instagram</a><br/>
-          <a href="mailto:info@aplikasiku.com">Email</a>
+          <a href="mailto:greenverse14@gmail.com">Email</a>
         </div>
       </div>
 

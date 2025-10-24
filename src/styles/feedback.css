@@ -1,0 +1,174 @@
+/* src/styles/feedback.css */
+
+/* Theme variables (light) + dark override */
+:root {
+  --primary: #2D6A4F;
+  --secondary: #52B788;
+  --accent: #74C69D;
+  --bg-light: #F8F9FA;
+  --text-dark: #212529;
+  --card-light: #FFFFFF;
+  --shadow: rgba(0, 0, 0, 0.1);
+
+  /* semantic */
+  --bg: var(--bg-light);
+  --card-bg: var(--card-light);
+  --text: var(--text-dark);
+  --muted: rgba(33, 37, 41, 0.6);
+}
+
+/* dark-mode variables */
+.dark-mode {
+  --primary: #52B788;
+  --secondary: #74C69D;
+  --accent: #95D5B2;
+  --bg-light: #0D1B2A;
+  --text-dark: #E9ECEF;
+  --card-light: #1B263B;
+  --shadow: rgba(0, 0, 0, 0.5);
+
+  --bg: var(--bg-light);
+  --card-bg: var(--card-light);
+  --text: var(--text-dark);
+  --muted: rgba(233, 236, 239, 0.45);
+}
+
+/* Page layout */
+.feedback-page {
+  padding: 28px 16px;
+  min-height: 70vh;
+  background: var(--card-light);
+  color: var(--text);
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Container centering */
+.feedback-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Title */
+.feedback-title {
+  margin-top: 50px;
+  font-size: clamp(32px, 5vw, 48px);
+  margin-bottom: 60px;
+  color: var(--primary);
+  text-align: center;
+  font-weight: 700;
+}
+
+/* Card wrapper */
+.feedback-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 8px 24px var(--shadow);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Form elements */
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.field-input,
+.field-textarea {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  outline: none;
+  transition: box-shadow .12s, border-color .12s, background .12s;
+  font-size: 14px;
+}
+
+/* subtle border & background for dark mode */
+.dark-mode .field-input,
+.dark-mode .field-textarea {
+  border: 1px solid rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.02);
+}
+
+/* focus */
+.field-input:focus,
+.field-textarea:focus {
+  box-shadow: 0 8px 18px rgba(82,183,136,0.06);
+  border-color: rgba(82,183,136,0.35);
+}
+
+/* Textarea */
+.field-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Actions */
+.feedback-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--secondary), var(--primary));
+  color: white;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(37, 122, 89, 0.12);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-plain {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* messages */
+.feedback-error {
+  margin-top: 6px;
+  color: #ff7675;
+  font-size: 13px;
+}
+
+.feedback-success {
+  margin-top: 6px;
+  color: #b8f5d0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* responsive */
+@media (max-width: 720px) {
+  .feedback-container { padding: 0 6px; }
+  .feedback-card { padding: 14px; }
+  .btn-primary { padding: 10px 14px; font-size: 15px; }
+}

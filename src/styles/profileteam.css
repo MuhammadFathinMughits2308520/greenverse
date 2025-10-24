@@ -6,7 +6,7 @@
 
 .teampage {
   min-height: 1000px;
-  background-color: var(--card-light);
+  background-color: var(--bg-light);
   padding: 80px 5%;
   display: flex;
   justify-content: center;

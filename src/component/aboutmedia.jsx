@@ -38,7 +38,7 @@ function AboutMedia() {
                 Apa itu ECOMBOT?
             </h2>
             <p className={`AboutMedia-about ${isVisible ? 'visible' : ''}`}>
-                ECOMBOT adalah <i>E-Comic</i> berbasis Robot Virtual yang memuat kearifan lokal Mapag Hujan sebagai media pembelajaran yang interaktif dan inovatif. Media ini menggabungkan komik digital dengan karakter <i>chatbot</i> yang berperan sebagai pemandu literasi lingkungan. Melalui pendekatan STREAM (<i>Science, Technology, Robotics, Engineering, Arts, and Mathematics</i>), Ecombot membantu pengguna mengeksplorasi keterkaitan berbagai disiplin ilmu serta budaya lokal dalam upaya menjaga kelestarian lingkungan.
+                ECOMBOT adalah media pembelajaran interaktif dan inovatif.  Media ini menggabungkan <i>E-Comic</i> dengan Robot Virtual dalam bentuk ChatBot yang memuat kearifan lokal Mapag Hujan sebagai media sebagai sarana penguatan literasi lingkungan. Melalui pendekatan STREAM (<i>Science, Technology, Robotics, Engineering, Arts, and Mathematics</i>), ECOMBOT membantu pengguna mengeksplorasi keterkaitan berbagai disiplin ilmu dalam upaya menjaga kelestarian lingkungan.
             </p>
         </div>
     );
