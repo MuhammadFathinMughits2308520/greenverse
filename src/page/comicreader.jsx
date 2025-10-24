@@ -1,6 +1,8 @@
 // ComicReader.jsx
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
+import { useDarkMode } from '../context/DarkModeContext';
+import LogoutButton from "../component/logoutbutton";
 import "../styles/comicreader.css";
 
 // SVG Icons
@@ -45,6 +47,7 @@ export default function ComicReader({ comic = "sample", episode = "1" }) {
   const [headerVisible, setHeaderVisible] = useState(true);
   const [toastMessage, setToastMessage] = useState("");
   const [showChatbot, setShowChatbot] = useState(false);
+  const { isDark, toggleDarkMode } = useDarkMode();
   const [permission, setPermission] = useState(null); // { finish: bool, allowed_page: number, last_page: number }
 
   const containerRef = useRef(null);
@@ -201,29 +204,29 @@ useEffect(() => {
 
   // --- Navigation checks (permission) ---
   const canGoToPage = useCallback(async (targetIndex) => {
-  if (!manifest) return false;
-  const lastIndex = manifest.pages.length - 1;
-  if (targetIndex < 0 || targetIndex > lastIndex) return false;
+    if (!manifest) return false;
+    const lastIndex = manifest.pages.length - 1;
+    if (targetIndex < 0 || targetIndex > lastIndex) return false;
 
-  // semua halaman diizinkan kalau sudah finish
-  if (permission?.finish) return true;
+    // semua halaman diizinkan kalau sudah finish
+    if (permission?.finish) return true;
 
-  // kalau belum finish, hanya boleh sampai halaman terakhir yang pernah dibaca
-  if (targetIndex <= 2) return true;
+    // kalau belum finish, hanya boleh sampai halaman terakhir yang pernah dibaca
+    if (targetIndex <= 2) return true;
 
-  // fallback ke server check
-  try {
-    const params = new URLSearchParams({ comic, episode, page: targetIndex });
-    const res = await fetch(`https://backendecombot-production.up.railway.app/api/comic-progress/?${params.toString()}`, {
-      headers: { "Content-Type": "application/json", ...getAuthHeader() },
-    });
-    const data = await res.json();
-    return data.finish === true || targetIndex <= data.last_page;
-  } catch (err) {
-    console.warn("permission-check failed:", err);
-    return true;
-  }
-}, [manifest, permission, comic, episode]);
+    // fallback ke server check
+    try {
+      const params = new URLSearchParams({ comic, episode, page: targetIndex });
+      const res = await fetch(`https://backendecombot-production.up.railway.app/api/comic-progress/?${params.toString()}`, {
+        headers: { "Content-Type": "application/json", ...getAuthHeader() },
+      });
+      const data = await res.json();
+      return data.finish === true || targetIndex <= data.last_page;
+    } catch (err) {
+      console.warn("permission-check failed:", err);
+      return true;
+    }
+  }, [manifest, permission, comic, episode]);
 
 
 
@@ -232,12 +235,15 @@ useEffect(() => {
     if (!manifest) return;
     const target = currentPage + 1;
     const allowed = await canGoToPage(target);
-    if (!allowed) {
+    console.log("target : ", target);
+    if (!allowed && target <= currentPage) {
       showToast("Selesaikan explorasi terlebih dahulu");
       setTimeout(() => {
         navigate('/ecombot');
-      }, 1500);
+      }, 1000);
       return;
+    }else if(target >= 4){
+      showToast("Semua halaman sudah terbuka");
     }
     setCurrentPage(prev => Math.min(prev + 1, manifest.pages.length - 1));
     setHeaderVisible(true);
@@ -316,13 +322,30 @@ useEffect(() => {
   const isImageLoaded = loadedImages.has(currentPage);
   const progress = ((currentPage + 1) / manifest.pages.length) * 100;
 
+  const handleLogout = () => {
+    window.location.href = "/login"; // redirect ke halaman login
+  };
+
   return (
     <div ref={containerRef} className="comic-reader" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className="comic-reader-progress" style={{ width: `${progress}%` }} />
 
       <div className={`comic-reader-header ${!headerVisible ? 'hidden' : ''}`}>
-        <div className="comic-reader-title">{manifest.title || `${comic} - Episode ${episode}`}</div>
+        <div className="comic-reader-title" onClick={()=>navigate('/')}>
+          <img src="/item/logo.svg" alt="Logo" loading='lazy' className='logo'/>
+          <span className="title-text">Ecombot</span>
+        </div>
         <div className="comic-reader-counter">{currentPage + 1} / {manifest.pages.length}</div>
+        <div className="comic-reader-aksi">
+          <button 
+            className="dark-mode-toggle-comic" 
+            onClick={toggleDarkMode}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {isDark ? '☀️' : '🌙'}
+          </button>
+            <LogoutButton onLogoutSuccess={handleLogout} />
+        </div>
       </div>
 
       <div className="comic-reader-main">
@@ -344,9 +367,6 @@ useEffect(() => {
       {/* navigation buttons */}
       {currentPage > 0 && <button onClick={() => goToPrevPage()} className="comic-reader-nav-btn prev" aria-label="Previous page"><ChevronLeft /></button>}
       {currentPage < manifest.pages.length - 1 && <button onClick={() => goToNextPage()} className="comic-reader-nav-btn next" aria-label="Next page"><ChevronRight /></button>}
-
-      {/* dots */}
-      <div className="comic-reader-dots">{manifest.pages.map((_, idx) => (<button key={idx} onClick={() => goToPage(idx)} className={`comic-reader-dot ${currentPage === idx ? 'active' : ''}`} aria-label={`Go to page ${idx + 1}`}></button>))}</div>
 
       {/* Chatbot floating (requirement #1) */}
       {showChatbot && (

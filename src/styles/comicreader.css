@@ -1,3 +1,4 @@
+/* ===== Base Layout ===== */
 .comic-reader {
   position: relative;
   width: 100%;
@@ -5,6 +6,10 @@
   background-color: var(--bg-light);
   overflow: hidden;
   transition: background-color 0.3s ease;
+}
+
+.dark-mode .comic-reader {
+  background-color: var(--bg-dark);
 }
 
 .comic-reader-container {
@@ -18,20 +23,43 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Header */
+.dark-mode .comic-reader-container {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
+.comic-reader-aksi{
+  display: flex;
+  max-width: 200px;
+  min-width: 150px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ===== Header ===== */
 .comic-reader-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  padding: 1rem 2rem;
-  background: linear-gradient(to bottom, var(--primary), transparent);
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(180deg, var(--primary) 0%, rgba(82, 183, 136, 0.95) 100%);
+  backdrop-filter: blur(10px);
   color: white;
   z-index: 30;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: transform 0.3s ease;
+  gap: 0.75rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, background 0.3s ease;
+  flex-wrap: nowrap;
+}
+
+
+.dark-mode .comic-reader-header {
+  background: linear-gradient(180deg, rgba(27, 38, 59, 0.98) 0%, rgba(27, 38, 59, 0.92) 100%);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
 .comic-reader-header.hidden {
@@ -39,42 +67,166 @@
 }
 
 .comic-reader-title {
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: clamp(0.95rem, 2vw, 1.125rem);
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.comic-reader-title:hover {
+  opacity: 0.85;
+}
+
+.comic-reader-title .logo {
+  width: clamp(24px, 5vw, 32px);
+  height: clamp(24px, 5vw, 32px);
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .comic-reader-counter {
-  background-color: var(--secondary);
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+  background-color: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  padding: 0.4rem 0.75rem;
+  border-radius: 16px;
+  font-size: clamp(0.75rem, 1.5vw, 0.9rem);
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* Main Display */
-.comic-reader-main {
-  width: 100%;
-  height: 100vh;
+.dark-mode .comic-reader-counter {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode-toggle-comic {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5rem 1rem 6rem;
-  position: relative;
+  min-width: 40px;
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+.dark-mode-toggle-comic:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.dark-mode-toggle-comic:active {
+  transform: scale(0.95);
+}
+
+/* Logout Button Styles */
+.logout-button,
+button[class*="logout"],
+.comic-reader-header button:last-child {
+  background: rgba(239, 68, 68, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 0.4rem 0.75rem;
+  font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 40px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.dark-mode .logout-button,
+.dark-mode button[class*="logout"],
+.dark-mode .comic-reader-header button:last-child {
+  background: rgba(220, 38, 38, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+}
+
+.logout-button:hover,
+button[class*="logout"]:hover,
+.comic-reader-header button:last-child:hover {
+  background: rgba(220, 38, 38, 1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+.dark-mode .logout-button:hover,
+.dark-mode button[class*="logout"]:hover,
+.dark-mode .comic-reader-header button:last-child:hover {
+  background: rgba(185, 28, 28, 1);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
+}
+
+.logout-button:active,
+button[class*="logout"]:active,
+.comic-reader-header button:last-child:active {
+  transform: scale(0.95);
+}
+
+/* Icon inside logout button */
+.logout-button svg,
+button[class*="logout"] svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== Main Display ===== */
+.comic-reader-main {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1rem 1rem;
+  overflow: hidden;
 }
 
 .comic-reader-image {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 95%;
+  max-height: 85vh;
   width: auto;
   height: auto;
   object-fit: contain;
   opacity: 0;
-  box-shadow: 0 10px 50px var(--shadow);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   border-radius: 12px;
   transition: opacity 0.5s ease, transform 0.3s ease;
   transform: scale(0.95);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dark-mode .comic-reader-image {
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.4);
 }
 
 .comic-reader-image.visible {
@@ -82,7 +234,11 @@
   transform: scale(1);
 }
 
-/* Loading States */
+.comic-reader-image:active {
+  transform: scale(0.98);
+}
+
+/* ===== Loading States ===== */
 .comic-reader-loading,
 .comic-reader-page-loading {
   text-align: center;
@@ -91,6 +247,11 @@
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+}
+
+.dark-mode .comic-reader-loading,
+.dark-mode .comic-reader-page-loading {
+  color: var(--text-light);
 }
 
 .comic-reader-page-loading {
@@ -105,8 +266,14 @@
   text-align: center;
   padding: 2rem;
   background-color: var(--card-light);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px var(--shadow);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+}
+
+.dark-mode .comic-reader-error {
+  background-color: var(--card-dark);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .error-message {
@@ -122,17 +289,25 @@
   color: var(--text-dark);
 }
 
+.dark-mode .error-detail {
+  color: var(--text-light);
+}
+
 .comic-reader-no-pages {
   color: #f59e0b;
   font-size: clamp(1rem, 2vw, 1.125rem);
   font-weight: 600;
 }
 
-/* Spinner Animation */
+/* ===== Spinner Animation ===== */
 .spinner {
   margin: 0 auto;
   color: var(--primary);
   animation: spin 1s linear infinite;
+}
+
+.dark-mode .spinner {
+  color: var(--secondary);
 }
 
 @keyframes spin {
@@ -144,7 +319,7 @@
   }
 }
 
-/* Navigation Buttons - Desktop */
+/* ===== Navigation Buttons - Desktop ===== */
 .comic-reader-nav-btn {
   position: fixed;
   top: 50%;
@@ -159,10 +334,15 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(82, 183, 136, 0.4);
+  box-shadow: 0 4px 20px rgba(82, 183, 136, 0.3);
   transition: all 0.3s ease;
   z-index: 20;
-  opacity: 0.9;
+  opacity: 0.85;
+}
+
+.dark-mode .comic-reader-nav-btn {
+  background: linear-gradient(135deg, rgba(82, 183, 136, 0.9) 0%, rgba(65, 147, 109, 0.9) 100%);
+  box-shadow: 0 4px 20px rgba(82, 183, 136, 0.4);
 }
 
 .comic-reader-nav-btn.prev {
@@ -176,7 +356,7 @@
 .comic-reader-nav-btn:hover {
   background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
   transform: translateY(-50%) scale(1.15);
-  box-shadow: 0 6px 30px rgba(82, 183, 136, 0.6);
+  box-shadow: 0 6px 30px rgba(82, 183, 136, 0.5);
   opacity: 1;
 }
 
@@ -189,15 +369,21 @@
   height: 28px;
 }
 
-/* Touch Areas for Mobile */
+/* ===== Touch Areas for Mobile ===== */
 .comic-reader-touch-area {
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   width: 40%;
   z-index: 15;
   cursor: pointer;
   display: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 .comic-reader-touch-area.left {
@@ -208,136 +394,149 @@
   right: 0;
 }
 
-.comic-reader-touch-area:active {
-  background: radial-gradient(circle at center, rgba(82, 183, 136, 0.1), transparent);
-}
-
-/* Dots Navigation */
-.comic-reader-dots {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 0.5rem;
-  background-color: rgba(45, 106, 79, 0.9);
-  padding: 0.75rem 1.5rem;
-  border-radius: 9999px;
-  max-width: 90%;
-  overflow-x: auto;
-  z-index: 20;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px var(--shadow);
-}
-
-.comic-reader-dots::-webkit-scrollbar {
-  height: 4px;
-}
-
-.comic-reader-dots::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-}
-
-.comic-reader-dots::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 2px;
-}
-
-.comic-reader-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 9999px;
-  background-color: rgba(255, 255, 255, 0.4);
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0;
-  min-width: 0.5rem;
-  flex-shrink: 0;
-}
-
-.comic-reader-dot.active {
-  width: 2rem;
-  background-color: white;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-}
-
-.comic-reader-dot:hover {
-  background-color: rgba(255, 255, 255, 0.7);
-  transform: scale(1.3);
-}
-
-/* Progress Indicator */
+/* ===== Progress Indicator ===== */
 .comic-reader-progress {
   position: fixed;
   top: 0;
   left: 0;
-  height: 3px;
+  height: 4px;
   background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
   transition: width 0.3s ease;
   z-index: 31;
+  box-shadow: 0 2px 8px rgba(82, 183, 136, 0.3);
 }
 
-/* Dark mode enhancements */
-.dark-mode .comic-reader-header {
-  background: linear-gradient(to bottom, rgba(27, 38, 59, 0.95), transparent);
+.dark-mode .comic-reader-progress {
+  background: linear-gradient(90deg, var(--secondary) 0%, var(--accent) 100%);
+  box-shadow: 0 2px 8px rgba(82, 183, 136, 0.5);
 }
 
-.dark-mode .comic-reader-dots {
-  background-color: rgba(27, 38, 59, 0.9);
-}
-
-/* Chatbot floating */
+/* ===== Chatbot Floating Button ===== */
 .chatbot-floating {
   position: fixed;
-  right: 1rem;
-  bottom: 4.8rem; /* above dots/progress controls */
-  width: 56px;
-  height: 56px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--secondary), var(--primary));
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 24px rgba(82, 183, 136, 0.4);
   z-index: 60;
   cursor: pointer;
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-.chatbot-floating img {
-  width: 60%;
-  height: 60%;
-  object-fit: contain;
-}
-.chatbot-floating:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 10px 36px rgba(0,0,0,0.32);
+  transition: all 0.3s ease;
+  border: 3px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Toast notification */
+.dark-mode .chatbot-floating {
+  background: linear-gradient(135deg, rgba(82, 183, 136, 0.95) 0%, rgba(65, 147, 109, 0.95) 100%);
+  box-shadow: 0 6px 24px rgba(82, 183, 136, 0.6);
+  border: 3px solid rgba(255, 255, 255, 0.1);
+}
+
+.chatbot-floating img {
+  width: 55%;
+  height: 55%;
+  object-fit: contain;
+}
+
+.chatbot-floating:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 10px 36px rgba(82, 183, 136, 0.5);
+}
+
+.dark-mode .chatbot-floating:hover {
+  box-shadow: 0 10px 36px rgba(82, 183, 136, 0.7);
+}
+
+.chatbot-floating:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* ===== Toast Notification ===== */
 .comic-toast {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 6.6rem;
-  background: rgba(33,33,33,0.92);
+  bottom: 6rem;
+  background: rgba(33, 33, 33, 0.95);
+  backdrop-filter: blur(10px);
   color: white;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
   z-index: 80;
   font-weight: 600;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+  font-size: 0.95rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
   max-width: 90%;
   text-align: center;
   pointer-events: none;
+  animation: slideUp 0.3s ease;
 }
 
+.dark-mode .comic-toast {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-dark);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+}
 
-/* Tablet (768px - 1024px) */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ===== Tablet Responsive (768px - 1024px) ===== */
 @media (max-width: 1024px) {
   .comic-reader-header {
-    padding: 0.875rem 1.5rem;
+    padding: 0.75rem 1.25rem;
+    gap: 0.75rem;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .comic-reader-title {
+    gap: 0.5rem;
+  }
+
+  .comic-reader-counter {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .comic-reader-aksi {
+    display: flex;
+    max-width: 100px;
+    min-width: 50px;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .dark-mode-toggle-comic {
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0.4rem 0.5rem;
+  }
+
+  .logout-button,
+  button[class*="logout"],
+  .comic-reader-aksi button:last-child {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+    min-height: 42px;
+  }
+
+  .logout-button svg,
+  button[class*="logout"] svg {
+    width: 15px;
+    height: 15px;
   }
 
   .comic-reader-nav-btn {
@@ -359,21 +558,64 @@
   }
 
   .comic-reader-main {
-    padding: 4.5rem 1rem 5rem;
+    padding: 4.5rem 1rem 1rem;
+  }
+
+  .chatbot-floating {
+    width: 56px;
+    height: 56px;
+    right: 1.25rem;
+    bottom: 1.25rem;
   }
 }
 
-/* Mobile (< 768px) */
+/* ===== Mobile Responsive (< 768px) ===== */
 @media (max-width: 768px) {
   .comic-reader-header {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 0.625rem;
+    gap: 0.375rem;
+  }
+
+  .comic-reader-title {
+    gap: 0.3rem;
+    font-size: 0.875rem;
+  }
+
+  .comic-reader-title .logo {
+    width: 24px;
+    height: 24px;
   }
 
   .comic-reader-counter {
-    padding: 0.375rem 0.75rem;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    border-radius: 12px;
   }
 
-  /* Hide nav buttons on mobile */
+  .dark-mode-toggle-comic {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0.3rem 0.45rem;
+    font-size: 1rem;
+    border-radius: 8px;
+  }
+
+  .logout-button,
+  button[class*="logout"],
+  .comic-reader-header button:last-child {
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    min-height: 36px;
+    border-radius: 8px;
+  }
+
+  .logout-button svg,
+  button[class*="logout"] svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Hide navigation buttons on mobile */
   .comic-reader-nav-btn {
     display: none;
   }
@@ -384,52 +626,80 @@
   }
 
   .comic-reader-main {
-    padding: 3.5rem 0.5rem 5rem;
+    padding: 3.5rem 0.5rem 1rem;
   }
 
   .comic-reader-image {
+    max-width: 98%;
+    max-height: 80vh;
     border-radius: 8px;
   }
 
-  .comic-reader-dots {
+  .chatbot-floating {
+    width: 52px;
+    height: 52px;
+    right: 1rem;
     bottom: 1rem;
-    padding: 0.5rem 1rem;
-    max-width: 95%;
+    border-width: 2px;
   }
 
-  .comic-reader-dot {
-    width: 0.375rem;
-    height: 0.375rem;
-    min-width: 0.375rem;
-  }
-
-  .comic-reader-dot.active {
-    width: 1.5rem;
+  .comic-toast {
+    bottom: 5rem;
+    font-size: 0.9rem;
+    padding: 0.65rem 1rem;
   }
 }
 
-/* Small Mobile (< 480px) */
+/* ===== Small Mobile (< 480px) ===== */
 @media (max-width: 480px) {
   .comic-reader-header {
-    padding: 0.625rem 0.75rem;
+    padding: 0.45rem 0.5rem;
+    gap: 0.25rem;
   }
 
   .comic-reader-title {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
+    gap: 0.25rem;
+  }
+
+  .comic-reader-title .logo {
+    width: 20px;
+    height: 20px;
   }
 
   .comic-reader-counter {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+    padding: 0.25rem 0.45rem;
+    font-size: 0.7rem;
+  }
+
+  .dark-mode-toggle-comic {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0.25rem 0.35rem;
+    font-size: 0.9rem;
+  }
+
+  .logout-button,
+  button[class*="logout"],
+  .comic-reader-header button:last-child {
+    padding: 0.25rem 0.45rem;
+    font-size: 0.7rem;
+    min-height: 32px;
+    gap: 0.25rem;
+  }
+
+  .logout-button svg,
+  button[class*="logout"] svg {
+    width: 12px;
+    height: 12px;
   }
 
   .comic-reader-main {
-    padding: 3rem 0.25rem 4.5rem;
+    padding: 3rem 0.375rem 1rem;
   }
 
-  .comic-reader-dots {
-    bottom: 0.75rem;
-    padding: 0.375rem 0.75rem;
+  .comic-reader-image {
+    border-radius: 6px;
   }
 
   .comic-reader-error {
@@ -437,31 +707,46 @@
   }
 
   .chatbot-floating {
-    right: 0.6rem;
-    bottom: 6.2rem;
     width: 48px;
     height: 48px;
+    right: 0.75rem;
+    bottom: 0.75rem;
   }
-  .comic-toast { bottom: 7.5rem; font-size: 0.95rem; }
+
+  .comic-toast {
+    bottom: 4.5rem;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.875rem;
+  }
 }
 
-/* Landscape mode on mobile */
+/* ===== Landscape Mode on Mobile ===== */
 @media (max-height: 500px) and (orientation: landscape) {
   .comic-reader-header {
     padding: 0.5rem 1rem;
   }
 
   .comic-reader-main {
-    padding: 3rem 1rem 4rem;
+    padding: 3.5rem 1rem 0.5rem;
   }
 
-  .comic-reader-dots {
-    bottom: 0.5rem;
-    padding: 0.375rem 0.75rem;
+  .comic-reader-image {
+    max-height: 75vh;
+  }
+
+  .chatbot-floating {
+    width: 44px;
+    height: 44px;
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .comic-toast {
+    bottom: 4rem;
   }
 }
 
-/* Animation for page transitions */
+/* ===== Animation for Page Transitions ===== */
 @keyframes fadeInScale {
   from {
     opacity: 0;
@@ -477,17 +762,36 @@
   animation: fadeInScale 0.5s ease;
 }
 
-/* Accessibility */
+/* ===== Accessibility ===== */
 @media (prefers-reduced-motion: reduce) {
   .comic-reader-image,
   .comic-reader-nav-btn,
-  .comic-reader-dot {
+  .chatbot-floating,
+  .comic-toast {
     transition: none;
     animation: none;
   }
 }
 
-/* Loading skeleton */
+/* Focus styles for accessibility */
+.comic-reader-nav-btn:focus-visible,
+.dark-mode-toggle-comic:focus-visible,
+.logout-button:focus-visible,
+button[class*="logout"]:focus-visible,
+.chatbot-floating:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.dark-mode .comic-reader-nav-btn:focus-visible,
+.dark-mode .dark-mode-toggle-comic:focus-visible,
+.dark-mode .logout-button:focus-visible,
+.dark-mode button[class*="logout"]:focus-visible,
+.dark-mode .chatbot-floating:focus-visible {
+  outline-color: rgba(82, 183, 136, 0.8);
+}
+
+/* ===== Loading Skeleton ===== */
 .comic-reader-skeleton {
   width: 100%;
   max-width: 800px;
@@ -501,6 +805,15 @@
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 12px;
+}
+
+.dark-mode .comic-reader-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--card-dark) 25%,
+    var(--bg-dark) 50%,
+    var(--card-dark) 75%
+  );
 }
 
 @keyframes shimmer {

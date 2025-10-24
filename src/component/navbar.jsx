@@ -45,7 +45,7 @@ function Navbar({ scrollToSection }) {
 
   return (
     <div className={`navbar ${show ? "visible" : "hidden"}`}>
-      <div className='logo-nama'>
+      <div className='logo-nama' onClick={()=>navigate('/')}>
         <img src="/item/logo.svg" alt="Logo" loading='lazy' className='logo'/>
         <p className='nama'>GreenVerse Ecombot</p>
       </div>
