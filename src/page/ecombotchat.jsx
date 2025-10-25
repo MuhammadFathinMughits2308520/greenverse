@@ -1033,11 +1033,7 @@ const getCurrentTitle = () => {
     setMessages(prev => [...prev, { 
       from: 'bot', 
       text: `📝 **Pertanyaan:**\n\n${firstQuestion.text}\n\nSilakan ketik jawaban Anda:`,
-      data: {
-        id: currentStep,
-        // TIDAK ADA next_keywords SELAMA SESI PERTANYAAN
-        next_keywords: [] 
-      }
+      data: {}
     }]);
     
     // SET WAITING FOR ANSWER STATE
@@ -1092,10 +1088,7 @@ const getCurrentTitle = () => {
         setMessages(prev => [...prev, { 
           from: 'bot', 
           text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
-          data: {
-            id: currentStep,
-            next_keywords: [] // TIDAK ADA QUICK BUTTONS SELAMA PERTANYAAN
-          }
+          data: {}
         }]);
         
         // SET WAITING FOR ANSWER UNTUK PERTANYAAN BERIKUTNYA
@@ -2233,8 +2226,7 @@ const getCurrentTitle = () => {
                                     <p className="font-medium">{image.caption}</p>
                                     )}
                                     {image.source && (
-                                    <p className="">Sumber: 
-                                      <i>
+                                    <p className="">Sumber: <i> 
                                         {image.source}
                                       </i>
                                     </p>
