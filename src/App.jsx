@@ -9,7 +9,8 @@ import RegisterPage from './page/registerpage';
 import Ecombot from './page/ecombot';
 import NotFound from './page/notfound';
 import ComicReader from './page/comicreader';
-import './styles/globals.css';  // ← TAMBAHKAN INI
+import EcombotChat from './page/ecombotchat';
+import './styles/globals.css';
 
 function App() {
   const scrollToSection = (sectionId) => {
@@ -37,22 +38,32 @@ function App() {
           {/* Routes tanpa Navbar (Auth pages) */}
           <Route path='/login' element={<LoginPage /> } />
           <Route path='/register' element={<RegisterPage />} />
+          
+          {/* Routes Protected dengan EcombotChat dan semua sub-routes */}
+          <Route path="/ecombot/*" element={
+            <ProtectedRoute>
+              <EcombotChat />
+            </ProtectedRoute>
+          } />
+          
+          {/* Route lama ecombot (jika masih diperlukan) */}
           <Route
-          path="/ecombot"
-          element={
-            <ProtectedRoute>
-              <Ecombot />
-            </ProtectedRoute>
-          }
-        />
-          <Route path="/ecomic" 
-          element={
-            <ProtectedRoute>
-              <ComicReader comic="my-comic" episode="e_001" />
-            </ProtectedRoute>
-          }
+            path="/ecombot-old"
+            element={
+              <ProtectedRoute>
+                <Ecombot />
+              </ProtectedRoute>
+            }
           />
-        <Route path="*" element={<NotFound />} />
+          
+          <Route path="/ecomic" 
+            element={
+              <ProtectedRoute>
+                <ComicReader comic="my-comic" episode="e_001" />
+              </ProtectedRoute>
+            }
+          />
+          {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>
       </Router>
     </DarkModeProvider>

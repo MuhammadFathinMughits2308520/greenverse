@@ -1,0 +1,389 @@
+{
+  "chatbot_flow": {
+    "intro": {
+      "id": "intro",
+      "type": "bot_message",
+      "character": "Aquano",
+      "message": "Hallo, sudah siap untuk eksplorasi hari ini bersama Ecombot?",
+      "next_keywords": ["Siap"]
+    },
+    "kimia_hijau": {
+      "id": "kimia_hijau",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kimia Hijau (Green Chemistry)",
+      "message": "Sebelum membahas tradisi Mapag Hujan, Ecombot akan mengulas terlebih dahulu materi kimia hijau atau green chemistry.\n\nKimia hijau (green chemistry) adalah pendekatan yang bertujuan menjaga lingkungan supaya tetap bersih dan aman. Intinya, semua proses dan produk kimia dibuat agar tidak menimbulkan limbah atau zat berbahaya bagi manusia dan alam. Ada 12 prinsip kimia hijau yang ditampilkan dalam gambar berikut ini!\n\nKimia hijau memiliki peranan penting dalam mewujudkan lingkungan agar tetap terjaga dan terhindar dari bencana alam, pemanasan global, dan terhindar dari paparan bahan kimia berbahaya.\n\nGimana? Apakah sudah paham dengan peran kimia hijau dan pentingnya kimia hijau? Jika belum, silahkan tanyakan dan diskusikan.",
+      "images": [
+        {
+          "url": "/assets/12-prinsip-kimia-hijau.png",
+          "source": ""
+        }
+      ],
+      "next_keywords": ["Tanya Ecombot", "Sudah"]
+    },
+    "tanya_ecombot": {
+      "id": "tanya_ecombot",
+      "type": "bot_message",
+      "character": "Aquano",
+      "message": "Hallo, ada yang ingin ditanyakan? Ecombot siap membantu kamu",
+      "next_keywords": ["Menu sebelumnya"]
+    },
+    "pre_kegiatan": {
+      "id": "pre_kegiatan",
+      "type": "bot_message",
+      "character": "Aquano",
+      "message": "Luar Biasa, sekarang Ecombot akan memandu kamu mengeksplorasi tradisi Mapag Hujan dan menemukan bagaimana tradisi ini berhubungan dengan lingkungan serta prinsip kimia hijau.",
+      "next_keywords": ["mulai eksplorasi 1", "tanya ecombot", "menu sebelumnya"]
+    },
+    "kegiatan_1": {
+      "id": "kegiatan_1",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kegiatan Eksplorasi 1: Masalah Sampah dan Banjir",
+      "message": "Tahukah kamu? Musim hujan sering menimbulkan banjir di berbagai wilayah. Salah satu penyebab utama adalah menumpuknya sampah di sungai, selokan, dan gorong-gorong, sehingga aliran air menjadi tersumbat. Selain upaya pemerintah, masyarakat diminta berperan aktif dengan tidak membuang sampah sembarangan ke sungai maupun selokan. Kesadaran warga sangat penting karena meski pemerintah membersihkan, masalah banjir akan terus terjadi jika sampah tetap dibuang sembarangan.",
+      "images": [
+        {
+          "url": "/assets/banjir.png",
+          "source": ""
+        },
+        {
+          "url": "/assets/banjir2.png",
+          "source": "JabarEkspres.com"
+        }
+      ],
+      "next_keywords": ["pertanyaan 1", "tanya ecombot", "menu sebelumnya"]
+    },
+    "pertanyaan_1": {
+      "id": "pertanyaan_1",
+      "type": "bot_message",
+      "character": "Aquano",
+      "questions": [
+        {
+          "id": "q_kegiatan_1",
+          "text": "Masalah apa yang ditimbulkan oleh musim hujan sebagaimana dijelaskan dalam narasi di atas?",
+          "type": "essay",
+          "required": true,
+          "storage_key": "answer:kegiatan_1",
+          "max_length": 500
+        }
+      ],
+      "next_keywords": ["mulai eksplorasi 2", "menu sebelumnya"]
+    },
+    "kegiatan_2": {
+      "id": "kegiatan_2",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kegiatan Eksplorasi 2: Tradisi Mapag Hujan",
+      "message": "Di Jawa Barat khususnya di wilayah Bandung dan Subang mempunyai tradisi Mapag Hujan. Tahukah kamu? Tradisi ini menjadi sarana gotong royong masyarakat dalam membersihkan sungai, saluran air, dan lingkungan sekitar. Di Bandung, Mapag Hujan lebih difokuskan pada upaya mitigasi banjir dengan cara meningkatkan daya resapan air, mengelola sampah, serta melestarikan lingkungan. Kegiatan ini di dukung oleh pemerintah setempat melalui gerakan \"Maraton Bebersih Walungan dan Susukan\".\n\nSementara itu di Subang, Mapag Hujan juga dilaksanakan sekaligus menampilkan berbagai pertunjukan seni tradisional, gotong royong membersihkan lingkungan, penanaman pohon, dan penghijauan sebagai wujud rasa syukur dan kepedulian terhadap alam.",
+      "images": [
+        {
+          "url": "/assets/mapag-hujan.png",
+          "source": "multisite.bandung.go.id"
+        },
+        {
+          "url": "/assets/mapag-hujan-2.png",
+          "source": "Sokoguru.id"
+        },
+        {
+          "url": "/assets/mapag-hujan-3.png",
+          "source": "megapolitan.antaranews.com"
+        },
+        {
+          "url": "/assets/mapag-hujan-4.png",
+          "source": "www.lampusatu.com"
+        }
+      ],
+      "next_keywords": ["pertanyaan 2", "tanya ecombot", "menu sebelumnya"]
+    },
+    "pertanyaan_2": {
+      "id": "pertanyaan_2",
+      "type": "bot_message",
+      "character": "Aquano",
+      "questions": [
+        {
+          "id": "q_kegiatan_2",
+          "text": "Menurut kamu, bagaimana hubungan tradisi Mapag Hujan dengan masalah lingkungan sebelumnya?",
+          "type": "essay",
+          "required": true,
+          "storage_key": "answer:kegiatan_2",
+          "max_length": 500
+        }
+      ],
+      "next_keywords": ["mulai eksplorasi 3", "menu sebelumnya"]
+    },
+    "kegiatan_3": {
+      "id": "kegiatan_3",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kegiatan Eksplorasi 3: Aspek Sains (Science)",
+      "message": "Mapag Hujan memiliki hubungan erat dengan konsep-konsep ilmiah dalam sains lingkungan. Tradisi ini menunjukkan bagaimana keberadaan sampah di alam dan air hujan saling memengaruhi satu sama lain. Dari sudut pandang sains, Mapag Hujan dapat dipahami melalui kesadaran masyarakat akan pentingnya menjaga kebersihan sungai dan mengelola sampah sebelum musim hujan tiba. Jika sampah tidak dikelola dengan baik, kualitas air dan keseimbangan lingkungan bisa terganggu.\n\n**1. Interaksi Air Hujan dengan Lingkungan**\nAir hujan yang turun akan berinteraksi dengan material disekitarnya. Jika sungai dipenuhi sampah, air dapat melarutkan senyawa berbahaya seperti plastik, logam berat, dan limbah rumah tangga. Penumpukan sampah menyempitkan aliran air, menyebabkan sungai meluap saat hujan deras dan memicu banjir. Air banjir yang tercemar membawa zat kimia ke tanah dan air tanah, sehingga berisiko bagi kesehatan masyarakat.\n\n**2. Pengaruh Sampah terhadap Kualitas Lingkungan**\nSampah yang tidak dikelola dengan baik akan mencemari air, udara, dan tanah. Sampah organik membusuk menghasilkan gas seperti metana (CH4), amonia (NH3), H2S, dan CO2 yang mencemari udara. Limbah meningkatkan BOD dan COD, yang dapat menurunkan kadar oksigen terlarut, dan mengganggu kehidupan biota air. Air lindi dari sampah meresap ke tanah, membawa senyawa berbahaya dan logam berat. Mengubah struktur kimia tanah, menurunkan kesuburan, serta mencemari air tanah.",
+      "next_keywords": ["pertanyaan 3", "tanya ecombot", "menu sebelumnya"]
+    },
+    "pertanyaan_3": {
+      "id": "pertanyaan_3",
+      "type": "bot_message",
+      "character": "Aquano",
+      "questions": [
+        {
+          "id": "q_kegiatan_3_1",
+          "text": "Diskusikan dengan kelompokmu!\n Mengapa penumpukan sampah di dasar sungai dapat meningkatkan risiko banjir saat musim hujan?",
+          "type": "essay",
+          "required": true,
+          "storage_key": "answer:kegiatan_3_1",
+          "max_length": 500
+        },
+        {
+          "id": "q_kegiatan_3_2",
+          "text": "Jika kamu menjadi bagian dari masyarakat yang tinggal di sekitar sungai, tindakan apa yang bisa kamu lakukan untuk mencegah dampak pencemaran lingkungan akibat sampah?",
+          "type": "essay",
+          "required": true,
+          "storage_key": "answer:kegiatan_3_2",
+          "max_length": 500
+        }
+      ],
+      "next_keywords": ["mulai eksplorasi 4", "menu sebelumnya"]
+    },
+    "kegiatan_4": {
+      "id": "kegiatan_4",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kegiatan Eksplorasi 4: Aspek Teknologi (Technology)",
+      "message": "Aspek ini berfokus pada penerapan teknologi untuk memecahkan permasalahan lingkungan akibat interaksi sampah dan hujan. Dalam tradisi Mapag Hujan, kearifan lokal masyarakat berkolaborasi dengan adaptasi teknologi yang didukung pemerintah setempat untuk menciptakan solusi ramah lingkungan. Melalui kolaborasi ini, masyarakat turut berperan dalam mengembangkan teknologi sederhana pengelolaan sampah secara berkelanjutan, salah satunya melalui pembuatan lubang resapan biopori.\n\nLubang biopori dibuat dengan kedalaman sekitar 1 meter dan diameter 10–30 cm untuk meningkatkan daya serap tanah terhadap air hujan serta mempercepat penguraian sampah organik menjadi kompos. Teknologi ramah lingkungan ini membantu menjaga ketersediaan air tanah dan mengurangi genangan di permukiman.\n\nDalam tradisi Mapag Hujan, penerapan biopori mencerminkan pemanfaatan teknologi sederhana berbasis sains untuk mitigasi banjir dan perbaikan kualitas tanah. Biopori menampung sampah organik agar terurai alami sekaligus meningkatkan kesuburan tanah.\n\nBerikut ini cara membuat biopori:\n1. Siapkan tanah di lokasi yang mudah menyerap air.\n2. Buat lubang tegak lurus sedalam ±1 meter, diameter 10–30 cm.\n3. Masukkan pipa PVC ke lubang agar tidak longsor.\n4. Isi dengan sampah organik seperti daun kering atau sisa sayuran.",
+      "images": [
+        {
+          "url": "/assets/aspek-teknologi.png",
+          "source": ""
+        },
+        {
+          "url": "/assets/aspek-teknologi-2.png",
+          "source": "indoplasma.or.id"
+        }
+      ],
+      "next_keywords": ["pertanyaan 4", "tanya ecombot", "menu sebelumnya"]
+    },
+    "pertanyaan_4": {
+      "id": "pertanyaan_4",
+      "type": "bot_message",
+      "character": "Aquano",
+      "questions": [
+        {
+          "id": "q_kegiatan_4_1",
+          "text": "Apa hubungan solusi penggunaan teknologi lubang resapan biopori dengan prinsip kimia hijau!",
+          "type": "discussion",
+          "required": true,
+          "storage_key": "answer:kegiatan_4_1",
+          "max_length": 500
+        },
+        {
+          "id": "q_kegiatan_4_2",
+          "text": "Apakah ada solusi lain berbasis prinsip kimia hijau yang dapat kamu terapkan untuk mengatasi masalah pengelolaan sampah tersebut?",
+          "type": "discussion",
+          "required": true,
+          "storage_key": "answer:kegiatan_4_2",
+          "max_length": 500
+        }
+      ],
+      "next_keywords": ["mulai eksplorasi 5", "menu sebelumnya"]
+    },
+    "kegiatan_5": {
+      "id": "kegiatan_5",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kegiatan Eksplorasi 5: Aspek Rekayasa (Engineering)",
+      "message": "Aspek ini berhubungan dengan cara membuat solusi nyata lewat rekayasa atau teknik sederhana. Dalam kegiatan Mapag Hujan, masyarakat menerapkan sistem drainase alami dengan membuat lubang biopori. Lubang ini membantu air hujan meresap ke tanah dan mencegah banjir, sekaligus mengubah sampah organik jadi kompos yang bermanfaat bagi tanah.",
+      "next_keywords": ["mari merancang", "tanya ecombot", "menu sebelumnya"]
+    },
+    "mari_merancang": {
+      "id": "mari_merancang",
+      "type": "bot_message",
+      "character": "Aquano",
+      "questions": [
+        {
+          "id": "q_kegiatan_5",
+          "text": "Rancanglah biopori versi kelompokmu dengan menggunakan bahan yang ada di sekitar seperti botol bekas, ember, kaleng! Perhatikan bahan yang digunakan, ukuran lubang, dan cara penempatannya di lingkungan rumah atau sekolah.",
+          "type": "challenge",
+          "required": true,
+          "storage_key": "answer:kegiatan_5",
+          "max_length": 1000,
+          "allow_image_upload": true
+        }
+      ],
+      "next_keywords": ["mulai eksplorasi 6", "menu sebelumnya"]
+    },
+    "kegiatan_6": {
+      "id": "kegiatan_6",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kegiatan Eksplorasi 6: Aspek Seni (Arts)",
+      "message": "Mapag Hujan hadir dalam berbagai ekspresi budaya masyarakat. Di Subang, tradisi ini sering disertai dengan pembuatan poster maupun spanduk bertema lingkungan yang menekankan pentingnya menjaga kebersihan sungai. Selain itu, terdapat pula pertunjukan seni tradisional dan modern, seperti musik, tari, dan drama, yang dikemas dengan pesan moral tentang kelestarian lingkungan.",
+      "images": [
+        {
+          "url": "/assets/aspek-seni.png",
+          "source": ""
+        },
+        {
+          "url": "/assets/aspek-seni-2.png",
+          "source": ""
+        },
+        {
+          "url": "/assets/aspek-seni-3.png",
+          "source": "www.kotasubang.com"
+        }
+      ],
+      "next_keywords": ["ayo berkreasi", "tanya ecombot", "menu sebelumnya"]
+    },
+    "ayo_berkreasi": {
+      "id": "ayo_berkreasi",
+      "type": "bot_message",
+      "character": "Aquano",
+      "questions": [
+        {
+          "id": "q_kegiatan_6",
+          "text": "Ciptakan karya seni seperti gambar, poster, atau puisi yang bertema menjaga lingkungan berdasarkan prinsip kimia hijau!",
+          "type": "creative",
+          "required": true,
+          "storage_key": "answer:kegiatan_6",
+          "max_length": 2000,
+          "allow_image_upload": true
+        }
+      ],
+      "next_keywords": ["mulai eksplorasi 7", "menu sebelumnya"]
+    },
+    "kegiatan_7": {
+      "id": "kegiatan_7",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kegiatan Eksplorasi 7: Aspek Matematika (Mathematics)",
+      "message": "Aspek ini digunakan untuk menganalisis efektivitas dukungan kegiatan Mapag Hujan dalam mendukung mitigasi banjir dan menjaga keseimbangan lingkungan. Analisis kuantitatif memberikan gambaran konkret mengenai hasil dan dampak dari kegiatan tersebut, sebagai contoh, volume genangan banjir Kota Bandung mengalami penurunan signifikan dari lebih dari 99.000 m³ pada tahun 2015 menjadi 36.000 m³ pada tahun 2023. Besar penurunan volume dapat dihitung sebagai:\n\nPersentase penurunan volume genangan = (99.000-36.000)/99.000 x 100% = 63,6%\n\nArtinya, terjadi penurunan volume genangan air sebesar 63,6% dalam kurun waktu delapan tahun, menunjukkan adanya dampak nyata dari program pengendalian banjir dan pembangunan infrastruktur hijau. Meskipun hasil ini tidak sepenuhnya disebabkan oleh tradisi Mapag Hujan, kegiatan tersebut memiliki peran penting dalam meningkatkan kesadaran dan partisipasi masyarakat terhadap pentingnya menjaga kebersihan lingkungan dan pengelolaan air. Kesadaran kolektif inilah yang menjadi langkah awal dalam mendukung keberhasilan program mitigasi banjir secara berkelanjutan.",
+      "next_keywords": ["pertanyaan reflektif", "tanya ecombot", "menu sebelumnya"]
+    },
+    "pertanyaan_reflektif": {
+      "id": "pertanyaan_reflektif",
+      "type": "bot_message",
+      "character": "Aquano",
+      "questions": [
+        {
+          "id": "q_kegiatan_7_1",
+          "text": "Menurutmu, apakah tradisi Mapag Hujan dapat terus dilestarikan untuk membantu mengurangi masalah lingkungan di masa depan? Jelaskan pendapatmu?",
+          "type": "reflective",
+          "required": true,
+          "storage_key": "answer:kegiatan_7_1",
+          "max_length": 500
+        },
+        {
+          "id": "q_kegiatan_7_2",
+          "text": "Bagaimana menurutmu, apakah adaptasi Tradisi Mapag Hujan sejalan dengan prinsip kimia hijau? Jelaskan",
+          "type": "reflective",
+          "required": true,
+          "storage_key": "answer:kegiatan_7_2",
+          "max_length": 500
+        }
+      ],
+      "next_keywords": ["eksplorasi selesai", "menu sebelumnya"]
+    },
+    "completion": {
+      "id": "completion",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Eksplorasi Selesai",
+      "message": "Selamat! kamu telah menyelesaikan seluruh eksplorasi ini.\n\nDengan menyelesaikan kegiatan ini, kamu telah belajar tentang tradisi Mapag Hujan, bagaimana tradisi ini membantu mitigasi banjir, mengelola sampah, dan menjaga keseimbangan lingkungan. Selain itu, kamu juga memahami keterkaitan tradisi lokal dengan prinsip kimia hijau, serta pentingnya literasi lingkungan dalam kehidupan sehari-hari. Gunakan pengetahuan ini untuk membuat keputusan yang lebih bijak terhadap lingkungan di rumah, sekolah, atau lingkungan sekitar.",
+      "next_keywords": ["tanya ecombot", "menu sebelumnya"]
+    }
+  },
+  "navigation": {
+    "intro": {
+      "siap": "kimia_hijau"
+    },
+    "kimia_hijau": {
+      "tanya ecombot": "tanya_ecombot",
+      "sudah": "pre_kegiatan"
+    },
+    "tanya_ecombot": {
+      "menu sebelumnya": "kimia_hijau"
+    },
+    "pre_kegiatan": {
+      "mulai eksplorasi 1": "kegiatan_1",
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "kimia_hijau"
+    },
+    "kegiatan_1": {
+      "pertanyaan 1": "pertanyaan_1",
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "pre_kegiatan"
+    },
+    "pertanyaan_1": {
+      "mulai eksplorasi 2": "kegiatan_2",
+      "menu sebelumnya": "kegiatan_1"
+    },
+    "kegiatan_2": {
+      "pertanyaan 2": "pertanyaan_2",
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "kegiatan_1"
+    },
+    "pertanyaan_2": {
+      "mulai eksplorasi 3": "kegiatan_3",
+      "menu sebelumnya": "kegiatan_2"
+    },
+    "kegiatan_3": {
+      "pertanyaan 3": "pertanyaan_3",
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "kegiatan_2"
+    },
+    "pertanyaan_3": {
+      "mulai eksplorasi 4": "kegiatan_4",
+      "menu sebelumnya": "kegiatan_3"
+    },
+    "kegiatan_4": {
+      "pertanyaan 4": "pertanyaan_4",
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "kegiatan_3"
+    },
+    "pertanyaan_4": {
+      "mulai eksplorasi 5": "kegiatan_5",
+      "menu sebelumnya": "kegiatan_4"
+    },
+    "kegiatan_5": {
+      "mari merancang": "mari_merancang",
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "kegiatan_4"
+    },
+    "mari_merancang": {
+      "mulai eksplorasi 6": "kegiatan_6",
+      "menu sebelumnya": "kegiatan_5"
+    },
+    "kegiatan_6": {
+      "ayo berkreasi": "ayo_berkreasi",
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "kegiatan_5"
+    },
+    "ayo_berkreasi": {
+      "mulai eksplorasi 7": "kegiatan_7",
+      "menu sebelumnya": "kegiatan_6"
+    },
+    "kegiatan_7": {
+      "pertanyaan reflektif": "pertanyaan_reflektif",
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "kegiatan_6"
+    },
+    "pertanyaan_reflektif": {
+      "eksplorasi selesai": "completion",
+      "menu sebelumnya": "kegiatan_7"
+    },
+    "completion": {
+      "tanya ecombot": "tanya_ecombot",
+      "menu sebelumnya": "intro"
+    }
+  },
+  "metadata": {
+    "title": "Chatbot Pembelajaran Mapag Hujan & Kimia Hijau",
+    "subject": "STEAM (Science, Technology, Engineering, Arts, Mathematics)",
+    "target_audience": "Siswa SMA",
+    "learning_objectives": [
+      "Memahami konsep kimia hijau dan 12 prinsipnya",
+      "Mengenal tradisi Mapag Hujan dan relevansinya dengan lingkungan",
+      "Menganalisis masalah lingkungan dari perspektif STEAM",
+      "Menerapkan teknologi sederhana (biopori) untuk solusi lingkungan",
+      "Mengembangkan kesadaran dan tanggung jawab terhadap lingkungan"
+    ]
+  }
+}
