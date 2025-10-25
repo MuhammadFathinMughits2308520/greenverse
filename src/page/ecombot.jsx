@@ -60,30 +60,30 @@ function Ecombot() {
   };
 
   const handleMarkFinish = async () => {
-  const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
-  const token = localStorage.getItem("access");
-  console.debug("handleMarkFinish called", { comic: comicSlug, episode: episodeSlug, currentPage, tokenPresent: !!token });
+    const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
+    const token = localStorage.getItem("access");
+    console.debug("handleMarkFinish called", { comic: comicSlug, episode: episodeSlug, currentPage, tokenPresent: !!token });
 
-  try {
-    const result = await markFinishApi(comicSlug, episodeSlug, currentPage, { complete: true });
-    console.log("markFinish result:", result);
-    if (result.finish) {
-      showToast("Selamat! Eksplorasi selesai.");
-      setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
-      setTimeout(() => navigate('/ecomic'), 3000);
-    } else {
-      showToast(result.message || "Gagal menandai selesai");
+    try {
+      const result = await markFinishApi(comicSlug, episodeSlug, currentPage, { complete: true });
+      console.log("markFinish result:", result);
+      if (result.finish) {
+        showToast("Selamat! Eksplorasi selesai.");
+        setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
+        setTimeout(() => navigate('/ecomic'), 3000);
+      } else {
+        showToast(result.message || "Gagal menandai selesai");
+      }
+    } catch (err) {
+      console.error("markFinishApi error:", err);
+      const msg = err?.body?.message || err?.message || "Gagal menandai selesai";
+      showToast(msg);
+      if (err.status === 401) {
+        // token invalid / user harus login ulang
+        navigate('/login');
+      }
     }
-  } catch (err) {
-    console.error("markFinishApi error:", err);
-    const msg = err?.body?.message || err?.message || "Gagal menandai selesai";
-    showToast(msg);
-    if (err.status === 401) {
-      // token invalid / user harus login ulang
-      navigate('/login');
-    }
-  }
-};
+  };
 
 
 

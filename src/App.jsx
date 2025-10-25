@@ -11,6 +11,7 @@ import NotFound from './page/notfound';
 import ComicReader from './page/comicreader';
 import EcombotChat from './page/ecombotchat';
 import './styles/globals.css';
+import CekFeedBack from './page/cekfeedback';
 
 function App() {
   const scrollToSection = (sectionId) => {
@@ -45,6 +46,7 @@ function App() {
               <EcombotChat />
             </ProtectedRoute>
           } />
+          <Route path="/teacher/monitor/greenverse-123" element={<CekFeedBack />}/>
           
           {/* Route lama ecombot (jika masih diperlukan) */}
           <Route
@@ -63,7 +65,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* <Route path="*" element={<NotFound />} /> */}
+          
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </DarkModeProvider>

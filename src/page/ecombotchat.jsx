@@ -12,6 +12,7 @@ import Kegiatan4 from "./Kegiatan4";
 import Kegiatan5 from "./Kegiatan5";
 import Kegiatan6 from "./Kegiatan6";
 import Kegiatan7 from "./Kegiatan7";
+import markFinishApi from '../scripts/markFinishApi';
 import { useChatFlow } from '../hooks/useChatFlow';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
@@ -195,6 +196,7 @@ const fallbackChatFlow = {
 export const AppContext = React.createContext();
 
 const EcombotChat = () => {
+  const [permission, setPermission] = useState({ finish: false, last_page: savedPage });
   const { chatFlow, loading, error } = useChatFlow();
   const [messages, setMessages] = useState([]);
   const [botTyping, setBotTyping] = useState(false);
@@ -972,19 +974,33 @@ const getCurrentTitle = () => {
   };
 
   // FUNGSI BARU: Redirect ke /ecomic
-  const redirectToEcomic = () => {
-    console.log('Redirecting to /ecomic endpoint');
-    
-    // Tampilkan pesan konfirmasi sebelum redirect
-    setMessages(prev => [...prev, { 
-      from: 'bot', 
-      text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
-    }]);
-    
-    // Redirect setelah 2 detik
-    setTimeout(() => {
-      navigate('/ecomic');
-    }, 2000);
+  const redirectToEcomic = async () => {
+    const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
+    const token = localStorage.getItem("access");
+    console.debug("handleMarkFinish called", { comic: comicSlug, episode: episodeSlug, currentPage, tokenPresent: !!token });
+
+    try {
+      const result = await markFinishApi(comicSlug, episodeSlug, currentPage, { complete: true });
+      console.log("markFinish result:", result);
+      if (result.finish) {
+        setMessages(prev => [...prev, { 
+          from: 'bot', 
+          text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
+        }]);
+        setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
+        setTimeout(() => navigate('/ecomic'), 3000);
+      } else {
+        alert(result.message || "Gagal menandai selesai");
+      }
+    } catch (err) {
+      console.error("markFinishApi error:", err);
+      const msg = err?.body?.message || err?.message || "Gagal menandai selesai";
+      showToast(msg);
+      if (err.status === 401) {
+        // token invalid / user harus login ulang
+        navigate('/login');
+      }
+    }
   };
 
   // Fungsi untuk memulai sesi pertanyaan - DIPERBAIKI: TANPA QUICK BUTTONS
