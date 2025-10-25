@@ -95,7 +95,7 @@ const fallbackChatFlow = {
       character: "Aquano",
       title: "Eksplorasi Selesai",
       message: "Selamat! kamu telah menyelesaikan seluruh eksplorasi ini.\n\nDengan menyelesaikan kegiatan ini, kamu telah belajar tentang tradisi Mapag Hujan, bagaimana tradisi ini membantu mitigasi banjir, mengelola sampah, dan menjaga keseimbangan lingkungan. Selain itu, kamu juga memahami keterkaitan tradisi lokal dengan prinsip kimia hijau, serta pentingnya literasi lingkungan dalam kehidupan sehari-hari. Gunakan pengetahuan ini untuk membuat keputusan yang lebih bijak terhadap lingkungan di rumah, sekolah, atau lingkungan sekitar.",
-      next_keywords: ["tanya ecombot", "menu sebelumnya"]
+      next_keywords: ["tanya ecombot", "menu sebelumnya", "eksplorasi selesai"]
     },
     forum_diskusi: {
       id: "forum_diskusi",
@@ -177,12 +177,13 @@ const fallbackChatFlow = {
       "menu sebelumnya": "kegiatan_6"
     },
     pertanyaan_reflektif: {
-      "eksplorasi selesai": "completion",
+      "Eksplorasi Selesai": "completion",
       "menu sebelumnya": "kegiatan_7"
     },
     completion: {
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "kegiatan_7"
+      "menu sebelumnya": "kegiatan_7",
+      "eksplorasi selesai": "redirect_ecomic"
     },
     forum_diskusi: {
       "menu sebelumnya": "previous_step"
@@ -722,8 +723,14 @@ const getCurrentTitle = () => {
     return aspectMap[step] || 'General';
   };
 
-  // Fungsi untuk mendapatkan quick buttons - DIPERBAIKI UNTUK FORUM
-  const getQuickButtons = (stepKey) => {
+  // Fungsi untuk mendapatkan quick buttons - DIPERBAIKI: TIDAK TAMPIL SAAT PERTANYAAN
+  const getQuickButtons = (stepKey, messageText = '') => {
+    // JIKA SEDANG DALAM SESI PERTANYAAN, JANGAN TAMPILKAN QUICK BUTTONS
+    if (waitingForAnswer) {
+      console.log('Not showing quick buttons - waiting for answer:', waitingForAnswer);
+      return null;
+    }
+    
     const step = getStepData(stepKey);
     if (!step || !step.next_keywords) return null;
     
@@ -872,6 +879,11 @@ const getCurrentTitle = () => {
       return { stepKey: 'ayo_berkreasi' };
     }
     
+    // Deteksi eksplorasi selesai - PRIORITAS BARU
+    if (normalizedInput.includes('eksplorasi selesai')) {
+      return { stepKey: 'redirect_ecomic' };
+    }
+    
     // Deteksi eksplorasi
     const eksplorasiMatch = normalizedInput.match(/(mulai\s+)?eksplorasi\s+(\d+)/i) || 
                            normalizedInput.match(/ke\s+eksplorasi\s+(\d+)/i) ||
@@ -887,7 +899,7 @@ const getCurrentTitle = () => {
     }
     
     // Deteksi completion
-    if (normalizedInput.includes('eksplorasi selesai')) {
+    if (normalizedInput.includes('Eksplorasi Selesai')) {
       return { stepKey: 'completion' };
     }
     
@@ -959,7 +971,23 @@ const getCurrentTitle = () => {
     }
   };
 
-  // Fungsi untuk memulai sesi pertanyaan - DIPERBAIKI
+  // FUNGSI BARU: Redirect ke /ecomic
+  const redirectToEcomic = () => {
+    console.log('Redirecting to /ecomic endpoint');
+    
+    // Tampilkan pesan konfirmasi sebelum redirect
+    setMessages(prev => [...prev, { 
+      from: 'bot', 
+      text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
+    }]);
+    
+    // Redirect setelah 2 detik
+    setTimeout(() => {
+      navigate('/ecomic');
+    }, 2000);
+  };
+
+  // Fungsi untuk memulai sesi pertanyaan - DIPERBAIKI: TANPA QUICK BUTTONS
   const startQuestionSession = () => {
     console.log('=== STARTING QUESTION SESSION ===');
     console.log('Current step:', currentStep);
@@ -991,7 +1019,8 @@ const getCurrentTitle = () => {
       text: `📝 **Pertanyaan:**\n\n${firstQuestion.text}\n\nSilakan ketik jawaban Anda:`,
       data: {
         id: currentStep,
-        next_keywords: [] // Kosongkan sementara selama sesi pertanyaan
+        // TIDAK ADA next_keywords SELAMA SESI PERTANYAAN
+        next_keywords: [] 
       }
     }]);
     
@@ -1002,13 +1031,17 @@ const getCurrentTitle = () => {
     scrollChat();
   };
 
-  // Fungsi untuk memproses jawaban pertanyaan - DIPERBAIKI DENGAN VALIDASI
+  // Fungsi untuk memproses jawaban pertanyaan - DIPERBAIKI: TANPA QUICK BUTTONS SELAMA PERTANYAAN
   const processQuestionAnswer = async (input) => {
     // Validasi: jika jawaban kosong, beri peringatan
     if (!input.trim()) {
       setMessages(prev => [...prev, { 
         from: 'bot', 
-        text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:"
+        text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
+        data: {
+          id: currentStep,
+          next_keywords: [] // TIDAK ADA QUICK BUTTONS
+        }
       }]);
       return;
     }
@@ -1042,7 +1075,11 @@ const getCurrentTitle = () => {
         setCurrentQuestionIndex(nextIndex);
         setMessages(prev => [...prev, { 
           from: 'bot', 
-          text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`
+          text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
+          data: {
+            id: currentStep,
+            next_keywords: [] // TIDAK ADA QUICK BUTTONS SELAMA PERTANYAAN
+          }
         }]);
         
         // SET WAITING FOR ANSWER UNTUK PERTANYAAN BERIKUTNYA
@@ -1067,7 +1104,7 @@ const getCurrentTitle = () => {
             'pertanyaan_4': ["mulai eksplorasi 5", "menu sebelumnya"],
             'mari_merancang': ["mulai eksplorasi 6", "menu sebelumnya"],
             'ayo_berkreasi': ["mulai eksplorasi 7", "menu sebelumnya"],
-            'pertanyaan_reflektif': ["eksplorasi selesai", "menu sebelumnya"]
+            'pertanyaan_reflektif': ["Eksplorasi Selesai", "menu sebelumnya"]
           };
           
           nextKeywords = navigationMap[currentStep] || ["menu sebelumnya"];
@@ -1075,10 +1112,10 @@ const getCurrentTitle = () => {
         
         setMessages(prev => [...prev, { 
           from: 'bot', 
-          text: "🎉 **Terima kasih!** Anda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
+          text: "🎉 **Terima kasih!**\nAnda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
           data: {
             id: currentStep,
-            next_keywords: nextKeywords
+            next_keywords: nextKeywords // HANYA TAMPILKAN QUICK BUTTONS DI SINI
           }
         }]);
         
@@ -1107,7 +1144,11 @@ const getCurrentTitle = () => {
       console.error('Error saving answer:', error);
       setMessages(prev => [...prev, { 
         from: 'bot', 
-        text: "⚠️ Jawaban Anda telah dicatat secara lokal. Terima kasih!"
+        text: "⚠️ Jawaban Anda telah dicatat secara lokal. Terima kasih!",
+        data: {
+          id: currentStep,
+          next_keywords: [] // TIDAK ADA QUICK BUTTONS PADA ERROR
+        }
       }]);
     }
     
@@ -1135,12 +1176,16 @@ const getCurrentTitle = () => {
     return stepMap[currentStep];
   };
 
-  // Fungsi untuk memulai sesi pertanyaan reflektif
+  // Fungsi untuk memulai sesi pertanyaan reflektif - DIPERBAIKI: TANPA QUICK BUTTONS
   const startReflectiveQuestions = () => {
     if (reflectiveQuestions.length === 0) {
       setMessages(prev => [...prev, { 
         from: 'bot', 
-        text: "Maaf, pertanyaan reflektif belum tersedia saat ini."
+        text: "Maaf, pertanyaan reflektif belum tersedia saat ini.",
+        data: {
+          id: 'pertanyaan_reflektif',
+          next_keywords: [] // TIDAK ADA QUICK BUTTONS
+        }
       }]);
       return;
     }
@@ -1148,18 +1193,26 @@ const getCurrentTitle = () => {
     setCurrentReflectiveQuestion(0);
     setMessages(prev => [...prev, { 
       from: 'bot', 
-      text: `Mari kita mulai sesi pertanyaan reflektif!\n\nPertanyaan 1: ${reflectiveQuestions[0]}\n\nSilakan ketik jawaban Anda:`
+      text: `Mari kita mulai sesi pertanyaan reflektif!\n\nPertanyaan 1: ${reflectiveQuestions[0]}\n\nSilahkan ketik jawaban Anda:`,
+      data: {
+        id: 'pertanyaan_reflektif',
+        next_keywords: [] // TIDAK ADA QUICK BUTTONS SELAMA PERTANYAAN
+      }
     }]);
     setWaitingForAnswer('reflective_0');
   };
 
-  // Fungsi untuk memproses pertanyaan reflektif - DIPERBAIKI DENGAN VALIDASI
+  // Fungsi untuk memproses pertanyaan reflektif - DIPERBAIKI: TANPA QUICK BUTTONS SELAMA PERTANYAAN
   const processReflectiveAnswer = async (input) => {
     // Validasi: jika jawaban kosong, beri peringatan
     if (!input.trim()) {
       setMessages(prev => [...prev, { 
         from: 'bot', 
-        text: "Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:"
+        text: "Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
+        data: {
+          id: 'pertanyaan_reflektif',
+          next_keywords: [] // TIDAK ADA QUICK BUTTONS
+        }
       }]);
       return;
     }
@@ -1188,17 +1241,21 @@ const getCurrentTitle = () => {
       setCurrentReflectiveQuestion(nextQuestionIndex);
       setMessages(prev => [...prev, { 
         from: 'bot', 
-        text: `Terima kasih! Jawaban Anda telah dicatat.\n\nPertanyaan ${nextQuestionIndex + 1}: ${reflectiveQuestions[nextQuestionIndex]}\n\nSilakan ketik jawaban Anda:`
+        text: `Terima kasih! Jawaban Anda telah dicatat.\n\nPertanyaan ${nextQuestionIndex + 1}: ${reflectiveQuestions[nextQuestionIndex]}\n\nSilakan ketik jawaban Anda:`,
+        data: {
+          id: 'pertanyaan_reflektif',
+          next_keywords: [] // TIDAK ADA QUICK BUTTONS SELAMA PERTANYAAN
+        }
       }]);
       setWaitingForAnswer(`reflective_${nextQuestionIndex}`);
     } else {
-      // Selesai semua pertanyaan reflektif
+      // Selesai semua pertanyaan reflektif - TAMPILKAN QUICK BUTTONS DI SINI
       setMessages(prev => [...prev, { 
         from: 'bot', 
         text: "Terima kasih! Anda telah menyelesaikan semua pertanyaan reflektif. Jawaban Anda telah disimpan untuk refleksi pembelajaran.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
         data: {
           id: 'pertanyaan_reflektif',
-          next_keywords: ["eksplorasi selesai", "menu sebelumnya"]
+          next_keywords: ["Eksplorasi Selesai", "menu sebelumnya"] // HANYA DI SINI QUICK BUTTONS TAMPIL
         }
       }]);
       setWaitingForAnswer(null);
@@ -1359,7 +1416,22 @@ const getCurrentTitle = () => {
       return;
     }
     
-    // **PRIORITAS 2: Cek untuk navigasi "menu sebelumnya" - TERLEBIH DAHULU!**
+    // **PRIORITAS 2: Cek untuk navigasi "eksplorasi selesai" - KE /ECOMIC**
+    if (normalizedInput.includes('eksplorasi selesai')) {
+      console.log('Eksplorasi selesai detected, redirecting to /ecomic');
+      
+      setMessages(prev => [...prev, { from: 'user', text: input }]);
+      setBotTyping(true);
+      
+      setTimeout(() => {
+        setBotTyping(false);
+        redirectToEcomic();
+      }, 1000);
+      
+      return;
+    }
+    
+    // **PRIORITAS 3: Cek untuk navigasi "menu sebelumnya" - TERLEBIH DAHULU!**
     const kembaliPatterns = [
       /menu sebelumnya/i,
       /kembali/i,
@@ -1444,7 +1516,7 @@ const getCurrentTitle = () => {
       }
     }
     
-    // **PRIORITAS 3: Cek untuk memulai sesi pertanyaan berdasarkan keyword**
+    // **PRIORITAS 4: Cek untuk memulai sesi pertanyaan berdasarkan keyword**
     const questionKeywords = [
       'pertanyaan 1',
       'pertanyaan 2', 
@@ -1497,7 +1569,7 @@ const getCurrentTitle = () => {
       }
     }
     
-    // **PRIORITAS 4: Cek untuk tanya ecombot/forum**
+    // **PRIORITAS 5: Cek untuk tanya ecombot/forum**
     const tanyaEcombotPatterns = [
       /tanya ecombot/i,
       /tanya/i,
@@ -1521,7 +1593,7 @@ const getCurrentTitle = () => {
         if (currentStep === 'forum_diskusi') {
           setMessages(prev => [...prev, { 
             from: 'bot', 
-            text: "Silakan ajukan pertanyaan Anda tentang berbagai topik pembelajaran. Saya akan membantu menjawabnya menggunakan sistem AI.\n\nKetik 'menu sebelumnya' untuk kembali ke alur pembelajaran."
+            text: "Silahkan ajukan pertanyaan Anda tentang berbagai topik pembelajaran. Saya akan membantu menjawabnya menggunakan sistem AI.\n\nKetik 'menu sebelumnya' untuk kembali ke alur pembelajaran."
           }]);
         } else {
           // Pindah ke forum - simpan langkah saat ini ke history
@@ -1535,7 +1607,7 @@ const getCurrentTitle = () => {
       }
     }
     
-    // **PRIORITAS 5: Jika di forum diskusi, proses pertanyaan dengan LangChain**
+    // **PRIORITAS 6: Jika di forum diskusi, proses pertanyaan dengan LangChain**
     if (currentStep === 'forum_diskusi' && !waitingForAnswer) {
       console.log('Processing forum question with LangChain:', input);
       
@@ -1580,7 +1652,7 @@ const getCurrentTitle = () => {
       return;
     }
     
-    // **PRIORITAS 6: Cek untuk navigasi ke kegiatan berikutnya dengan keyword "pertanyaan"**
+    // **PRIORITAS 7: Cek untuk navigasi ke kegiatan berikutnya dengan keyword "pertanyaan"**
     if (normalizedInput.includes('pertanyaan') && !normalizedInput.includes('reflektif')) {
       // Periksa apakah semua pertanyaan telah dijawab
       const allAnswered = checkAllQuestionsAnswered();
@@ -1600,14 +1672,18 @@ const getCurrentTitle = () => {
         setMessages(prev => [...prev, { from: 'user', text: input }]);
         setMessages(prev => [...prev, { 
           from: 'bot', 
-          text: "Maaf, Anda harus menjawab semua pertanyaan terlebih dahulu sebelum dapat melanjutkan ke kegiatan berikutnya. Silakan selesaikan semua pertanyaan yang tersedia."
+          text: "Maaf, Anda harus menjawab semua pertanyaan terlebih dahulu sebelum dapat melanjutkan ke kegiatan berikutnya. Silakan selesaikan semua pertanyaan yang tersedia.",
+          data: {
+            id: currentStep,
+            next_keywords: [] // TIDAK ADA QUICK BUTTONS PADA ERROR
+          }
         }]);
         scrollChat();
       }
       return;
     }
     
-    // **PRIORITAS 7: Proses navigasi seperti biasa**
+    // **PRIORITAS 8: Proses navigasi seperti biasa**
     const targetKegiatan = getKegiatanFromText(input);
     if (targetKegiatan) {
       setMessages(prev => [...prev, { from: 'user', text: input }]);
@@ -1616,8 +1692,14 @@ const getCurrentTitle = () => {
       setTimeout(async () => {
         setBotTyping(false);
         
-        // Handle khusus untuk navigasi ke forum_diskusi atau completion
-        if (targetKegiatan.stepKey === 'forum_diskusi' || targetKegiatan.stepKey === 'completion') {
+        // Handle khusus untuk navigasi ke forum_diskusi atau completion atau redirect_ecomic
+        if (targetKegiatan.stepKey === 'forum_diskusi' || targetKegiatan.stepKey === 'completion' || targetKegiatan.stepKey === 'redirect_ecomic') {
+          
+          if (targetKegiatan.stepKey === 'redirect_ecomic') {
+            redirectToEcomic();
+            return;
+          }
+          
           // Simpan langkah saat ini ke history sebelum pindah
           setPreviousSteps(prev => [...prev, currentStep]);
           setCurrentStep(targetKegiatan.stepKey);
@@ -1710,7 +1792,11 @@ const getCurrentTitle = () => {
           
           setMessages(prev => [...prev, { 
             from: 'bot', 
-            text: errorMessage
+            text: errorMessage,
+            data: {
+              id: currentStep,
+              next_keywords: [] // TIDAK ADA QUICK BUTTONS PADA ERROR
+            }
           }]);
         }
         
@@ -1720,7 +1806,7 @@ const getCurrentTitle = () => {
       return;
     }
     
-    // **PRIORITAS 8: Proses dengan currentChatFlow navigation yang sudah ada**
+    // **PRIORITAS 9: Proses dengan currentChatFlow navigation yang sudah ada**
     const currentNavigation = currentChatFlow.navigation ? currentChatFlow.navigation[currentStep] : null;
     
     if (currentNavigation) {
@@ -1771,6 +1857,9 @@ const getCurrentTitle = () => {
                   );
                 }
               }
+            } else if (nextStep === 'redirect_ecomic') {
+              // Handle redirect ke /ecomic
+              redirectToEcomic();
             } else {
               // Simpan langkah saat ini ke history sebelum navigasi
               setPreviousSteps(prev => [...prev, currentStep]);
@@ -1821,7 +1910,7 @@ const getCurrentTitle = () => {
       }
     }
     
-    // **PRIORITAS 9: Default response - HANYA JIKA TIDAK ADA YANG COCOK DI ATAS**
+    // **PRIORITAS 10: Default response - HANYA JIKA TIDAK ADA YANG COCOK DI ATAS**
     console.log('No matching command found, showing default response');
     
     // PESAN DEFAULT YANG LEBIH INFORMATIF
@@ -2061,10 +2150,10 @@ const getCurrentTitle = () => {
       <div className="w-full h-screen fixed inset-0 bg-white">
         <div className="flex flex-col md:flex-row h-full w-full">
           {/* KIRI - Avatar (Desktop) */}
-          <div className="hidden md:relative md:flex md:w-1/3 bg-white-50 flex-col">
+          <div className="hidden md:relative md:flex md:w-1/3 bg-white-50 flex-col bg-yellow-50">
             <div className='text-center !mt-12'>
               <p className='text-lime-500 text-lg font-semibold'>{currentTitle.materi}</p>
-    <h1 className='text-3xl text-lime-500 font-bold mt-2'>{currentTitle.title}</h1>
+              <h1 className='text-3xl text-lime-500 font-bold mt-2'>{currentTitle.title}</h1>
             </div>
             {/* AVATAR AQUANO */}
             <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center">
@@ -2075,7 +2164,7 @@ const getCurrentTitle = () => {
                   className="w-96 h-auto transition-all duration-300"
                 />
               </div>
-              <span className="text-lime-700 font-semibold mt-1 z-20 relative bg-white px-3 py-0.5 rounded-full shadow-sm border border-gray-200 text-sm">
+              <span className="text-lime-700 font-semibold mt-1 z-20 relative bg-white !px-3 !py-0.5 rounded-full shadow-sm border border-gray-200 text-sm">
                 Aquano
               </span>
             </div>
@@ -2092,12 +2181,10 @@ const getCurrentTitle = () => {
             </button>
 
             {/* AREA PESAN */}
-            <div className="flex-1 overflow-y-auto !p-4 !space-y-4" id="messages">
+            <div className="flex-1 overflow-y-auto !p-4 !pb-48 !pt-20 !space-y-4 bg-cover bg-center bg-no-repeat bg-[url('/assets/background.png')]" id="messages">
                 {messages.map((message, index) => (
                 <div key={index} className={`flex items-end ${message.from === 'bot' ? '' : 'justify-end'}`}>
                     <div className={`flex flex-col !space-y-2 text-md leading-tight max-w-xs !mx-2 ${message.from === 'bot' ? 'order-2 items-start' : 'order-1 items-end'}`}>
-                    
-                    
                     
                     <div className={`!px-4 !py-3 rounded-xl inline-block ${
                         message.from === 'bot'
@@ -2177,12 +2264,13 @@ const getCurrentTitle = () => {
                         )}
                     </div>
                     
-                    {message.from === 'bot' && message.data?.next_keywords && (
+                    {/* HANYA TAMPILKAN QUICK BUTTONS JIKA TIDAK SEDANG MENUNGGU JAWABAN */}
+                    {message.from === 'bot' && message.data?.next_keywords && !waitingForAnswer && (
                         <div 
                         id="quick-buttons" 
                         className="flex flex-wrap gap-2 mt-3"
                         dangerouslySetInnerHTML={{ 
-                            __html: getQuickButtons(message.data.id) 
+                            __html: getQuickButtons(message.data.id, message.text) 
                         }}
                         />
                     )}
@@ -2190,8 +2278,8 @@ const getCurrentTitle = () => {
                   <div
                     className={`w-12 h-12 rounded-full flex items-center justify-center ${
                       message.from === 'bot' 
-                        ? 'order-1 bg-green-100' 
-                        : 'order-2 bg-lime-400'
+                        ? 'order-1 bg-yellow-200' 
+                        : 'order-2 bg-lime-200'
                     }`}
                   >
                     {message.from === 'bot' ? (
@@ -2227,7 +2315,7 @@ const getCurrentTitle = () => {
             </div>
 
             {/* Input Container - Mobile */}
-            <div className="md:hidden absolute w-screen !bottom-2 !px-4 !pt-4 !pb-4 z-20">
+            <div className="md:hidden absolute w-screen !bottom-0 !px-4 !pt-4 !pb-4 z-20 bg-yellow-50">
               <div className="relative flex">
                 <input 
                   type="text" 
@@ -2258,7 +2346,7 @@ const getCurrentTitle = () => {
             </div>
 
             {/* Avatar Mobile */}
-            <div className="md:hidden relative z-10 flex flex-col items-center !mt-20 !pb-22">
+            <div className="md:hidden relative z-10 flex flex-col items-center bottom-24 ">
               <div className="w-48 h-12 flex items-center justify-center">
                 <img
                   src={Aquano}
@@ -2272,7 +2360,7 @@ const getCurrentTitle = () => {
             </div>
 
             {/* Input Container - Desktop */}
-            <div className="hidden md:block border-t-2 border-gray-200 px-4 pt-4 pb-4 bg-white">
+            <div className="hidden md:block px-4 pt-4 pb-4 bg-yellow-50">
               <div className="relative flex">
                 <input 
                   type="text" 
@@ -2288,13 +2376,13 @@ const getCurrentTitle = () => {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="text-md w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 !pl-5 !pr-16 bg-gray-100 border-2 border-gray-200 focus:border-lime-500 rounded-full !py-3"
+                  className="text-md w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 !pl-5 !pr-16 bg-yellow-50 focus:border-lime-500 rounded-full !py-3"
                 />
                 <div className="absolute right-2 inset-y-0 flex items-center">
                   <button 
                     type="button" 
                     onClick={updateChat}
-                    className="inline-flex items-center justify-center rounded-full h-10 w-10 text-white bg-lime-500 !bg-lime-500 hover:!bg-lime-600 shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none"
+                    className="inline-flex items-center justify-center rounded-full h-10 w-10 text-white !bg-lime-500 hover:!bg-lime-600 shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none"
                   >
                     <i className="mdi mdi-arrow-right text-xl leading-none"></i>
                   </button>
@@ -2304,7 +2392,7 @@ const getCurrentTitle = () => {
 
             {/* PANEL KEGIATAN*/}
             {showKegiatan && (
-              <div className="absolute top-0 right-0 h-full w-80 bg-white border-l-2 border-gray-200 shadow-2xl z-30 animate-slide-in overflow-y-auto">
+              <div className="absolute top-0 right-0 h-full w-80 bg-yellow-50 border-l-2 border-gray-200 shadow-2xl z-30 animate-slide-in overflow-y-auto">
                 <div className="flex flex-col !p-4 border-b border-gray-200 items-center gap-2">
                   <button
                     onClick={() => setShowKegiatan(false)}
@@ -2328,7 +2416,7 @@ const getCurrentTitle = () => {
                           ? location.pathname.includes(kegiatan.path)
                             ? '!bg-lime-600 text-white'
                             : '!bg-lime-500 text-white hover:!bg-lime-600'
-                          : '!bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : '!bg-white text-gray-400 cursor-not-allowed'
                       }`}
                     >
                       <div className="flex items-center justify-between">
