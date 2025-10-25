@@ -12,10 +12,7 @@ import Kegiatan4 from "./Kegiatan4";
 import Kegiatan5 from "./Kegiatan5";
 import Kegiatan6 from "./Kegiatan6";
 import Kegiatan7 from "./Kegiatan7";
-import markFinishApi from '../scripts/markFinishApi';
 import { useChatFlow } from '../hooks/useChatFlow';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
 
 // Fallback data jika loading gagal
 const fallbackChatFlow = {
@@ -196,7 +193,6 @@ const fallbackChatFlow = {
 export const AppContext = React.createContext();
 
 const EcombotChat = () => {
-  const [permission, setPermission] = useState({ finish: false, last_page: savedPage });
   const { chatFlow, loading, error } = useChatFlow();
   const [messages, setMessages] = useState([]);
   const [botTyping, setBotTyping] = useState(false);
@@ -362,7 +358,7 @@ const getCurrentTitle = () => {
       // Jika user sudah login, coba load atau buat session
       const sessionId = localStorage.getItem('current_session_id') || `session_${Date.now()}`;
       
-      const response = await fetch(`${API_BASE}/chat/session/start/`, {
+      const response = await fetch('http://localhost:8000/api/chat/session/start/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -404,7 +400,7 @@ const getCurrentTitle = () => {
       
       if (!token || !sessionId) return;
 
-      const response = await fetch(`${API_BASE}/chat/session/${sessionId}/activity/${activityId}/`, {
+      const response = await fetch(`http://localhost:8000/api/chat/session/${sessionId}/activity/${activityId}/`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -438,7 +434,7 @@ const getCurrentTitle = () => {
         setMessages(historyMessages);
         
         // Load progress
-        const progressResponse = await fetch(`${API_BASE}/chat/session/${sessionId}/overview/`, {
+        const progressResponse = await fetch(`http://localhost:8000/api/chat/session/${sessionId}/overview/`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -585,7 +581,7 @@ const getCurrentTitle = () => {
       
       if (!token || !sessionId) return null;
 
-      const response = await fetch(`${API_BASE}/chat/session/send/`, {
+      const response = await fetch('http://localhost:8000/api/chat/session/send/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -633,7 +629,7 @@ const getCurrentTitle = () => {
         return { status: 'saved_locally' };
       }
 
-      const response = await fetch(`${API_BASE}/chat/answer/submit/`, {
+      const response = await fetch('http://localhost:8000/api/chat/answer/submit/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -796,7 +792,7 @@ const getCurrentTitle = () => {
       const sessionId = localStorage.getItem('current_session_id');
       
       if (token && sessionId) {
-        await fetch(`${API_BASE}/api/chat/activity/complete/`, {
+        await fetch('http://localhost:8000/api/chat/activity/complete/', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -946,7 +942,7 @@ const getCurrentTitle = () => {
     try {
       console.log('Processing forum question with LangChain:', question);
       
-      const response = await fetch(`${API_BASE}/ask/`, {
+      const response = await fetch('http://localhost:8000/api/ask/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -974,33 +970,19 @@ const getCurrentTitle = () => {
   };
 
   // FUNGSI BARU: Redirect ke /ecomic
-  const redirectToEcomic = async () => {
-    const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
-    const token = localStorage.getItem("access");
-    console.debug("handleMarkFinish called", { comic: comicSlug, episode: episodeSlug, currentPage, tokenPresent: !!token });
-
-    try {
-      const result = await markFinishApi(comicSlug, episodeSlug, currentPage, { complete: true });
-      console.log("markFinish result:", result);
-      if (result.finish) {
-        setMessages(prev => [...prev, { 
-          from: 'bot', 
-          text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
-        }]);
-        setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
-        setTimeout(() => navigate('/ecomic'), 3000);
-      } else {
-        alert(result.message || "Gagal menandai selesai");
-      }
-    } catch (err) {
-      console.error("markFinishApi error:", err);
-      const msg = err?.body?.message || err?.message || "Gagal menandai selesai";
-      showToast(msg);
-      if (err.status === 401) {
-        // token invalid / user harus login ulang
-        navigate('/login');
-      }
-    }
+  const redirectToEcomic = () => {
+    console.log('Redirecting to /ecomic endpoint');
+    
+    // Tampilkan pesan konfirmasi sebelum redirect
+    setMessages(prev => [...prev, { 
+      from: 'bot', 
+      text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
+    }]);
+    
+    // Redirect setelah 2 detik
+    setTimeout(() => {
+      navigate('/ecomic');
+    }, 2000);
   };
 
   // Fungsi untuk memulai sesi pertanyaan - DIPERBAIKI: TANPA QUICK BUTTONS
@@ -2226,7 +2208,7 @@ const getCurrentTitle = () => {
                                     <p className="font-medium">{image.caption}</p>
                                     )}
                                     {image.source && (
-                                    <p className="">Sumber: <i> 
+                                    <p>Sumber: <i>
                                         {image.source}
                                       </i>
                                     </p>
