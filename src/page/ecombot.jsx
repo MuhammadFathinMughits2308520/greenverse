@@ -34,7 +34,7 @@ function Ecombot() {
   useEffect(() => {
     const token = localStorage.getItem("access");
     // If you expect ecombot endpoint under a different path, change URL accordingly
-    axios.get("https://backendecombot-production.up.railway.app/api/ecombot/", {
+    axios.get("http://127.0.0.1:8000/api/ecombot/", {
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     .then(res => {

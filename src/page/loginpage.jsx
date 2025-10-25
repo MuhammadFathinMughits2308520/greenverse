@@ -3,6 +3,8 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/authpage.css";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
+
 function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -23,7 +25,7 @@ function LoginPage() {
       try {
         // Verifikasi token ke backend
         const response = await axios.post(
-          "https://backendecombot-production.up.railway.app/api/token/verify/",
+          `${API_BASE}/token/verify/`,
           { token }
         );
 
@@ -37,7 +39,7 @@ function LoginPage() {
         if (refresh) {
           try {
             const refreshResponse = await axios.post(
-              "https://backendecombot-production.up.railway.app/api/token/refresh/",
+              `${API_BASE}/token/refresh/`,
               { refresh }
             );
             
@@ -71,7 +73,7 @@ function LoginPage() {
     
     try {
       const res = await axios.post(
-        "https://backendecombot-production.up.railway.app/api/login/",
+        `${API_BASE}/login/`,
         { username, password }
       );
       

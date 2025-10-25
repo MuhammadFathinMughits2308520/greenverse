@@ -14,7 +14,7 @@ function Card({foto,nama,peran,tugas}){
             <img src={foto} alt={nama} className='foto-card'/>
             <div className='card-profil'>
                 <p className='nama-card'>{nama}</p>
-                <p className='tugas-card'>{tugas}</p>
+                <p className='tugas-card' dangerouslySetInnerHTML={{ __html: tugas}}></p>
             </div>
         </div>
     );

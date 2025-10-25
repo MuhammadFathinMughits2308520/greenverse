@@ -17,17 +17,17 @@ function ProfileTeam() {
   }, []);
 
   const anggota = [
-    { foto: '/item/dospem.png', nama: 'Triannisa Rahmawati S. Pd., M.Si', peran: 'Dosen Pembimbing', tugas: "Supervisor" },
-    { foto: '/item/team2.png', nama: 'Nasrul Adadi', peran: 'Pendidikan Kimia', tugas: 'Project Leader' },
-    { foto: '/item/team3.png', nama: 'Desi Fauza Nurjanah', peran: 'Pendidikan Kimia', tugas: 'Content Developer'},
-    { foto: '/item/team1.png', nama: 'Defrizal Yahdiyan Risyad', peran: 'Ilmu Komputer', tugas: 'AI & Virtual Robot Engineer'},
-    { foto: '/item/team4.png', nama: 'Muhammad Ridho Fajri', peran: 'Pendidikan Ilmu Komputer', tugas: 'Visual Designer'},
-    { foto: '/item/team5.png', nama: 'Muhammad Fathin Mughits', peran: 'Pendidikan Ilmu Komputer', tugas: 'Web Developer' },
+    { foto: '/item/dospem.png', nama: 'Triannisa Rahmawati S. Pd., M.Si', peran: 'Dosen Pembimbing', tugas: "<i>Supervisor</i>" },
+    { foto: '/item/team2.png', nama: 'Nasrul Adadi', peran: 'Pendidikan Kimia', tugas: '<i>Project Leader</i>' },
+    { foto: '/item/team3.png', nama: 'Desi Fauza Nurjanah', peran: 'Pendidikan Kimia', tugas: '<i>Content Developer</i>'},
+    { foto: '/item/team1.png', nama: 'Defrizal Yahdiyan Risyad', peran: 'Ilmu Komputer', tugas: '<i>AI & Virtual Robot Engineer</i>'},
+    { foto: '/item/team4.png', nama: 'Muhammad Ridho Fajri', peran: 'Pendidikan Ilmu Komputer', tugas: '<i>Visual Designer</i>'},
+    { foto: '/item/team5.png', nama: 'Muhammad Fathin Mughits', peran: 'Pendidikan Ilmu Komputer', tugas: '<i>Web Developer</i>' },
   ];
 
   return (
     <div className="teampage" ref={teamRef} id='team'>
-      <h2 className={`profil ${isVisible ? 'visible' : ''}`}>Profil Team</h2>
+      <h2 className={`profil ${isVisible ? 'visible' : ''}`}>Tim Profil</h2>
       <div className="teampage-konten">
         {anggota.map((item, index) => (
           <div key={index} className={`team-card ${isVisible ? 'visible' : ''}`}>

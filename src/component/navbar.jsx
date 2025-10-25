@@ -47,7 +47,7 @@ function Navbar({ scrollToSection }) {
     <div className={`navbar ${show ? "visible" : "hidden"}`}>
       <div className='logo-nama' onClick={()=>navigate('/')}>
         <img src="/item/logo.svg" alt="Logo" loading='lazy' className='logo'/>
-        <p className='nama'>GreenVerse Ecombot</p>
+        <p className='nama'>GreenVerse ECOMBOT</p>
       </div>
 
       <button 
@@ -71,10 +71,10 @@ function Navbar({ scrollToSection }) {
           Riset
         </a>
         <a onClick={() => handleNavClick('team')} className='link-konten1'>
-          Our Team
+          Tim Greenverse
         </a>
         <button className="tombol-produk" onClick={() => navigate('/ecomic')}>
-          Get Started
+          Akses Media
         </button>
         <button 
           className="dark-mode-toggle" 

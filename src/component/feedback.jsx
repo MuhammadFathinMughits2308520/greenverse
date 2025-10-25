@@ -60,7 +60,7 @@ export default function FeedbackPage() {
   return (
     <div className="feedback-page">
       <div className="feedback-container">
-        <h2 className="feedback-title">Feedback</h2>
+        <h2 className="feedback-title">Umpan Balik</h2>
 
         <div className="feedback-card">
           <form className="feedback-form" onSubmit={handleSubmit} noValidate>
@@ -102,7 +102,7 @@ export default function FeedbackPage() {
 
             <div className="feedback-actions">
               <button type="submit" className="btn-primary" disabled={submitting}>
-                {submitting ? 'Mengirim...' : 'Kirim Feedback'}
+                {submitting ? 'Mengirim...' : 'Kirim Umpan Balik'}
               </button>
 
               <button

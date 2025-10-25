@@ -1,6 +1,8 @@
 import React from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
+
 
 function LogoutButton() {
   const navigate = useNavigate();
@@ -16,7 +18,7 @@ function LogoutButton() {
 
     try {
       await axios.post(
-        "https://backendecombot-production.up.railway.app/api/logout/",
+        `${API_BASE}/logout/`,
         { refresh: refreshToken },
         {
           headers: {
@@ -47,7 +49,7 @@ function LogoutButton() {
 
   return (
     <button onClick={handleLogout} className="logout-button">
-      Logout
+      Keluar
     </button>
   );
 }

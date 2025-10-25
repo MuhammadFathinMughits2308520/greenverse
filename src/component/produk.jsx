@@ -26,9 +26,9 @@ function Produk() {
     },
     {
       judul: 'Produk E-Comic (ECOMBOT)',
-      isi: 'Sebuah <i>e-comic</i> interaktif yang menggabungkan teknologi robot virtual dalam bentuk <i>chatbot</i> bermuatan kearifan lokal Mapag Hujan dengan pendekatan STREAM sebagai sarana literasi lingkungan yang edukatif dan interaktif.',
+      isi: 'Sebuah <i>e-comic</i> interaktif yang menggabungkan teknologi robot virtual dalam bentuk <i>ChatBot</i> bermuatan kearifan lokal Mapag Hujan dengan pendekatan STREAM sebagai sarana literasi lingkungan yang edukatif dan interaktif.',
       action: () => navigate('/ecomic'),
-      link_subtitle: 'Get Started'
+      link_subtitle: 'Akses Media'
     },
   ];
 

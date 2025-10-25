@@ -11,15 +11,6 @@ function Footer() {
           <p>Membantu proses belajar lebih mudah dan interaktif.</p>
         </div>
 
-        <div className="footer-links">
-          <h3>Tautan Cepat</h3>
-          <ul>
-            <li><a href="">Tentang</a></li>
-            <li><a href="">Kontak</a></li>
-            <li><a href="">Kebijakan Privasi</a></li>
-          </ul>
-        </div>
-
         <div className="footer-social">
           <h3>Ikuti Kami</h3>
           <a href="https://www.instagram.com/pkmamli.greenverse/" target="_blank" rel="noreferrer">Instagram</a><br/>

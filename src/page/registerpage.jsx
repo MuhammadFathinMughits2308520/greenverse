@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import "../styles/authpage.css";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
+
 
 function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -31,7 +33,7 @@ function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const res = await axios.post("https://backendecombot-production.up.railway.app/api/register/", {
+      const res = await axios.post(`${API_BASE}/register/`, {
         username, password
       });
       setMessage(res.data.message || "Registrasi berhasil! Silakan login.");

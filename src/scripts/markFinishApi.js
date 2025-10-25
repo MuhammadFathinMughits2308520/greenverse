@@ -2,8 +2,10 @@
 export default async function markFinishApi(comic, episode, last_page = 0, opts = {}) {
   const token = localStorage.getItem("access");
   const body = { comic, episode, last_page, ...opts };
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
 
-  const res = await fetch("https://backendecombot-production.up.railway.app/api/comic-progress/finish/", {
+
+  const res = await fetch(`${API_BASE}/comic-progress/finish/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

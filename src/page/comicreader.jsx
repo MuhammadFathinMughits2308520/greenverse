@@ -5,6 +5,9 @@ import { useDarkMode } from '../context/DarkModeContext';
 import LogoutButton from "../component/logoutbutton";
 import "../styles/comicreader.css";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
+
+
 // SVG Icons
 const ChevronLeft = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -48,7 +51,8 @@ export default function ComicReader({ comic = "sample", episode = "1" }) {
   const [toastMessage, setToastMessage] = useState("");
   const [showChatbot, setShowChatbot] = useState(false);
   const { isDark, toggleDarkMode } = useDarkMode();
-  const [permission, setPermission] = useState(null); // { finish: bool, allowed_page: number, last_page: number }
+  const [permission, setPermission] = useState(null);
+  const [needsPermissionRefresh, setNeedsPermissionRefresh] = useState(false);
 
   const containerRef = useRef(null);
   const imageCache = useRef({});
@@ -57,13 +61,13 @@ export default function ComicReader({ comic = "sample", episode = "1" }) {
   // key localStorage per comic/episode
   const storageKey = `comic_last_${comic}_${episode}`;
 
-  // --- Fetch manifest (same as before) ---
+  // --- Fetch manifest ---
   useEffect(() => {
     let ignore = false;
     const fetchManifest = async () => {
       try {
         const response = await fetch(
-          `https://backendecombot-production.up.railway.app/api/comics/${comic}/${episode}/manifest.json`
+          `${API_BASE}/comics/${comic}/${episode}/manifest.json`
         );
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
@@ -80,58 +84,50 @@ export default function ComicReader({ comic = "sample", episode = "1" }) {
 
   useEffect(() => {
     if (!manifest) return;
-    // tunggu permission jika belum null; jika permission null berarti
-    // kita masih loading permission — tetapi ambil localStorage agar tidak kosong.
     const savedLocal = Number(localStorage.getItem(storageKey) ?? 0);
     const serverLast = (permission && typeof permission.last_page === "number") ? permission.last_page : null;
-    // prioritas: server -> local -> 0
     const startFrom = (serverLast !== null) ? serverLast : savedLocal;
     const clamped = Math.max(0, Math.min(startFrom, manifest.pages.length - 1));
     setCurrentPage(clamped);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [manifest, permission]);
 
-
-  // --- Load user permission & last page from backend (if logged in) ---
+  // --- Load user permission & last page from backend ---
   useEffect(() => {
     let ignore = false;
     const token = localStorage.getItem("access");
     if (!token) {
-      // fallback: try localStorage only
       const saved = localStorage.getItem(storageKey);
       if (saved) setCurrentPage(Number(saved));
-      setPermission({ finish: true, allowed_page: Infinity }); // allow everything for anonymous
+      setPermission({ finish: true, allowed_page: Infinity });
       return;
     }
 
     const fetchPermission = async () => {
       try {
         const params = new URLSearchParams({ comic, episode });
-        const res = await fetch(`https://backendecombot-production.up.railway.app/api/comic-progress/?${params.toString()}`, {
+        const res = await fetch(`${API_BASE}/comic-progress/?${params.toString()}`, {
           headers: { "Content-Type": "application/json", ...getAuthHeader() },
         });
         if (!res.ok) {
-          // If endpoint not found or error, fallback safe defaults
-          setPermission({ finish: false, allowed_page: Infinity, last_page: 0 });
+          setPermission({ finish: false, allowed_page: 2, last_page: 0 });
           const saved = localStorage.getItem(storageKey);
           if (saved) setCurrentPage(Number(saved));
           return;
         }
         const data = await res.json();
         if (!ignore) {
-          // expected response example: { finish: false, allowed_page: 2, last_page: 1 }
           setPermission({
             finish: data.finish ?? false,
-            allowed_page: typeof data.allowed_page === "number" ? data.allowed_page : (data.last_page ?? 0),
+            allowed_page: typeof data.allowed_page === "number" ? data.allowed_page : 2,
             last_page: data.last_page ?? 0
           });
-          // restore last page (priority: server -> localStorage)
           const startPage = data.last_page ?? Number(localStorage.getItem(storageKey) ?? 0);
           setCurrentPage(Math.max(0, Math.min(startPage, (manifest?.pages?.length ?? 1) - 1)));
         }
       } catch (err) {
         console.warn("permission fetch failed:", err);
-        setPermission({ finish: false, allowed_page: Infinity, last_page: 0 });
+        setPermission({ finish: false, allowed_page: 2, last_page: 0 });
         const saved = localStorage.getItem(storageKey);
         if (saved) setCurrentPage(Number(saved));
       }
@@ -139,15 +135,15 @@ export default function ComicReader({ comic = "sample", episode = "1" }) {
     fetchPermission();
     return () => { ignore = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comic, episode]);
+  }, [comic, episode, needsPermissionRefresh]);
 
-  // --- Image preloading & caching (aggressive, keeps cache so switching pages doesn't reload) ---
+  // --- Image preloading & caching ---
   useEffect(() => {
     if (!manifest?.pages) return;
     const preloadImage = (idx, priority = false) => {
       if (idx < 0 || idx >= manifest.pages.length) return;
       if (loadedImages.has(idx) || imageErrors.has(idx)) return;
-      if (imageCache.current[idx]) return; // already cached
+      if (imageCache.current[idx]) return;
 
       const page = manifest.pages[idx];
       const img = new Image();
@@ -162,7 +158,6 @@ export default function ComicReader({ comic = "sample", episode = "1" }) {
       img.src = page.url;
     };
 
-    // preload current (high), next two, prev one, and a couple further ahead
     preloadImage(currentPage, true);
     preloadImage(currentPage + 1, true);
     preloadImage(currentPage + 2);
@@ -170,33 +165,29 @@ export default function ComicReader({ comic = "sample", episode = "1" }) {
     preloadImage(currentPage + 3);
   }, [currentPage, manifest, loadedImages, imageErrors]);
 
-  // --- Save last-read into localStorage and optionally backend (debounced-ish) ---
-  // --- Tampilkan chatbot ketika user sudah di halaman 3 atau sudah finish eksplorasi ---
-useEffect(() => {
-  // tampilkan jika user di halaman ke-3 atau status finish true
-  const shouldShow = currentPage >= 2 || permission?.finish === true;
-  setShowChatbot(shouldShow);
+  // --- Save progress & show chatbot ---
+  useEffect(() => {
+    const shouldShow = currentPage >= 2 || permission?.finish === true;
+    setShowChatbot(shouldShow);
 
-  // simpan progress ke localStorage + backend
-  localStorage.setItem(storageKey, String(currentPage));
-  const saveBackend = async () => {
-    const token = localStorage.getItem("access");
-    if (!token) return;
-    try {
-      await fetch("https://backendecombot-production.up.railway.app/api/comic-progress/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
-        body: JSON.stringify({ comic, episode, last_page: currentPage }),
-      });
-    } catch (err) {
-      console.debug("save progress failed:", err);
-    }
-  };
-  saveBackend();
-}, [currentPage, comic, episode, permission]);
+    localStorage.setItem(storageKey, String(currentPage));
+    const saveBackend = async () => {
+      const token = localStorage.getItem("access");
+      if (!token) return;
+      try {
+        await fetch(`${API_BASE}/comic-progress/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...getAuthHeader() },
+          body: JSON.stringify({ comic, episode, last_page: currentPage }),
+        });
+      } catch (err) {
+        console.debug("save progress failed:", err);
+      }
+    };
+    saveBackend();
+  }, [currentPage, comic, episode, permission, storageKey]);
 
-
-  // --- Utility: show toast */}
+  // --- Utility: show toast ---
   const showToast = (msg, timeout = 2500) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(""), timeout);
@@ -208,83 +199,113 @@ useEffect(() => {
     const lastIndex = manifest.pages.length - 1;
     if (targetIndex < 0 || targetIndex > lastIndex) return false;
 
-    // semua halaman diizinkan kalau sudah finish
-    if (permission?.finish) return true;
+    if (permission?.finish === true) return true;
 
-    // kalau belum finish, hanya boleh sampai halaman terakhir yang pernah dibaca
-    if (targetIndex <= 2) return true;
+    const MAX_PAGE_WITHOUT_FINISH = 2;
+    if (targetIndex <= MAX_PAGE_WITHOUT_FINISH) return true;
 
-    // fallback ke server check
-    try {
-      const params = new URLSearchParams({ comic, episode, page: targetIndex });
-      const res = await fetch(`https://backendecombot-production.up.railway.app/api/comic-progress/?${params.toString()}`, {
-        headers: { "Content-Type": "application/json", ...getAuthHeader() },
-      });
-      const data = await res.json();
-      return data.finish === true || targetIndex <= data.last_page;
-    } catch (err) {
-      console.warn("permission-check failed:", err);
-      return true;
+    if (!permission) {
+      try {
+        const params = new URLSearchParams({ comic, episode });
+        const res = await fetch(`${API_BASE}/comic-progress/?${params.toString()}`, {
+          headers: { "Content-Type": "application/json", ...getAuthHeader() },
+        });
+        if (!res.ok) return false;
+        const data = await res.json();
+        
+        setPermission({
+          finish: data.finish ?? false,
+          allowed_page: data.allowed_page ?? 2,
+          last_page: data.last_page ?? 0
+        });
+        
+        return data.finish === true;
+      } catch (err) {
+        console.warn("permission-check failed:", err);
+        return false;
+      }
     }
+
+    return false;
   }, [manifest, permission, comic, episode]);
 
-
-
-  // --- Navigation functions with permission checks ---
+  // --- Navigation functions ---
   const goToNextPage = useCallback(async () => {
     if (!manifest) return;
     const target = currentPage + 1;
+    
+    if (target >= manifest.pages.length) {
+      showToast("Ini adalah halaman terakhir");
+      return;
+    }
+    
     const allowed = await canGoToPage(target);
-    console.log("target : ", target);
-    if (!allowed && target <= currentPage) {
-      showToast("Selesaikan explorasi terlebih dahulu");
+    
+    if (!allowed) {
+      showToast("Selesaikan explorasi terlebih dahulu untuk membuka halaman berikutnya");
       setTimeout(() => {
         navigate('/ecombot');
-      }, 1000);
+      }, 2000);
       return;
-    }else if(target >= 4){
-      showToast("Semua halaman sudah terbuka");
     }
-    setCurrentPage(prev => Math.min(prev + 1, manifest.pages.length - 1));
+    
+    setCurrentPage(target);
     setHeaderVisible(true);
-  }, [currentPage, manifest, canGoToPage]);
+  }, [currentPage, manifest, canGoToPage, navigate]);
 
   const goToPrevPage = useCallback(async () => {
     if (!manifest) return;
     const target = currentPage - 1;
-    const allowed = await canGoToPage(target);
-    if (!allowed) {
-      showToast("Tidak bisa pindah ke halaman tersebut");
+    
+    if (target < 0) {
+      showToast("Ini adalah halaman pertama");
       return;
     }
-    setCurrentPage(prev => Math.max(prev - 1, 0));
+    
+    const allowed = await canGoToPage(target);
+    if (!allowed) {
+      showToast("Tidak bisa mengakses halaman tersebut");
+      return;
+    }
+    
+    setCurrentPage(target);
     setHeaderVisible(true);
   }, [currentPage, manifest, canGoToPage]);
 
   const goToPage = useCallback(async (pageIndex) => {
     if (!manifest) return;
-    const allowed = await canGoToPage(pageIndex);
-    if (!allowed) {
-      showToast("Selesaikan explorasi terlebih dahulu");
+    
+    if (pageIndex < 0 || pageIndex >= manifest.pages.length) {
+      showToast("Halaman tidak valid");
       return;
     }
+    
+    const allowed = await canGoToPage(pageIndex);
+    if (!allowed) {
+      showToast("Selesaikan explorasi terlebih dahulu untuk membuka halaman ini");
+      setTimeout(() => {
+        navigate('/ecombot');
+      }, 2000);
+      return;
+    }
+    
     setCurrentPage(pageIndex);
     setHeaderVisible(true);
-  }, [manifest, canGoToPage]);
+  }, [manifest, canGoToPage, navigate]);
 
-  // keyboard & touch handlers (same as before)
+  // --- Keyboard handlers ---
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); goToNextPage(); }
       if (e.key === "ArrowLeft") { e.preventDefault(); goToPrevPage(); }
       if (e.key === "Home") { e.preventDefault(); goToPage(0); }
-      if (e.key === "End") { e.preventDefault(); goToPage(manifest?.pages.length - 1); }
+      if (e.key === "End" && manifest) { e.preventDefault(); goToPage(manifest.pages.length - 1); }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToNextPage, goToPrevPage, goToPage, manifest]);
 
-  // touch/swipe handlers
+  // --- Touch handlers ---
   const touchStartX = useRef(0);
   const handleTouchStart = (e) => touchStartX.current = e.touches[0].clientX;
   const handleTouchEnd = (e) => {
@@ -294,17 +315,34 @@ useEffect(() => {
     if (diff > 0) goToNextPage(); else goToPrevPage();
   };
 
-  // header toggle
+  // --- Header toggle ---
   const handleImageClick = () => {
     setHeaderVisible(v => !v);
     clearTimeout(hideHeaderTimer.current);
     hideHeaderTimer.current = setTimeout(() => setHeaderVisible(false), 3000);
   };
 
-  // cleanup timer on unmount
+  // --- Cleanup timer ---
   useEffect(() => () => clearTimeout(hideHeaderTimer.current), []);
 
-  // save progress on unload (defensive)
+  // --- Refresh permission when tab becomes visible ---
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        setNeedsPermissionRefresh(prev => !prev);
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', () => setNeedsPermissionRefresh(prev => !prev));
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', () => {});
+    };
+  }, []);
+
+  // --- Save on unload ---
   useEffect(() => {
     const handleBeforeUnload = () => {
       localStorage.setItem(storageKey, String(currentPage));
@@ -313,7 +351,7 @@ useEffect(() => {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [currentPage, storageKey]);
 
-  // Rendering fallback states
+  // --- Rendering ---
   if (error) return (<div className="comic-reader-container"><div className="comic-reader-error"><p className="error-message">❌ Error: {error}</p><p className="error-detail">Failed to load comic.</p></div></div>);
   if (!manifest) return (<div className="comic-reader-container"><div className="comic-reader-loading"><Loader /><p>Loading comic...</p></div></div>);
   if (!manifest.pages || manifest.pages.length === 0) return (<div className="comic-reader-container"><p className="comic-reader-no-pages">⚠️ No pages found in this comic</p></div>);
@@ -323,7 +361,7 @@ useEffect(() => {
   const progress = ((currentPage + 1) / manifest.pages.length) * 100;
 
   const handleLogout = () => {
-    window.location.href = "/login"; // redirect ke halaman login
+    window.location.href = "/login";
   };
 
   return (
@@ -344,7 +382,7 @@ useEffect(() => {
           >
             {isDark ? '☀️' : '🌙'}
           </button>
-            <LogoutButton onLogoutSuccess={handleLogout} />
+          <LogoutButton onLogoutSuccess={handleLogout} />
         </div>
       </div>
 
@@ -360,22 +398,18 @@ useEffect(() => {
         />
       </div>
 
-      {/* touch areas */}
-      {currentPage > 0 && <div className="comic-reader-touch-area left" onClick={() => goToPrevPage()} />}
-      {currentPage < manifest.pages.length - 1 && <div className="comic-reader-touch-area right" onClick={() => goToNextPage()} />}
+      {currentPage > 0 && <div className="comic-reader-touch-area left" onClick={goToPrevPage} />}
+      {currentPage < manifest.pages.length - 1 && <div className="comic-reader-touch-area right" onClick={goToNextPage} />}
 
-      {/* navigation buttons */}
-      {currentPage > 0 && <button onClick={() => goToPrevPage()} className="comic-reader-nav-btn prev" aria-label="Previous page"><ChevronLeft /></button>}
-      {currentPage < manifest.pages.length - 1 && <button onClick={() => goToNextPage()} className="comic-reader-nav-btn next" aria-label="Next page"><ChevronRight /></button>}
+      {currentPage > 0 && <button onClick={goToPrevPage} className="comic-reader-nav-btn prev" aria-label="Previous page"><ChevronLeft /></button>}
+      {currentPage < manifest.pages.length - 1 && <button onClick={goToNextPage} className="comic-reader-nav-btn next" aria-label="Next page"><ChevronRight /></button>}
 
-      {/* Chatbot floating (requirement #1) */}
       {showChatbot && (
         <div className="chatbot-floating" role="button" tabIndex={0} onClick={() => showToast("Chatbot opened (placeholder)")}>
           <img src="/item/chatbot-icon.svg" alt="Chatbot" onClick={() => navigate('/ecombot')}/>
         </div>
       )}
 
-      {/* Toast */}
       {toastMessage && <div className="comic-toast" role="status">{toastMessage}</div>}
     </div>
   );

@@ -14,6 +14,8 @@ import Kegiatan6 from "./Kegiatan6";
 import Kegiatan7 from "./Kegiatan7";
 import { useChatFlow } from '../hooks/useChatFlow';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
+
 // Fallback data jika loading gagal
 const fallbackChatFlow = {
   chatbot_flow: {
@@ -357,7 +359,7 @@ const getCurrentTitle = () => {
       // Jika user sudah login, coba load atau buat session
       const sessionId = localStorage.getItem('current_session_id') || `session_${Date.now()}`;
       
-      const response = await fetch('http://localhost:8000/api/chat/session/start/', {
+      const response = await fetch(`${API_BASE}/chat/session/start/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -399,7 +401,7 @@ const getCurrentTitle = () => {
       
       if (!token || !sessionId) return;
 
-      const response = await fetch(`http://localhost:8000/api/chat/session/${sessionId}/activity/${activityId}/`, {
+      const response = await fetch(`${API_BASE}/chat/session/${sessionId}/activity/${activityId}/`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -433,7 +435,7 @@ const getCurrentTitle = () => {
         setMessages(historyMessages);
         
         // Load progress
-        const progressResponse = await fetch(`http://localhost:8000/api/chat/session/${sessionId}/overview/`, {
+        const progressResponse = await fetch(`${API_BASE}/chat/session/${sessionId}/overview/`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -580,7 +582,7 @@ const getCurrentTitle = () => {
       
       if (!token || !sessionId) return null;
 
-      const response = await fetch('http://localhost:8000/api/chat/session/send/', {
+      const response = await fetch(`${API_BASE}/chat/session/send/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -628,7 +630,7 @@ const getCurrentTitle = () => {
         return { status: 'saved_locally' };
       }
 
-      const response = await fetch('http://localhost:8000/api/chat/answer/submit/', {
+      const response = await fetch(`${API_BASE}/chat/answer/submit/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -785,7 +787,7 @@ const getCurrentTitle = () => {
       const sessionId = localStorage.getItem('current_session_id');
       
       if (token && sessionId) {
-        await fetch('http://localhost:8000/api/chat/activity/complete/', {
+        await fetch(`${API_BASE}/api/chat/activity/complete/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -930,7 +932,7 @@ const getCurrentTitle = () => {
     try {
       console.log('Processing forum question with LangChain:', question);
       
-      const response = await fetch('http://localhost:8000/api/ask/', {
+      const response = await fetch(`${API_BASE}/ask/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

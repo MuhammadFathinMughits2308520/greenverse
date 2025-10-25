@@ -14,26 +14,23 @@ function Beranda() {
       // Slide 1: tampilkan 3 baris (small title, big product, deskripsi)
       titleSmall: 'PKM AMLI-RSH 2025',
       produk: 'ECOMBOT',
-      subtitle: `E-Comic Berbasis Robot Virtual Bermuatan Kearifan Lokal Mapag Hujan dengan Pendekatan STREAM untuk Mendukung Program Prioritas`,
+      subtitle: `<i>E-Comic</i> Berbasis Robot Virtual Bermuatan Kearifan Lokal Mapag Hujan dengan Pendekatan STREAM untuk Mendukung Program Prioritas`,
       // background khusus: gunakan gambar untuk desktop, gambar lebih kecil atau berbeda untuk mobile
       desktopBg: '/item/laptop/gambar-beranda1.png',
       mobileBg: '/item/mobile/gambar-beranda1.png' // sediakan image mobile atau fallback ke desktop jika tidak ada
     },
     {
       title: 'Inovasi Media Pembelajaran Digital',
-      subtitle: 'Solusi Masa Depan',
       desktopBg: '/item/laptop/gambar-beranda2.png',
       mobileBg: '/item/mobile/gambar-beranda2.png'
     },
     {
       title: 'Sarana Penguatan Literasi Lingkungan',
-      subtitle: 'Bersama Membangun',
       desktopBg: '/item/laptop/gambar-beranda3.png',
       mobileBg: '/item/mobile/gambar-beranda3.png'
     },
     {
       title: 'Bermuatan Kearifan Lokal',
-      subtitle: 'Menuju Masa Depan Hijau',
       desktopBg: '/item/laptop/gambar-beranda4.png',
       mobileBg: '/item/mobile/gambar-beranda4.png'
     }
@@ -108,13 +105,13 @@ function Beranda() {
                   </div>
 
                   {/* deskripsi panjang */}
-                  <p className="slide-subtitle slide-subtitle-long">{slide.subtitle}</p>
+                  <p className="slide-subtitle slide-subtitle-long" dangerouslySetInnerHTML={{ __html: slide.subtitle }}></p>
                 </>
               ) : (
                 <>
                   {/* slide biasa */}
                   <h2 className="slide-title">{slide.title}</h2>
-                  <p className="slide-subtitle">{slide.subtitle}</p>
+                  <p className="slide-subtitle" dangerouslySetInnerHTML={{ __html: slide.subtitle }}></p>
                 </>
               )}
 

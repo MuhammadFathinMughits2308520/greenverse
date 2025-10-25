@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
+
 function ProtectedRoute({ children }) {
   const [isAuth, setIsAuth] = useState(null); // null = loading, true = authenticated, false = not authenticated
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +22,7 @@ function ProtectedRoute({ children }) {
       try {
         // Verifikasi token ke backend
         const verifyRes = await fetch(
-          "https://backendecombot-production.up.railway.app/api/token/verify/",
+          `${API_BASE}/token/verify/`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -47,7 +49,7 @@ function ProtectedRoute({ children }) {
 
         // Coba refresh token
         const refreshRes = await fetch(
-          "https://backendecombot-production.up.railway.app/api/token/refresh/",
+          `${API_BASE}/token/refresh/`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
