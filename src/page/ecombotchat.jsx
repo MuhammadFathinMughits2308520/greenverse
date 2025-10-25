@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
+import { useNavigate, useLocation, Routes, Route, useParams } from 'react-router-dom';
 import Aquano from "../assets/aquano.png";
 import Head from "../assets/head.png";
 import User from "../assets/user.png";
@@ -196,6 +196,18 @@ const fallbackChatFlow = {
 export const AppContext = React.createContext();
 
 const EcombotChat = () => {
+  const params = useParams(); // expects route like /comics/:comic/:episode/ecombot (optional)
+  // try params.comic or params.comic_slug or fallback later
+  const comicParam = params.comic || params.comic_slug || params.comicSlug || null;
+  const episodeParam = params.episode || params.episode_slug || params.episodeSlug || null;
+
+  // determine comic/episode slugs (fallback to sensible defaults or localStorage)
+  const comicSlug = comicParam || localStorage.getItem("last_comic_slug") || "my-comic";
+  const episodeSlug = episodeParam || localStorage.getItem("last_episode_slug") || "e_001";
+
+  // determine currentPage from localStorage (saved by ComicReader)
+  const storageKey = `comic_last_${comicSlug}_${episodeSlug}`;
+  const savedPage = Number(localStorage.getItem(storageKey) ?? 0);
   const [permission, setPermission] = useState({ finish: false, last_page: savedPage });
   const { chatFlow, loading, error } = useChatFlow();
   const [messages, setMessages] = useState([]);
@@ -994,8 +1006,6 @@ const getCurrentTitle = () => {
       }
     } catch (err) {
       console.error("markFinishApi error:", err);
-      const msg = err?.body?.message || err?.message || "Gagal menandai selesai";
-      showToast(msg);
       if (err.status === 401) {
         // token invalid / user harus login ulang
         navigate('/login');
