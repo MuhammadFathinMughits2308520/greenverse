@@ -16,7 +16,7 @@ function ResearchBenefit() {
         },
         {
             judul: 'Relevansi Program Prioritas Nasional',
-            isi: 'Upaya untuk mendukung Program Prioritas Pemerintah, khususnya Nomor. 8 tentang penguatan pendidikan, sains, teknologi, dan digitalisasi, serta Nomor. 17 khususnya tentang pelestarian seni dan budaya.'
+            isi: 'Upaya untuk mendukung Program Prioritas Pemerintah, khususnya Nomor 8 tentang penguatan pendidikan, sains, teknologi, dan digitalisasi, serta Nomor 17 khususnya tentang pelestarian seni dan budaya.'
         },
     ]
     

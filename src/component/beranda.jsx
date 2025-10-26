@@ -120,7 +120,7 @@ function Beranda() {
                 onClick={() => navigate('/ecomic')}
                 aria-label="Get Started ECOMBOT"
               >
-                Get Started
+                Akses Media
               </button>
             </div>
           </div>
