@@ -114,77 +114,77 @@ const fallbackChatFlow = {
     pre_kegiatan: {
       "mulai eksplorasi 1": "kegiatan_1",
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "kimia_hijau"
+      "Menu Sebelumnya": "kimia_hijau"
     },
     kegiatan_1: {
       "pertanyaan 1": "pertanyaan_1",
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "pre_kegiatan"
+      "Menu Sebelumnya": "pre_kegiatan"
     },
     pertanyaan_1: {
       "mulai eksplorasi 2": "kegiatan_2",
-      "menu sebelumnya": "kegiatan_1"
+      "Menu Sebelumnya": "kegiatan_1"
     },
     kegiatan_2: {
       "pertanyaan 2": "pertanyaan_2",
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "kegiatan_1"
+      "Menu Sebelumnya": "kegiatan_1"
     },
     pertanyaan_2: {
       "mulai eksplorasi 3": "kegiatan_3",
-      "menu sebelumnya": "kegiatan_2"
+      "Menu Sebelumnya": "kegiatan_2"
     },
     kegiatan_3: {
       "pertanyaan 3": "pertanyaan_3",
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "kegiatan_2"
+      "Menu Sebelumnya": "kegiatan_2"
     },
     pertanyaan_3: {
       "mulai eksplorasi 4": "kegiatan_4",
-      "menu sebelumnya": "kegiatan_3"
+      "Menu Sebelumnya": "kegiatan_3"
     },
     kegiatan_4: {
       "pertanyaan 4": "pertanyaan_4",
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "kegiatan_3"
+      "Menu Sebelumnya": "kegiatan_3"
     },
     pertanyaan_4: {
       "mulai eksplorasi 5": "kegiatan_5",
-      "menu sebelumnya": "kegiatan_4"
+      "Menu Sebelumnya": "kegiatan_4"
     },
     kegiatan_5: {
       "mari merancang": "mari_merancang",
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "kegiatan_4"
+      "Menu Sebelumnya": "kegiatan_4"
     },
     mari_merancang: {
       "mulai eksplorasi 6": "kegiatan_6",
-      "menu sebelumnya": "kegiatan_5"
+      "Menu Sebelumnya": "kegiatan_5"
     },
     kegiatan_6: {
       "ayo berkreasi": "ayo_berkreasi",
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "kegiatan_5"
+      "Menu Sebelumnya": "kegiatan_5"
     },
     ayo_berkreasi: {
       "mulai eksplorasi 7": "kegiatan_7",
-      "menu sebelumnya": "kegiatan_6"
+      "Menu Sebelumnya": "kegiatan_6"
     },
     kegiatan_7: {
       "pertanyaan reflektif": "pertanyaan_reflektif",
-      "menu sebelumnya": "kegiatan_6"
+      "Menu Sebelumnya": "kegiatan_6"
     },
     pertanyaan_reflektif: {
       "Eksplorasi Selesai": "completion",
-      "menu sebelumnya": "kegiatan_7"
+      "Menu Sebelumnya": "kegiatan_7"
     },
     completion: {
       "tanya ecombot": "forum_diskusi",
-      "menu sebelumnya": "kegiatan_7",
+      "Menu Sebelumnya": "kegiatan_7",
       "eksplorasi selesai": "redirect_ecomic"
     },
     forum_diskusi: {
-      "menu sebelumnya": "previous_step"
+      "Menu Sebelumnya": "previous_step"
     }
   }
 };
@@ -239,13 +239,13 @@ const EcombotChat = () => {
   // Daftar halaman yang tersedia
   const kegiatanList = [
     { num: 0, path: '/kimia-hijau', name: 'Kimia Hijau', stepKey: 'kimia_hijau', materi: 'Pengenalan', alwaysAccessible: true },
-    { num: 1, path: '/kegiatan-1', name: 'Masalah sampah dan Banjir', stepKey: 'kegiatan_1', materi: 'Eksplorasi 1', alwaysAccessible: true },
+    { num: 1, path: '/kegiatan-1', name: 'Masalah Sampah dan Banjir', stepKey: 'kegiatan_1', materi: 'Eksplorasi 1', alwaysAccessible: true },
     { num: 2, path: '/kegiatan-2', name: 'Prinsip Kimia Hijau', stepKey: 'kegiatan_2', materi: 'Eksplorasi 2' },
-    { num: 3, path: '/kegiatan-3', name: 'Aspek Sains (Science)', stepKey: 'kegiatan_3', materi: 'Eksplorasi 3' },
-    { num: 4, path: '/kegiatan-4', name: 'Aspek Teknologi (Technology)', stepKey: 'kegiatan_4', materi: 'Eksplorasi 4' },
-    { num: 5, path: '/kegiatan-5', name: 'Aspek Rekayasa (Engineering)', stepKey: 'kegiatan_5', materi: 'Eksplorasi 5' },
-    { num: 6, path: '/kegiatan-6', name: 'Aspek Seni (Arts)', stepKey: 'kegiatan_6', materi: 'Eksplorasi 6' },
-    { num: 7, path: '/kegiatan-7', name: 'Aspek Matematika (Mathematics)', stepKey: 'kegiatan_7', materi: 'Eksplorasi 7' },
+    { num: 3, path: '/kegiatan-3', name: 'Aspek Sains (<i>Science</i>)', stepKey: 'kegiatan_3', materi: 'Eksplorasi 3' },
+    { num: 4, path: '/kegiatan-4', name: 'Aspek Teknologi (<i>Technology</i>)', stepKey: 'kegiatan_4', materi: 'Eksplorasi 4' },
+    { num: 5, path: '/kegiatan-5', name: 'Aspek Rekayasa (<i>Engineering</i>)', stepKey: 'kegiatan_5', materi: 'Eksplorasi 5' },
+    { num: 6, path: '/kegiatan-6', name: 'Aspek Seni (<i>Arts</i>)', stepKey: 'kegiatan_6', materi: 'Eksplorasi 6' },
+    { num: 7, path: '/kegiatan-7', name: 'Aspek Matematika (<i>Mathematics</i>)', stepKey: 'kegiatan_7', materi: 'Eksplorasi 7' },
   ];
 
   // Gunakan chatFlow yang aman (fallback jika undefined)
@@ -767,8 +767,8 @@ const getCurrentTitle = () => {
                               keyword.toLowerCase().includes('merancang') || 
                               keyword.toLowerCase().includes('kreasi');
       const buttonClass = isQuestionButton 
-        ? "px-4 py-2 bg-lime-500 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-600 border border-lime-600 transition-all duration-200"
-        : "px-4 py-2 bg-white text-gray-700 rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-50 hover:text-lime-600 border border-gray-200 transition-all duration-200";
+        ? "px-4 py-2 bg-lime-500 !text-lime-700 !font-bold rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-600 border border-lime-600 transition-all duration-200"
+        : "px-4 py-2 bg-white !text-lime-700 !font-bold rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-50 hover:text-lime-600 border border-gray-200 transition-all duration-200";
       
       return `<button class="${buttonClass}" data-text="${keyword}">${keyword}</button>`;
     }).join('');
@@ -2169,7 +2169,7 @@ const getCurrentTitle = () => {
           <div className="hidden md:relative md:flex md:w-1/3 bg-white-50 flex-col bg-yellow-50">
             <div className='text-center !mt-12'>
               <p className='text-lime-500 text-lg font-semibold'>{currentTitle.materi}</p>
-              <h1 className='text-3xl text-lime-500 font-bold mt-2'>{currentTitle.title}</h1>
+              <h1 className='text-3xl text-lime-500 font-bold mt-2' dangerouslySetInnerHTML={{ __html: currentTitle.title }}></h1>
             </div>
             {/* AVATAR AQUANO */}
             <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center">
@@ -2181,7 +2181,7 @@ const getCurrentTitle = () => {
                 />
               </div>
               <span className="text-lime-700 font-semibold mt-1 z-20 relative bg-white !px-3 !py-0.5 rounded-full shadow-sm border border-gray-200 text-sm">
-                Aquano
+                Ecombot
               </span>
             </div>
           </div>
@@ -2209,7 +2209,7 @@ const getCurrentTitle = () => {
                     } max-w-xs`}>
                         {/* Gunakan message_html jika ada, fallback ke message */}
                         {message.data?.title && (
-                          <h3 className="font-bold text-lime-700 text-lg">{message.data.title}</h3>
+                          <h3 className="font-bold text-lime-700 text-lg" dangerouslySetInnerHTML={{__html: message.data.title}} />
                         )}
                         {renderMessageText(message.data?.message_html || message.text)}
                         
@@ -2370,7 +2370,7 @@ const getCurrentTitle = () => {
                 />
               </div>
               <span className="text-lime-700 font-semibold !mt-4 z-20 relative bg-white !px-3 !py-0.5 rounded-full shadow-sm border border-gray-200 text-xs">
-                Aquano
+                Ecombot
               </span>
             </div>
 
@@ -2437,7 +2437,7 @@ const getCurrentTitle = () => {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs">{kegiatan.materi}</p>
-                          <p className="font-semibold">{kegiatan.name}</p>
+                          <p className="font-semibold" dangerouslySetInnerHTML={{__html: kegiatan.name}} />
                         </div>
                         {progress.completed.includes(kegiatan.stepKey) && (
                           <span className="!ml-2 text-xs bg-white text-lime-600 rounded-full text-center !px-2 !py-1">✓ Selesai</span>
