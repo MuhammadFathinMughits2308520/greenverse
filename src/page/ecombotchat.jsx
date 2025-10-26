@@ -758,8 +758,8 @@ const getCurrentTitle = () => {
       return uniqueKeywords
         .filter(keyword => keyword.toLowerCase().includes('menu sebelumnya'))
         .map(keyword => {
-          const buttonClass = "px-4 py-2 bg-lime-500 text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-600 border border-lime-600 transition-all duration-200";
-          return `<button class="${buttonClass}" data-text="${keyword}">${keyword}</button>`;
+          const buttonClass = "px-4 py-2 bg-lime-500 !text-lime-700 rounded-full text-sm !font-bold shadow-md hover:shadow-lg hover:bg-lime-600 border border-lime-600 transition-all duration-200";
+          return `<button class="${buttonClass}" data-text="Menu Sebelumnya">Menu Sebelumnya</button>`;
         })
         .join('');
     }
