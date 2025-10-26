@@ -193,7 +193,6 @@ const fallbackChatFlow = {
 export const AppContext = React.createContext();
 
 const EcombotChat = () => {
-<<<<<<< HEAD
   const params = useParams(); // expects route like /comics/:comic/:episode/ecombot (optional)
   // try params.comic or params.comic_slug or fallback later
   const comicParam = params.comic || params.comic_slug || params.comicSlug || null;
@@ -207,8 +206,6 @@ const EcombotChat = () => {
   const storageKey = `comic_last_${comicSlug}_${episodeSlug}`;
   const savedPage = Number(localStorage.getItem(storageKey) ?? 0);
   const [permission, setPermission] = useState({ finish: false, last_page: savedPage });
-=======
->>>>>>> 3af365ed6d7783a38c6e110b8c24bb8d2fded68c
   const { chatFlow, loading, error } = useChatFlow();
   const [messages, setMessages] = useState([]);
   const [botTyping, setBotTyping] = useState(false);
@@ -986,7 +983,6 @@ const getCurrentTitle = () => {
   };
 
   // FUNGSI BARU: Redirect ke /ecomic
-<<<<<<< HEAD
   const redirectToEcomic = async () => {
     const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
     const token = localStorage.getItem("access");
@@ -1012,22 +1008,7 @@ const getCurrentTitle = () => {
         navigate('/login');
       }
     }
-=======
-  const redirectToEcomic = () => {
-    console.log('Redirecting to /ecomic endpoint');
-    
-    // Tampilkan pesan konfirmasi sebelum redirect
-    setMessages(prev => [...prev, { 
-      from: 'bot', 
-      text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
-    }]);
-    
-    // Redirect setelah 2 detik
-    setTimeout(() => {
-      navigate('/ecomic');
-    }, 2000);
->>>>>>> 3af365ed6d7783a38c6e110b8c24bb8d2fded68c
-  };
+  }
 
   // Fungsi untuk memulai sesi pertanyaan - DIPERBAIKI: TANPA QUICK BUTTONS
   const startQuestionSession = () => {
