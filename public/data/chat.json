@@ -93,7 +93,7 @@
           "source": "www.lampusatu.com"
         }
       ],
-      "next_keywords": ["pertanyaan 2", "Tanya Ecombot", "Menu Sebelumnya"]
+      "next_keywords": ["Pertanyaan 2", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_2": {
       "id": "pertanyaan_2",
@@ -109,15 +109,15 @@
           "max_length": 500
         }
       ],
-      "next_keywords": ["mulai eksplorasi 3", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 3", "Menu Sebelumnya"]
     },
     "kegiatan_3": {
       "id": "kegiatan_3",
       "type": "bot_message",
       "character": "Aquano",
       "title": "Kegiatan Eksplorasi 3: Aspek Sains (Science)",
-      "message": "Mapag Hujan memiliki hubungan erat dengan konsep-konsep ilmiah dalam sains lingkungan. Tradisi ini menunjukkan bagaimana keberadaan sampah di alam dan air hujan saling memengaruhi satu sama lain. Dari sudut pandang sains, Mapag Hujan dapat dipahami melalui kesadaran masyarakat akan pentingnya menjaga kebersihan sungai dan mengelola sampah sebelum musim hujan tiba. Jika sampah tidak dikelola dengan baik, kualitas air dan keseimbangan lingkungan bisa terganggu.\n\n**1. Interaksi Air Hujan dengan Lingkungan**\nAir hujan yang turun akan berinteraksi dengan material disekitarnya. Jika sungai dipenuhi sampah, air dapat melarutkan senyawa berbahaya seperti plastik, logam berat, dan limbah rumah tangga. Penumpukan sampah menyempitkan aliran air, menyebabkan sungai meluap saat hujan deras dan memicu banjir. Air banjir yang tercemar membawa zat kimia ke tanah dan air tanah, sehingga berisiko bagi kesehatan masyarakat.\n\n**2. Pengaruh Sampah terhadap Kualitas Lingkungan**\nSampah yang tidak dikelola dengan baik akan mencemari air, udara, dan tanah. Sampah organik membusuk menghasilkan gas seperti metana (CH4), amonia (NH3), H2S, dan CO2 yang mencemari udara. Limbah meningkatkan BOD dan COD, yang dapat menurunkan kadar oksigen terlarut, dan mengganggu kehidupan biota air. Air lindi dari sampah meresap ke tanah, membawa senyawa berbahaya dan logam berat. Mengubah struktur kimia tanah, menurunkan kesuburan, serta mencemari air tanah.",
-      "next_keywords": ["pertanyaan 3", "Tanya Ecombot", "Menu Sebelumnya"]
+      "message": "Mapag Hujan memiliki hubungan erat dengan konsep-konsep ilmiah dalam sains lingkungan. Tradisi ini menunjukkan bagaimana keberadaan sampah di alam dan air hujan saling memengaruhi satu sama lain. Dari sudut pandang sains, Mapag Hujan dapat dipahami melalui kesadaran masyarakat akan pentingnya menjaga kebersihan sungai dan mengelola sampah sebelum musim hujan tiba. Jika sampah tidak dikelola dengan baik, kualitas air dan keseimbangan lingkungan bisa terganggu.\n\n**1. Interaksi Air Hujan dengan Lingkungan**\nAir hujan yang turun akan berinteraksi dengan material disekitarnya. Jika sungai dipenuhi sampah, air dapat melarutkan senyawa berbahaya seperti plastik, logam berat, dan limbah rumah tangga. Penumpukan sampah menyempitkan aliran air, menyebabkan sungai meluap saat hujan deras dan memicu banjir. Air banjir yang tercemar membawa zat kimia ke tanah dan air tanah, sehingga berisiko bagi kesehatan masyarakat.\n\n**2. Pengaruh Sampah terhadap Kualitas Lingkungan**\nSampah yang tidak dikelola dengan baik akan mencemari air, udara, dan tanah. Sampah organik membusuk menghasilkan gas seperti metana (CH₄), amonia (NH₃), hidrogen sulfida (H₂S), dan karbon dioksida (CO₂) yang mencemari udara. Limbah meningkatkan BOD (Biological Oxygen Demand) dan COD (Chemical Oxygen Demand), yang dapat menurunkan kadar oksigen terlarut, dan mengganggu kehidupan biota air. Air lindi dari sampah meresap ke tanah, membawa senyawa berbahaya dan logam berat. Mengubah struktur kimia tanah, menurunkan kesuburan, serta mencemari air tanah.",
+      "next_keywords": ["Pertanyaan 3", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_3": {
       "id": "pertanyaan_3",
@@ -141,7 +141,7 @@
           "max_length": 500
         }
       ],
-      "next_keywords": ["mulai eksplorasi 4", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 4", "Menu Sebelumnya"]
     },
     "kegiatan_4": {
       "id": "kegiatan_4",
@@ -159,7 +159,7 @@
           "source": "indoplasma.or.id"
         }
       ],
-      "next_keywords": ["pertanyaan 4", "Tanya Ecombot", "Menu Sebelumnya"]
+      "next_keywords": ["Pertanyaan 4", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_4": {
       "id": "pertanyaan_4",
@@ -183,7 +183,7 @@
           "max_length": 500
         }
       ],
-      "next_keywords": ["mulai eksplorasi 5", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 5", "Menu Sebelumnya"]
     },
     "kegiatan_5": {
       "id": "kegiatan_5",
@@ -191,7 +191,7 @@
       "character": "Aquano",
       "title": "Kegiatan Eksplorasi 5: Aspek Rekayasa (Engineering)",
       "message": "Aspek ini berhubungan dengan cara membuat solusi nyata lewat rekayasa atau teknik sederhana. Dalam kegiatan Mapag Hujan, masyarakat menerapkan sistem drainase alami dengan membuat lubang biopori. Lubang ini membantu air hujan meresap ke tanah dan mencegah banjir, sekaligus mengubah sampah organik jadi kompos yang bermanfaat bagi tanah.",
-      "next_keywords": ["mari merancang", "Tanya Ecombot", "Menu Sebelumnya"]
+      "next_keywords": ["Mari Merancang", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "mari_merancang": {
       "id": "mari_merancang",
@@ -208,7 +208,7 @@
           "allow_image_upload": true
         }
       ],
-      "next_keywords": ["mulai eksplorasi 6", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 6", "Menu Sebelumnya"]
     },
     "kegiatan_6": {
       "id": "kegiatan_6",
@@ -230,7 +230,7 @@
           "source": "www.kotasubang.com"
         }
       ],
-      "next_keywords": ["ayo berkreasi", "Tanya Ecombot", "Menu Sebelumnya"]
+      "next_keywords": ["Ayo Berkreasi", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "ayo_berkreasi": {
       "id": "ayo_berkreasi",
@@ -247,15 +247,15 @@
           "allow_image_upload": true
         }
       ],
-      "next_keywords": ["mulai eksplorasi 7", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 7", "Menu Sebelumnya"]
     },
     "kegiatan_7": {
       "id": "kegiatan_7",
       "type": "bot_message",
       "character": "Aquano",
       "title": "Kegiatan Eksplorasi 7: Aspek Matematika (Mathematics)",
-      "message": "Aspek ini digunakan untuk menganalisis efektivitas dukungan kegiatan Mapag Hujan dalam mendukung mitigasi banjir dan menjaga keseimbangan lingkungan. Analisis kuantitatif memberikan gambaran konkret mengenai hasil dan dampak dari kegiatan tersebut, sebagai contoh, volume genangan banjir Kota Bandung mengalami penurunan signifikan dari lebih dari 99.000 m³ pada tahun 2015 menjadi 36.000 m³ pada tahun 2023. Besar penurunan volume dapat dihitung sebagai:\n\nPersentase penurunan volume genangan = (99.000-36.000)/99.000 x 100% = 63,6%\n\nArtinya, terjadi penurunan volume genangan air sebesar 63,6% dalam kurun waktu delapan tahun, menunjukkan adanya dampak nyata dari program pengendalian banjir dan pembangunan infrastruktur hijau. Meskipun hasil ini tidak sepenuhnya disebabkan oleh tradisi Mapag Hujan, kegiatan tersebut memiliki peran penting dalam meningkatkan kesadaran dan partisipasi masyarakat terhadap pentingnya menjaga kebersihan lingkungan dan pengelolaan air. Kesadaran kolektif inilah yang menjadi langkah awal dalam mendukung keberhasilan program mitigasi banjir secara berkelanjutan.",
-      "next_keywords": ["pertanyaan reflektif", "Tanya Ecombot", "Menu Sebelumnya"]
+      "message": "Aspek ini digunakan untuk menganalisis efektivitas dukungan kegiatan Mapag Hujan dalam mendukung mitigasi banjir dan menjaga keseimbangan lingkungan. Analisis kuantitatif memberikan gambaran konkret mengenai hasil dan dampak dari kegiatan tersebut, sebagai contoh, volume genangan banjir Kota Bandung mengalami penurunan signifikan dari lebih dari 99.000 m³ pada tahun 2015 menjadi 36.000 m³ pada tahun 2023. Besar penurunan volume dapat dihitung sebagai:\n\nPersentase penurunan volume genangan = (99.000-36.000)/99.000 × 100% = 63,6%\n\nArtinya, terjadi penurunan volume genangan air sebesar 63,6% dalam kurun waktu delapan tahun, menunjukkan adanya dampak nyata dari program pengendalian banjir dan pembangunan infrastruktur hijau. Meskipun hasil ini tidak sepenuhnya disebabkan oleh tradisi Mapag Hujan, kegiatan tersebut memiliki peran penting dalam meningkatkan kesadaran dan partisipasi masyarakat terhadap pentingnya menjaga kebersihan lingkungan dan pengelolaan air. Kesadaran kolektif inilah yang menjadi langkah awal dalam mendukung keberhasilan program mitigasi banjir secara berkelanjutan.",
+      "next_keywords": ["Pertanyaan Reflektif", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_reflektif": {
       "id": "pertanyaan_reflektif",
@@ -279,7 +279,7 @@
           "max_length": 500
         }
       ],
-      "next_keywords": ["eksplorasi selesai", "Menu Sebelumnya"]
+      "next_keywords": ["Eksplorasi Selesai", "Menu Sebelumnya"]
     },
     "completion": {
       "id": "completion",
@@ -316,57 +316,57 @@
       "Menu Sebelumnya": "kegiatan_1"
     },
     "kegiatan_2": {
-      "pertanyaan 2": "pertanyaan_2",
+      "Pertanyaan 2": "pertanyaan_2",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_1"
     },
     "pertanyaan_2": {
-      "mulai eksplorasi 3": "kegiatan_3",
+      "Mulai Eksplorasi 3": "kegiatan_3",
       "Menu Sebelumnya": "kegiatan_2"
     },
     "kegiatan_3": {
-      "pertanyaan 3": "pertanyaan_3",
+      "Pertanyaan 3": "pertanyaan_3",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_2"
     },
     "pertanyaan_3": {
-      "mulai eksplorasi 4": "kegiatan_4",
+      "Mulai Eksplorasi 4": "kegiatan_4",
       "Menu Sebelumnya": "kegiatan_3"
     },
     "kegiatan_4": {
-      "pertanyaan 4": "pertanyaan_4",
+      "Pertanyaan 4": "pertanyaan_4",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_3"
     },
     "pertanyaan_4": {
-      "mulai eksplorasi 5": "kegiatan_5",
+      "Mulai Eksplorasi 5": "kegiatan_5",
       "Menu Sebelumnya": "kegiatan_4"
     },
     "kegiatan_5": {
-      "mari merancang": "mari_merancang",
+      "Mari Merancang": "mari_merancang",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_4"
     },
     "mari_merancang": {
-      "mulai eksplorasi 6": "kegiatan_6",
+      "Mulai Eksplorasi 6": "kegiatan_6",
       "Menu Sebelumnya": "kegiatan_5"
     },
     "kegiatan_6": {
-      "ayo berkreasi": "ayo_berkreasi",
+      "Ayo Berkreasi": "ayo_berkreasi",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_5"
     },
     "ayo_berkreasi": {
-      "mulai eksplorasi 7": "kegiatan_7",
+      "Mulai Eksplorasi 7": "kegiatan_7",
       "Menu Sebelumnya": "kegiatan_6"
     },
     "kegiatan_7": {
-      "pertanyaan reflektif": "pertanyaan_reflektif",
+      "Pertanyaan Reflektif": "pertanyaan_reflektif",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_6"
     },
     "pertanyaan_reflektif": {
-      "eksplorasi selesai": "completion",
+      "Eksplorasi Selesai": "completion",
       "Menu Sebelumnya": "kegiatan_7"
     },
     "completion": {
