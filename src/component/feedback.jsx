@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import '../styles/feedback.css';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
+
 
 export default function FeedbackPage() {
   const [form, setForm] = useState({ nama: '', email: '', pesan: '' });

@@ -5,8 +5,7 @@ import { useDarkMode } from '../context/DarkModeContext';
 import LogoutButton from "../component/logoutbutton";
 import "../styles/comicreader.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api';
-
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
 
 // SVG Icons
 const ChevronLeft = () => (
