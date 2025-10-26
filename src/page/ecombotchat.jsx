@@ -1,4 +1,4 @@
-// ecombotchat.jsx - FIXED VERSION
+// ecombotchat.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Routes, Route, useParams } from 'react-router-dom';
 import Aquano from "../assets/aquano.png";
@@ -21,6 +21,7 @@ const API_BASE_URL = 'https://backendecombot-production.up.railway.app/api';
 // Helper: ambil token JWT dengan error handling yang lebih baik
 const getAuthHeader = () => {
   try {
+    // Coba beberapa kemungkinan key token
     const token = localStorage.getItem("access") || 
                   localStorage.getItem("token") || 
                   localStorage.getItem("jwt") || 
@@ -31,6 +32,7 @@ const getAuthHeader = () => {
       return {};
     }
     
+    // Validasi format token dasar
     if (typeof token !== 'string' || token.trim() === '') {
       console.error('Invalid token format');
       return {};
@@ -64,8 +66,9 @@ const saveAuthToken = (token) => {
       return false;
     }
     
+    // Simpan dengan key utama 'access' untuk konsistensi
     localStorage.setItem("access", token);
-    localStorage.setItem("token", token);
+    localStorage.setItem("token", token); // Backup dengan key umum
     
     console.log('Token saved successfully');
     return true;
@@ -93,7 +96,7 @@ const fallbackChatFlow = {
       id: "intro",
       type: "bot_message",
       character: "Aquano",
-      message: "Hallo, sudah siap untuk eksplorasi hari ini bersama Ecombot?",
+      message: "Hai, sudah siap untuk eksplorasi hari ini?",
       next_keywords: ["siap"]
     },
     kimia_hijau: {
@@ -289,15 +292,16 @@ const EcombotChat = () => {
   const [reflectiveQuestions, setReflectiveQuestions] = useState([]);
   const [currentReflectiveQuestion, setCurrentReflectiveQuestion] = useState(0);
   const [currentSession, setCurrentSession] = useState(null);
-  const [isInitialized, setIsInitialized] = useState(false); // TAMBAHAN: Flag untuk mencegah double initialization
   
-  const [previousSteps, setPreviousSteps] = useState(['intro']);
+  // STATE BARU: Menyimpan langkah sebelumnya untuk navigasi "menu sebelumnya"
+  const [previousSteps, setPreviousSteps] = useState([]);
   
+  // State untuk progres kegiatan dan jawaban
   const [progress, setProgress] = useState({
-    completed: ['intro'],
+    completed: [],
     current: 'intro',
     answers: {},
-    visited: ['intro']
+    visited: []
   });
   
   const messagesEndRef = useRef(null);
@@ -316,8 +320,10 @@ const EcombotChat = () => {
     { num: 7, path: '/kegiatan-7', name: 'Aspek Matematika (<i>Mathematics</i>)', stepKey: 'kegiatan_7', materi: 'Eksplorasi 7' },
   ];
 
+  // Gunakan chatFlow yang aman (fallback jika undefined)
   const currentChatFlow = chatFlow || fallbackChatFlow;
 
+  // Fungsi untuk mendapatkan data step dengan fallback
   const getStepData = (stepKey) => {
     if (!currentChatFlow || !currentChatFlow.chatbot_flow) {
       return fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
@@ -326,6 +332,7 @@ const EcombotChat = () => {
     return currentChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
   };
 
+  // Fungsi untuk mendapatkan judul berdasarkan lokasi saat ini
   const getCurrentTitle = () => {
     const fullPath = location.pathname;
     
@@ -355,18 +362,94 @@ const EcombotChat = () => {
 
   const currentTitle = getCurrentTitle();
 
-  // PERBAIKAN: Initialize chat session dan load history dengan flag
+  // Initialize chat session dan load history - DIPERBAIKI
   useEffect(() => {
     const initializeChat = async () => {
-      if (currentChatFlow && !isInitialized) {
+      // Load history percakapan dari localStorage terlebih dahulu
+      const savedMessages = localStorage.getItem('ecombot_chat_history');
+      const savedProgress = localStorage.getItem('chatbot-progress');
+      const savedPreviousSteps = localStorage.getItem('ecombot_previous_steps');
+      const savedCurrentStep = localStorage.getItem('ecombot_current_step');
+
+      if (savedMessages) {
+        try {
+          const parsedMessages = JSON.parse(savedMessages);
+          setMessages(parsedMessages);
+        } catch (e) {
+          console.error('Error parsing saved messages:', e);
+        }
+      }
+
+      if (savedProgress) {
+        try {
+          const parsedProgress = JSON.parse(savedProgress);
+          setProgress(parsedProgress);
+        } catch (e) {
+          console.error('Error parsing saved progress:', e);
+        }
+      }
+
+      if (savedPreviousSteps) {
+        try {
+          const parsedSteps = JSON.parse(savedPreviousSteps);
+          setPreviousSteps(parsedSteps);
+        } catch (e) {
+          console.error('Error parsing previous steps:', e);
+        }
+      }
+
+      if (savedCurrentStep) {
+        setCurrentStep(savedCurrentStep);
+      }
+
+      // Jika tidak ada pesan yang tersimpan, mulai dengan intro
+      if (!savedMessages || JSON.parse(savedMessages).length === 0) {
+        const introMessage = getStepData('intro');
+        setMessages([{ 
+          from: 'bot', 
+          text: introMessage.message,
+          data: introMessage
+        }]);
+        
+        // Set progress awal
+        setProgress(prev => ({
+          ...prev,
+          visited: ['intro'],
+          current: 'intro'
+        }));
+        
+        setPreviousSteps([]);
+      }
+
+      // Load data dari backend jika tersedia
+      if (currentChatFlow && messages.length === 0) {
         await startOrLoadSession();
         loadReflectiveQuestions();
-        setIsInitialized(true); // Tandai sudah di-initialize
       }
     };
     
     initializeChat();
-  }, [currentChatFlow, isInitialized]);
+  }, [currentChatFlow]);
+
+  // Simpan history percakapan ke localStorage setiap kali messages berubah - DIPERBAIKI
+  useEffect(() => {
+    localStorage.setItem('ecombot_chat_history', JSON.stringify(messages));
+  }, [messages]);
+
+  // Simpan progress ke localStorage
+  useEffect(() => {
+    localStorage.setItem('chatbot-progress', JSON.stringify(progress));
+  }, [progress]);
+
+  // Simpan previous steps ke localStorage
+  useEffect(() => {
+    localStorage.setItem('ecombot_previous_steps', JSON.stringify(previousSteps));
+  }, [previousSteps]);
+
+  // Simpan current step ke localStorage
+  useEffect(() => {
+    localStorage.setItem('ecombot_current_step', currentStep);
+  }, [currentStep]);
 
   // Effect untuk auto-start question session
   useEffect(() => {
@@ -381,37 +464,19 @@ const EcombotChat = () => {
     }
   }, [currentStep, currentChatFlow]);
 
-  // PERBAIKAN UTAMA: Fungsi untuk memulai atau memuat sesi chat
+  // Fungsi untuk memulai atau memuat sesi chat - DIPERBAIKI DENGAN AUTH YANG KONSISTEN
   const startOrLoadSession = async () => {
     try {
       const isLoggedIn = isUserLoggedIn();
       
-      // Load dari localStorage terlebih dahulu
+      // Cek apakah ada data lokal yang tersimpan
       const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
       const localProgress = localStorage.getItem('chatbot-progress');
-      const localCurrentStep = localStorage.getItem('current_chat_step') || 'intro';
-      
-      // PERBAIKAN: Load progress dari localStorage
-      if (localProgress) {
-        try {
-          const parsedProgress = JSON.parse(localProgress);
-          if (!parsedProgress.visited) {
-            parsedProgress.visited = ['intro'];
-          }
-          setProgress(parsedProgress);
-          console.log('Loaded local progress:', parsedProgress);
-        } catch (e) {
-          console.error('Error parsing local progress:', e);
-        }
-      }
-      
-      // PERBAIKAN: Load step dari localStorage
-      setCurrentStep(localCurrentStep);
       
       if (!isLoggedIn) {
         console.warn('User not logged in, using local session only');
         
-        // PERBAIKAN: Jika ada data lokal, load dari localStorage
+        // Jika ada data lokal, load dari localStorage
         if (localMessages.length > 0) {
           const loadedMessages = localMessages.map(msg => ({
             from: msg.message_type === 'bot' ? 'bot' : 'user',
@@ -420,25 +485,16 @@ const EcombotChat = () => {
           }));
           setMessages(loadedMessages);
           console.log('Loaded local messages:', loadedMessages.length);
-        } else {
-          // PERBAIKAN: Jika tidak ada data, mulai dengan intro DENGAN quick buttons
-          const introMessage = getStepData('intro');
-          const initialMessage = { 
-            from: 'bot', 
-            text: introMessage.message,
-            data: introMessage // PENTING: Sertakan data untuk quick buttons
-          };
-          setMessages([initialMessage]);
-          
-          // Simpan ke localStorage
-          localStorage.setItem('local_chat_messages', JSON.stringify([{
-            message_type: 'bot',
-            character: 'Aquano',
-            message_text: introMessage.message,
-            step_id: 'intro',
-            message_data: introMessage,
-            timestamp: new Date().toISOString()
-          }]));
+        }
+        
+        // Load progress dari localStorage
+        if (localProgress) {
+          const parsedProgress = JSON.parse(localProgress);
+          if (!parsedProgress.visited) {
+            parsedProgress.visited = ['intro'];
+          }
+          setProgress(parsedProgress);
+          console.log('Loaded local progress:', parsedProgress);
         }
         
         // Buat session ID lokal
@@ -449,14 +505,14 @@ const EcombotChat = () => {
         return;
       }
 
-      // User sudah login, gunakan backend
+      // User sudah login, gunakan backend dengan auth header yang benar
       const sessionId = localStorage.getItem('current_session_id') || `session_${Date.now()}`;
       
       const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...getAuthHeader()
+          ...getAuthHeader() // Gunakan helper function yang sudah diperbaiki
         },
         body: JSON.stringify({
           session_id: sessionId
@@ -468,30 +524,18 @@ const EcombotChat = () => {
         setCurrentSession(data.session_id);
         localStorage.setItem('current_session_id', data.session_id);
         
-        // Load history dari server
         await loadActivityHistory(data.current_activity);
         
       } else if (response.status === 401) {
         console.warn('Token expired or invalid, clearing tokens and using local session');
         clearAuthTokens();
-        // Fallback ke local session dengan intro message yang benar
+        // Fallback ke local session
         const introMessage = getStepData('intro');
-        const initialMessage = { 
+        setMessages([{ 
           from: 'bot', 
           text: introMessage.message,
           data: introMessage
-        };
-        setMessages([initialMessage]);
-        
-        // Simpan ke localStorage
-        localStorage.setItem('local_chat_messages', JSON.stringify([{
-          message_type: 'bot',
-          character: 'Aquano',
-          message_text: introMessage.message,
-          step_id: 'intro',
-          message_data: introMessage,
-          timestamp: new Date().toISOString()
-        }]));
+        }]);
       } else {
         throw new Error(`Failed to start session: ${response.status}`);
       }
@@ -499,22 +543,11 @@ const EcombotChat = () => {
       console.error('Error starting session:', error);
       // Fallback ke local session
       const introMessage = getStepData('intro');
-      const initialMessage = { 
+      setMessages([{ 
         from: 'bot', 
         text: introMessage.message,
         data: introMessage
-      };
-      setMessages([initialMessage]);
-      
-      // Simpan ke localStorage
-      localStorage.setItem('local_chat_messages', JSON.stringify([{
-        message_type: 'bot',
-        character: 'Aquano',
-        message_text: introMessage.message,
-        step_id: 'intro',
-        message_data: introMessage,
-        timestamp: new Date().toISOString()
-      }]));
+      }]);
       
       const localSessionId = `local_session_${Date.now()}`;
       setCurrentSession(localSessionId);
@@ -522,7 +555,7 @@ const EcombotChat = () => {
     }
   };
 
-  // Fungsi untuk memuat history activity
+  // Fungsi untuk memuat history activity - DIPERBAIKI DENGAN AUTH
   const loadActivityHistory = async (activityId) => {
     try {
       const isLoggedIn = isUserLoggedIn();
@@ -548,7 +581,7 @@ const EcombotChat = () => {
               historyMessages.push({
                 from: 'bot',
                 text: msg.message_text,
-                data: msg.message_data || {}
+                data: msg.message_data
               });
             } else if (msg.message_type === 'user') {
               historyMessages.push({
@@ -559,17 +592,7 @@ const EcombotChat = () => {
           });
         }
         
-        // Jika ada history, gunakan history; jika tidak, gunakan intro message
-        if (historyMessages.length > 0) {
-          setMessages(historyMessages);
-        } else {
-          const introMessage = getStepData('intro');
-          setMessages([{ 
-            from: 'bot', 
-            text: introMessage.message,
-            data: introMessage
-          }]);
-        }
+        setMessages(historyMessages);
         
         const progressResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
           method: 'GET',
@@ -651,27 +674,6 @@ const EcombotChat = () => {
     setReflectiveQuestions(fallbackQuestions);
   };
 
-  // PERBAIKAN: Save progress dan current step ke localStorage
-  useEffect(() => {
-    localStorage.setItem('chatbot-progress', JSON.stringify(progress));
-    localStorage.setItem('current_chat_step', currentStep);
-  }, [progress, currentStep]);
-
-  // PERBAIKAN: Save messages ke localStorage setiap kali berubah
-  useEffect(() => {
-    if (messages.length > 0) {
-      const messagesToSave = messages.map(msg => ({
-        message_type: msg.from === 'bot' ? 'bot' : 'user',
-        character: msg.from === 'bot' ? 'Aquano' : 'User',
-        message_text: msg.text,
-        step_id: currentStep,
-        message_data: msg.data || {},
-        timestamp: new Date().toISOString()
-      }));
-      localStorage.setItem('local_chat_messages', JSON.stringify(messagesToSave));
-    }
-  }, [messages, currentStep]);
-
   // Effect untuk mengatur status forum
   useEffect(() => {
     const inForum = currentStep === 'forum_diskusi';
@@ -725,13 +727,14 @@ const EcombotChat = () => {
     }, 100);
   };
 
-  // Fungsi untuk menyimpan pesan ke database
+  // Fungsi untuk menyimpan pesan ke database - DIPERBAIKI DENGAN AUTH YANG KONSISTEN
   const saveMessageToDatabase = async (messageType, character, messageText, stepId, messageData = {}) => {
     try {
       const isLoggedIn = isUserLoggedIn();
       const sessionId = localStorage.getItem('current_session_id');
       
       if (!isLoggedIn || !sessionId) {
+        // FALLBACK: Simpan ke localStorage untuk user tidak login
         const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
         localMessages.push({
           message_type: messageType,
@@ -768,6 +771,7 @@ const EcombotChat = () => {
       } else if (response.status === 401) {
         console.warn('Token expired while saving message');
         clearAuthTokens();
+        // Fallback ke localStorage
         const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
         localMessages.push({
           message_type: messageType,
@@ -782,6 +786,7 @@ const EcombotChat = () => {
       }
     } catch (error) {
       console.error('Error saving message to database:', error);
+      // Fallback ke localStorage
       const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
       localMessages.push({
         message_type: messageType,
@@ -797,13 +802,14 @@ const EcombotChat = () => {
     return null;
   };
 
-  // Fungsi untuk menyimpan jawaban ke database
+  // Fungsi untuk menyimpan jawaban ke database - DIPERBAIKI DENGAN AUTH
   const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
     try {
       const isLoggedIn = isUserLoggedIn();
       const sessionId = localStorage.getItem('current_session_id');
       
       if (!isLoggedIn || !sessionId) {
+        // FALLBACK: save to localStorage dengan struktur yang lebih baik
         const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
         const answerRecord = {
           question: questionData.text,
@@ -814,11 +820,12 @@ const EcombotChat = () => {
           storage_key: questionData.storage_key,
           answer_type: answerType,
           timestamp: new Date().toISOString(),
-          question_data: questionData
+          question_data: questionData // Simpan data pertanyaan lengkap
         };
         savedAnswers.push(answerRecord);
         localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
         
+        // Juga simpan di progress lokal
         saveAnswer(questionData.storage_key, answer);
         
         return { status: 'saved_locally', data: answerRecord };
@@ -841,11 +848,13 @@ const EcombotChat = () => {
       
       if (response.ok) {
         const data = await response.json();
+        // Juga simpan di progress lokal
         saveAnswer(questionData.storage_key, answer);
         return data;
       } else if (response.status === 401) {
         console.warn('Token expired while saving answer');
         clearAuthTokens();
+        // Fallback to localStorage
         const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
         const answerRecord = {
           question: questionData.text,
@@ -861,6 +870,7 @@ const EcombotChat = () => {
         savedAnswers.push(answerRecord);
         localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
         
+        // Juga simpan di progress lokal
         saveAnswer(questionData.storage_key, answer);
         
         return { status: 'saved_locally_fallback', data: answerRecord };
@@ -869,6 +879,7 @@ const EcombotChat = () => {
       }
     } catch (error) {
       console.error('Error saving answer to database:', error);
+      // Fallback to localStorage
       const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
       const answerRecord = {
         question: questionData.text,
@@ -884,6 +895,7 @@ const EcombotChat = () => {
       savedAnswers.push(answerRecord);
       localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
       
+      // Juga simpan di progress lokal
       saveAnswer(questionData.storage_key, answer);
       
       return { status: 'saved_locally_fallback', data: answerRecord };
@@ -932,7 +944,7 @@ const EcombotChat = () => {
     return aspectMap[step] || 'General';
   };
 
-  // Fungsi untuk mendapatkan quick buttons
+  // PERBAIKAN: Fungsi untuk mendapatkan quick buttons - DIPERBAIKI UNTUK MENAMPILKAN BUTTON "SIAP"
   const getQuickButtons = (stepKey, messageText = '') => {
     if (waitingForAnswer) {
       return null;
@@ -953,10 +965,14 @@ const EcombotChat = () => {
         .join('');
     }
     
+    // PERBAIKAN: Tampilkan semua button termasuk "siap" untuk step intro
     return uniqueKeywords.map(keyword => {
       const isQuestionButton = keyword.toLowerCase().includes('pertanyaan') || 
                               keyword.toLowerCase().includes('merancang') || 
-                              keyword.toLowerCase().includes('kreasi');
+                              keyword.toLowerCase().includes('kreasi') ||
+                              keyword.toLowerCase().includes('siap') ||
+                              keyword.toLowerCase().includes('sudah') ||
+                              keyword.toLowerCase().includes('mulai');
       const buttonClass = isQuestionButton 
         ? "px-4 py-2 bg-lime-500 !text-lime-700 !font-bold rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-600 border border-lime-600 transition-all duration-200"
         : "px-4 py-2 bg-white !text-lime-700 !font-bold rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-50 hover:text-lime-600 border border-gray-200 transition-all duration-200";
@@ -976,8 +992,9 @@ const EcombotChat = () => {
     }));
   };
 
-  // Fungsi untuk menandai kegiatan sebagai selesai
+  // Fungsi untuk menandai kegiatan sebagai selesai - DIPERBAIKI DENGAN AUTH
   const completeActivity = async (activityId) => {
+    // Update state lokal
     setProgress(prev => {
       const completed = [...prev.completed];
       if (!completed.includes(activityId)) {
@@ -1012,6 +1029,7 @@ const EcombotChat = () => {
           clearAuthTokens();
         }
       } else {
+        // Untuk user tidak login, simpan progress ke localStorage
         const localProgress = JSON.parse(localStorage.getItem('chatbot-progress') || '{}');
         if (!localProgress.completed) localProgress.completed = [];
         if (!localProgress.completed.includes(activityId)) {
@@ -1059,6 +1077,7 @@ const EcombotChat = () => {
     const normalizedInput = input.toLowerCase().trim();
     const currentKegiatan = kegiatanList.find(k => location.pathname.includes(k.path));
     
+    // Deteksi tanya ecombot
     const tanyaEcombotPatterns = [
       /tanya ecombot/i,
       /tanya/i,
@@ -1076,22 +1095,27 @@ const EcombotChat = () => {
       }
     }
 
+    // Deteksi pertanyaan reflektif
     if (normalizedInput.includes('pertanyaan reflektif')) {
       return { stepKey: 'pertanyaan_reflektif' };
     }
     
+    // Deteksi mari merancang
     if (normalizedInput.includes('mari merancang')) {
       return { stepKey: 'mari_merancang' };
     }
     
+    // Deteksi ayo berkreasi
     if (normalizedInput.includes('ayo berkreasi')) {
       return { stepKey: 'ayo_berkreasi' };
     }
     
+    // Deteksi eksplorasi selesai
     if (normalizedInput.includes('eksplorasi selesai')) {
       return { stepKey: 'redirect_ecomic' };
     }
     
+    // Deteksi eksplorasi
     const eksplorasiMatch = normalizedInput.match(/(mulai\s+)?eksplorasi\s+(\d+)/i) || 
                            normalizedInput.match(/ke\s+eksplorasi\s+(\d+)/i) ||
                            normalizedInput.match(/eksplorasi\s+(\d+)/i) ||
@@ -1105,10 +1129,12 @@ const EcombotChat = () => {
       }
     }
     
+    // Deteksi completion
     if (normalizedInput.includes('Eksplorasi Selesai')) {
       return { stepKey: 'completion' };
     }
     
+    // Deteksi menu sebelumnya
     const kembaliPatterns = [
       /menu sebelumnya/i,
       /kembali/i,
@@ -1143,7 +1169,7 @@ const EcombotChat = () => {
     return null;
   };
 
-  // Fungsi untuk memproses pertanyaan forum dengan LangChain
+  // FUNGSI BARU: Memproses pertanyaan forum dengan LangChain
   const processForumQuestion = async (question) => {
     try {
       const response = await fetch(`${API_BASE_URL}/ask/`, {
@@ -1166,14 +1192,14 @@ const EcombotChat = () => {
       if (error.message.includes('Failed to fetch') || error.message.includes('Network')) {
         return "Maaf, tidak dapat terhubung ke server forum. Pastikan backend Django sedang berjalan.";
       } else if (error.message.includes('500')) {
-        return "Maaf, server mengalami masalah internal. Silakan coba lagi nanti.";
+        return "Maaf, server mengalami masalah internal. Silakan coba lagi nati.";
       } else {
         return "Maaf, terjadi kesalahan saat memproses pertanyaan Anda. Silakan coba lagi atau ketik 'menu sebelumnya' untuk kembali ke alur pembelajaran.";
       }
     }
   };
 
-  // Fungsi redirect ke /ecomic
+  // FUNGSI BARU: Redirect ke /ecomic - DIPERBAIKI DENGAN AUTH
   const redirectToEcomic = async () => {
     const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
 
@@ -1184,6 +1210,7 @@ const EcombotChat = () => {
       }]);
       setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
       
+      // Cek apakah user login untuk menandai penyelesaian di backend
       const isLoggedIn = isUserLoggedIn();
       if (isLoggedIn) {
         const sessionId = localStorage.getItem('current_session_id');
@@ -1240,7 +1267,7 @@ const EcombotChat = () => {
     scrollChat();
   };
 
-  // Fungsi untuk memproses jawaban pertanyaan
+  // Fungsi untuk memproses jawaban pertanyaan - DIPERBAIKI
   const processQuestionAnswer = async (input) => {
     if (!input.trim()) {
       setMessages(prev => [...prev, { 
@@ -1262,6 +1289,7 @@ const EcombotChat = () => {
       return;
     }
     
+    // Simpan pesan user ke state DAN database
     setMessages(prev => [...prev, { from: 'user', text: input }]);
     await saveMessageToDatabase('user', 'User', input, currentStep);
     
@@ -1269,6 +1297,7 @@ const EcombotChat = () => {
       const result = await saveAnswerToDatabase(currentQuestion, input, currentQuestion.type || 'essay');
       console.log('Answer save result:', result);
       
+      // Simpan juga di state lokal
       saveAnswer(currentQuestion.storage_key, input);
       
       if (currentIndex < currentQuestions.length - 1) {
@@ -1288,6 +1317,7 @@ const EcombotChat = () => {
         setWaitingForAnswer(`question_${nextIndex}`);
         
       } else {
+        // Selesai semua pertanyaan
         let nextKeywords = [];
         const stepData = getStepData(currentStep);
         
@@ -1323,6 +1353,7 @@ const EcombotChat = () => {
         setCurrentQuestions([]);
         setCurrentQuestionIndex(0);
         
+        // Tandai kegiatan sebagai selesai
         let kegiatanStep = currentStep;
         if (currentStep.startsWith('pertanyaan_')) {
           kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
@@ -1572,6 +1603,7 @@ const EcombotChat = () => {
     
     const normalizedInput = input.toLowerCase().trim();
     
+    // **PRIORITAS 1: Jika sedang menunggu jawaban untuk pertanyaan**
     if (waitingForAnswer) {
       if (waitingForAnswer.startsWith('reflective_')) {
         await processReflectiveAnswer(input);
@@ -1585,6 +1617,7 @@ const EcombotChat = () => {
       return;
     }
     
+    // **PRIORITAS 2: Cek untuk navigasi "eksplorasi selesai" - KE /ECOMIC**
     if (normalizedInput.includes('eksplorasi selesai')) {
       setMessages(prev => [...prev, { from: 'user', text: input }]);
       setBotTyping(true);
@@ -1597,6 +1630,7 @@ const EcombotChat = () => {
       return;
     }
     
+    // **PRIORITAS 3: Cek untuk navigasi "menu sebelumnya"**
     const kembaliPatterns = [
       /menu sebelumnya/i,
       /kembali/i,
@@ -1668,6 +1702,7 @@ const EcombotChat = () => {
       }
     }
     
+    // **PRIORITAS 4: Cek untuk memulai sesi pertanyaan berdasarkan keyword**
     const questionKeywords = [
       'pertanyaan 1',
       'pertanyaan 2', 
@@ -1709,6 +1744,7 @@ const EcombotChat = () => {
       }
     }
     
+    // **PRIORITAS 5: Cek untuk tanya ecombot/forum**
     const tanyaEcombotPatterns = [
       /tanya ecombot/i,
       /tanya/i,
@@ -1742,6 +1778,7 @@ const EcombotChat = () => {
       }
     }
     
+    // **PRIORITAS 6: Jika di forum diskusi, proses pertanyaan dengan LangChain**
     if (currentStep === 'forum_diskusi' && !waitingForAnswer) {
       setMessages(prev => [...prev, { from: 'user', text: input }]);
       setBotTyping(true);
@@ -1782,6 +1819,7 @@ const EcombotChat = () => {
       return;
     }
     
+    // **PRIORITAS 7: Cek untuk navigasi ke kegiatan berikutnya dengan keyword "pertanyaan"**
     if (normalizedInput.includes('pertanyaan') && !normalizedInput.includes('reflektif')) {
       const allAnswered = checkAllQuestionsAnswered();
       
@@ -1809,6 +1847,7 @@ const EcombotChat = () => {
       return;
     }
     
+    // **PRIORITAS 8: Proses navigasi seperti biasa**
     const targetKegiatan = getKegiatanFromText(input);
     if (targetKegiatan) {
       setMessages(prev => [...prev, { from: 'user', text: input }]);
@@ -1924,6 +1963,7 @@ const EcombotChat = () => {
       return;
     }
     
+    // **PRIORITAS 9: Proses dengan currentChatFlow navigation yang sudah ada**
     const currentNavigation = currentChatFlow.navigation ? currentChatFlow.navigation[currentStep] : null;
     
     if (currentNavigation) {
@@ -2016,6 +2056,7 @@ const EcombotChat = () => {
       }
     }
     
+    // **PRIORITAS 10: Default response**
     let defaultMessage = "Maaf, saya tidak memahami perintah tersebut. ";
     
     if (currentStep === 'forum_diskusi') {
@@ -2065,35 +2106,39 @@ const EcombotChat = () => {
   };
 
   const addChat = async (input, product) => {
-    setMessages(prev => [...prev, { from: 'user', text: input }]);
-    await saveMessageToDatabase('user', 'User', input, currentStep);
+  // Simpan pesan user
+  setMessages(prev => [...prev, { from: 'user', text: input }]);
+  await saveMessageToDatabase('user', 'User', input, currentStep);
+  
+  scrollChat();
+
+  setTimeout(() => {
+    setBotTyping(true);
+    scrollChat();
+  }, 500);
+
+  setTimeout(async () => {
+    setBotTyping(false);
+    
+    // Buat objek pesan bot dengan data yang lengkap
+    const botMessage = { 
+      from: 'bot', 
+      text: product,
+      data: {
+        id: currentStep,
+        // Tambahkan next_keywords jika ada
+        next_keywords: getStepData(currentStep)?.next_keywords || []
+      }
+    };
+    
+    setMessages(prev => [...prev, botMessage]);
+    
+    // Simpan pesan bot ke database
+    await saveMessageToDatabase('bot', 'Aquano', product, currentStep, botMessage.data);
     
     scrollChat();
-
-    setTimeout(() => {
-      setBotTyping(true);
-      scrollChat();
-    }, 500);
-
-    setTimeout(async () => {
-      setBotTyping(false);
-      
-      const botMessage = { 
-        from: 'bot', 
-        text: product,
-        data: {
-          id: currentStep,
-          next_keywords: getStepData(currentStep)?.next_keywords || []
-        }
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-      
-      await saveMessageToDatabase('bot', 'Aquano', product, currentStep, botMessage.data);
-      
-      scrollChat();
-    }, 1000);
-  };
+  }, 1000);
+};
 
   const updateChat = () => {
     if (inputValue.trim()) {
@@ -2123,6 +2168,7 @@ const EcombotChat = () => {
     return () => document.removeEventListener('click', handleQuickClick);
   }, [currentChatFlow, currentStep, progress, isInForum, waitingForAnswer, previousSteps]);
 
+  // Tentukan kegiatan mana yang aktif
   const getActiveKegiatan = () => {
     return kegiatanList.map(kegiatan => {
       const isActive = canAccessKegiatan(kegiatan.num);
@@ -2140,6 +2186,7 @@ const EcombotChat = () => {
 
   const activeKegiatanList = getActiveKegiatan();
 
+  // Fungsi navigasi halaman
   const handleKegiatanChange = async (kegiatanNum) => {
     const kegiatan = activeKegiatanList[kegiatanNum];
     if (kegiatan && kegiatan.active) {
@@ -2196,6 +2243,7 @@ const EcombotChat = () => {
     }
   };
 
+  // Context value
   const contextValue = {
     progress,
     saveAnswer,
@@ -2214,11 +2262,12 @@ const EcombotChat = () => {
     loadActivityHistory,
     previousSteps,
     setPreviousSteps,
-    isUserLoggedIn,
-    getAuthHeader,
-    clearAuthTokens
+    isUserLoggedIn, // Export fungsi baru
+    getAuthHeader, // Export fungsi baru
+    clearAuthTokens // Export fungsi baru
   };
 
+  // Tampilkan loading atau error state
   if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-white">
@@ -2250,11 +2299,13 @@ const EcombotChat = () => {
     <AppContext.Provider value={contextValue}>
       <div className="w-full h-screen fixed inset-0 bg-white">
         <div className="flex flex-col md:flex-row h-full w-full">
+          {/* KIRI - Avatar (Desktop) */}
           <div className="hidden md:relative md:flex md:w-1/3 bg-white-50 flex-col bg-yellow-50">
             <div className='text-center !mt-12'>
               <p className='text-lime-500 text-lg font-semibold'>{currentTitle.materi}</p>
               <h1 className='text-3xl text-lime-500 font-bold mt-2' dangerouslySetInnerHTML={{ __html: currentTitle.title }}></h1>
             </div>
+            {/* AVATAR AQUANO */}
             <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center">
               <div className="w-72 h-32 flex items-center justify-center">
                 <img
@@ -2269,7 +2320,9 @@ const EcombotChat = () => {
             </div>
           </div>
 
+          {/* ========== KANAN: HALAMAN CHAT ========== */}
           <div className="w-full md:w-2/3 flex flex-col h-full border-l border-gray-300 bg-white relative">
+            {/* Tombol Menu */}
             <button
               onClick={() => setShowKegiatan(true)}
               className="absolute top-4 right-4 !bg-lime-500 !hover:bg-lime-600 text-white !p-3 rounded-full shadow-lg z-20"
@@ -2277,6 +2330,7 @@ const EcombotChat = () => {
               <i className="mdi mdi-menu text-xl"></i>
             </button>
 
+            {/* AREA PESAN */}
             <div className="flex-1 overflow-y-auto !p-4 !pb-48 !pt-20 !space-y-4 bg-cover bg-center bg-no-repeat bg-[url('/assets/background.png')]" id="messages">
                 {messages.map((message, index) => (
                 <div key={index} className={`flex items-end ${message.from === 'bot' ? '' : 'justify-end'}`}>
@@ -2311,7 +2365,10 @@ const EcombotChat = () => {
                                     <p className="font-medium">{image.caption}</p>
                                     )}
                                     {image.source && (
-                                    <p>Sumber: <i>{image.source}</i></p>
+                                    <p>Sumber: <i>
+                                        {image.source}
+                                      </i>
+                                    </p>
                                     )}
                                 </div>
                                 )}
@@ -2334,7 +2391,10 @@ const EcombotChat = () => {
                             />
                             {message.data?.image_source && (
                             <p className="text-xs text-gray-500 mt-1 text-center">
-                                Sumber: <i>{message.data.image_source}</i>
+                                Sumber: 
+                                <i>
+                                  {message.data.image_source}
+                                </i>
                             </p>
                             )}
                         </div>
@@ -2398,6 +2458,7 @@ const EcombotChat = () => {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Input Container - Mobile */}
             <div className="md:hidden absolute w-screen !bottom-0 !px-4 !pt-4 !pb-16 z-20">
               <div className="relative flex">
                 <input 
@@ -2428,6 +2489,7 @@ const EcombotChat = () => {
               </div>
             </div>
 
+            {/* Avatar Mobile */}
             <div className="md:hidden relative z-10 flex flex-col items-center bottom-30 ">
               <div className="w-48 h-12 flex items-center justify-center">
                 <img
@@ -2441,6 +2503,7 @@ const EcombotChat = () => {
               </span>
             </div>
 
+            {/* Input Container - Desktop */}
             <div className="hidden md:block px-4 pt-4 pb-4 bg-yellow-50">
               <div className="relative flex">
                 <input 
@@ -2471,6 +2534,7 @@ const EcombotChat = () => {
               </div>
             </div>
 
+            {/* PANEL KEGIATAN*/}
             {showKegiatan && (
               <div className="absolute top-0 right-0 h-full w-80 bg-yellow-50 border-l-2 border-gray-200 shadow-2xl z-30 animate-slide-in overflow-y-auto">
                 <div className="flex flex-col !p-4 border-b border-gray-200 items-center gap-2">
@@ -2519,7 +2583,10 @@ const EcombotChat = () => {
                           />
                           {kegiatan.imageSource && (
                             <p className="text-xs text-gray-200 !mt-1 text-center">
-                              Sumber: <i>{kegiatan.imageSource}</i>
+                              Sumber: 
+                              <i>
+                                {kegiatan.imageSource}
+                              </i>
                             </p>
                           )}
                         </div>
