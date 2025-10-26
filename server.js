@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 // Serve static files
 app.use(express.static(join(__dirname, 'dist')));
 
-// SPA fallback - Express v5 syntax
-app.get('/:path*', (req, res) => {
+// SPA fallback - handle ALL requests that didn't match static files
+app.use((req, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'));
 });
 
