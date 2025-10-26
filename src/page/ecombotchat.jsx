@@ -2349,7 +2349,7 @@ const getCurrentTitle = () => {
             </div>
 
             {/* Input Container - Mobile */}
-            <div className="md:hidden absolute w-screen !bottom-0 !px-4 !pt-4 !pb-4 z-20 bg-yellow-50">
+            <div className="md:hidden absolute w-screen !bottom-0 !px-4 !pt-4 !pb-16 z-20">
               <div className="relative flex">
                 <input 
                   type="text" 
@@ -2365,7 +2365,7 @@ const getCurrentTitle = () => {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="text-md w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 !pl-5 !pr-16 bg-gray-100 border-2 border-gray-200 focus:border-lime-500 rounded-full !py-3"
+                  className="text-md w-full focus:outline-none focus:placeholder-gray-400 text-gray-600 placeholder-gray-600 !pl-5 !pr-16 bg-white border-2 border-gray-200 focus:border-lime-500 rounded-full !py-3"
                 />
                 <div className="absolute right-2 inset-y-0 flex items-center">
                   <button 
@@ -2380,7 +2380,7 @@ const getCurrentTitle = () => {
             </div>
 
             {/* Avatar Mobile */}
-            <div className="md:hidden relative z-10 flex flex-col items-center bottom-24 ">
+            <div className="md:hidden relative z-10 flex flex-col items-center bottom-30 ">
               <div className="w-48 h-12 flex items-center justify-center">
                 <img
                   src={Aquano}
@@ -2550,3 +2550,4 @@ const getCurrentTitle = () => {
 };
 
 export default EcombotChat;
+
