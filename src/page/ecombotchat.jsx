@@ -981,27 +981,73 @@ const EcombotChat = () => {
     }
   };
 
-  // FUNGSI BARU: Redirect ke /ecomic
-  const redirectToEcomic = async () => {
-    const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
-    const token = localStorage.getItem("access");
-    console.debug("handleMarkFinish called", { comic: comicSlug, episode: episodeSlug, currentPage, tokenPresent: !!token });
+// FUNGSI BARU: Redirect ke /ecomic dengan halaman terakhir
+const redirectToEcomic = async () => {
+  const token = localStorage.getItem("access");
+  console.debug("redirectToEcomic called", { 
+    comic: comicSlug, 
+    episode: episodeSlug, 
+    tokenPresent: !!token 
+  });
 
-    try {
-      setMessages(prev => [...prev, { 
-        from: 'bot', 
-        text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
-      }]);
-      setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
-      setTimeout(() => navigate('/ecomic'), 3000);
-      
-    } catch (err) {
-      console.error("markFinishApi error:", err);
-      if (err.status === 401) {
-        navigate('/login');
+  try {
+    // Tampilkan pesan konfirmasi
+    setMessages(prev => [...prev, { 
+      from: 'bot', 
+      text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman terakhir komik..."
+    }]);
+    
+    // SET HALAMAN TERAKHIR
+    const lastPageIndex = 4; 
+    
+    // Update permission state
+    setPermission(p => ({ 
+      ...p, 
+      finish: true, 
+      last_page: lastPageIndex  // Set langsung ke halaman terakhir
+    }));
+    
+    // Simpan status finish dan halaman terakhir di backend (jika user login)
+    if (token) {
+      try {
+        await fetch(`${API_BASE_URL}/comic-progress/finish/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeader()
+          },
+          body: JSON.stringify({ 
+            comic: comicSlug, 
+            episode: episodeSlug,
+            finish: true,
+            last_page: lastPageIndex  // Kirim halaman terakhir ke backend
+          }),
+        });
+        console.log("Finish status saved to backend with last_page:", lastPageIndex);
+      } catch (err) {
+        console.warn("Failed to save finish status:", err);
       }
     }
+    
+    // Simpan di localStorage untuk akses cepat - SET KE HALAMAN 4
+    localStorage.setItem(storageKey, String(lastPageIndex));
+    console.log("Saved to localStorage:", storageKey, "=", lastPageIndex);
+    
+    // Redirect setelah delay singkat
+    setTimeout(() => {
+      navigate('/ecomic');
+    }, 2000);
+    
+  } catch (err) {
+    console.error("redirectToEcomic error:", err);
+    if (err.status === 401) {
+      navigate('/login');
+    } else {
+      // Fallback: tetap redirect ke ecomic meski ada error
+      setTimeout(() => navigate('/ecomic'), 2000);
+    }
   }
+}
 
   // Fungsi untuk memulai sesi pertanyaan
   const startQuestionSession = () => {
