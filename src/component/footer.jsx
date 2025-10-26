@@ -7,7 +7,7 @@ function Footer() {
       <div className="footer-top">
         <div className="footer-brand">
           <img src="/item/logo.svg" />
-          <h2>GreenVerse ECOMBOT</h2>
+          <h2>ECOMBOT</h2>
           <p>Membantu proses belajar lebih mudah dan interaktif.</p>
         </div>
 

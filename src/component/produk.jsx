@@ -20,12 +20,12 @@ function Produk() {
     },
     {
       judul: 'Artikel Ilmiah',
-      isi: 'Berjudul “E-Comic Berbasis Robot Virtual Bermuatan Kearifan Lokal Mapag Hujan dengan Pendekatan STREAM sebagai Sarana Literasi Lingkungan dalam Mendukung Program Prioritas.”',
+      isi: 'Berjudul “<i>E-Comic</i> Berbasis Robot Virtual Bermuatan Kearifan Lokal Mapag Hujan dengan Pendekatan STREAM sebagai Sarana Literasi Lingkungan dalam Mendukung Program Prioritas.”',
       action: () => window.open('https://example.com/artikel', '_blank'),
       link_subtitle: 'Lihat'
     },
     {
-      judul: 'Produk E-Comic (ECOMBOT)',
+      judul: 'Produk ECOMBOT',
       isi: 'Sebuah <i>e-comic</i> interaktif yang menggabungkan teknologi robot virtual dalam bentuk <i>ChatBot</i> bermuatan kearifan lokal Mapag Hujan dengan pendekatan STREAM sebagai sarana literasi lingkungan yang edukatif dan interaktif.',
       action: () => navigate('/ecomic'),
       link_subtitle: 'Akses Media'
@@ -61,7 +61,7 @@ function Produk() {
   return (
     <div className='produk' ref={aboutteamRef}>
       <h2 className={`produk-judul ${isVisible ? 'visible' : ''}`}>
-        Hasil Riset
+        Luaran Riset
       </h2>
       <div className='produk-konten'>
         {cards.map((card, index) => {

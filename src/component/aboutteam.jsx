@@ -38,7 +38,7 @@ function AboutTeam() {
                 Tim GreenVerse
             </h2>
             <p className={`AboutTeam-about ${isVisible ? 'visible' : ''}`}>
-                GreenVerse merupakan tim kolaboratif dalam penelitian ini, terdiri atas lima orang yang tergabung dalam PKM-AMLI skema Riset Sosial Humaniora (RSH). Tim ini berfokus pada penguatan literasi lingkungan melalui pengembangan media pembelajaran digital sebagai sarana literasi lingkungan dengan kearifan lokal yang relevan dalam pembelajaran abad ke-21.
+                GreenVerse merupakan tim kolaboratif dalam riset ini, terdiri atas lima orang yang tergabung dalam PKM-AMLI skema Riset Sosial Humaniora (RSH). Tim ini berfokus pada penguatan literasi lingkungan melalui pengembangan media pembelajaran digital sebagai sarana literasi lingkungan dengan kearifan lokal yang relevan dalam pembelajaran abad ke-21.
             </p>
         </div>
     );
