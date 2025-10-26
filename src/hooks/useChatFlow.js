@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 
+// Helper: ambil token JWT (jika ada)
+const getAuthHeader = () => {
+  const token = localStorage.getItem("access");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 const API_BASE_URL = 'https://backendecombot-production.up.railway.app/api';
 
 export const useChatFlow = () => {
@@ -10,15 +16,12 @@ export const useChatFlow = () => {
   useEffect(() => {
     const fetchChatFlow = async () => {
       try {
-        // Coba fetch dari backend Django dulu
-        const token = localStorage.getItem('token');
-        
+        // Coba fetch dari backend terlebih dahulu
+        const token = localStorage.getItem("access");
         if (token) {
           try {
             const response = await fetch(`${API_BASE_URL}/chat/flow/`, {
-              headers: {
-                'Authorization': `Bearer ${token}`
-              }
+              headers: getAuthHeader()
             });
             
             if (response.ok) {
@@ -28,11 +31,11 @@ export const useChatFlow = () => {
               return;
             }
           } catch (backendError) {
-            console.log('Backend chat flow not available, using local JSON');
+            console.warn('Backend chat flow not available, using fallback');
           }
         }
-
-        // Fallback ke file JSON lokal
+        
+        // Fallback ke file lokal
         const response = await fetch('/data/chat.json');
         if (!response.ok) {
           throw new Error('Failed to fetch chat flow');

@@ -17,6 +17,12 @@ import { useChatFlow } from '../hooks/useChatFlow';
 // Konstanta untuk base URL API
 const API_BASE_URL = 'https://backendecombot-production.up.railway.app/api';
 
+// Helper: ambil token JWT (jika ada)
+const getAuthHeader = () => {
+  const token = localStorage.getItem("access");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 // Fallback data jika loading gagal
 const fallbackChatFlow = {
   chatbot_flow: {
@@ -263,12 +269,14 @@ const EcombotChat = () => {
   // Fungsi untuk mendapatkan judul berdasarkan lokasi saat ini
   const getCurrentTitle = () => {
     const fullPath = location.pathname;
+    console.log('Current path:', fullPath);
     
     const currentKegiatan = kegiatanList.find(kegiatan => 
       `/ecombot${kegiatan.path}` === fullPath || kegiatan.path === fullPath
     );
     
     if (currentKegiatan) {
+      console.log('Found kegiatan:', currentKegiatan);
       return {
         materi: currentKegiatan.materi,
         title: currentKegiatan.name
@@ -282,6 +290,7 @@ const EcombotChat = () => {
       };
     }
     
+    console.log('No matching kegiatan found for path:', fullPath);
     return {
       materi: 'Eksplorasi',
       title: 'Kimia Hijau'
@@ -302,183 +311,272 @@ const EcombotChat = () => {
     initializeChat();
   }, [currentChatFlow, messages.length]);
 
-  // Effect untuk auto-start question session
+  // Effect untuk auto-start question session ketika currentStep berubah ke step yang memiliki pertanyaan
   useEffect(() => {
+    console.log('=== CHECKING FOR QUESTION SESSION ===');
+    console.log('Current step:', currentStep);
+    
     const stepData = getStepData(currentStep);
     if (stepData) {
       const hasQuestions = (stepData.questions && Array.isArray(stepData.questions) && stepData.questions.length > 0) || 
                           stepData.question;
       
       if (hasQuestions) {
+        console.log('Step has questions, starting question session:', currentStep);
         startQuestionSession();
+      } else {
+        console.log('Step has no questions:', currentStep);
       }
     }
   }, [currentStep, currentChatFlow]);
 
-  // Fungsi untuk memulai atau memuat sesi chat - DIPERBAIKI
-const startOrLoadSession = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    
-    // Cek apakah ada data lokal yang tersimpan
-    const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
-    const localProgress = localStorage.getItem('chatbot-progress');
-    
-    if (!token) {
-      console.warn('User not logged in, using local session only');
-      const introMessage = getStepData('intro');
-      
-      // Jika ada data lokal, load dari localStorage
-      if (localMessages.length > 0) {
-        const loadedMessages = localMessages.map(msg => ({
-          from: msg.message_type === 'bot' ? 'bot' : 'user',
-          text: msg.message_text,
-          data: msg.message_data || {}
-        }));
-        setMessages(loadedMessages);
-        console.log('Loaded local messages:', loadedMessages.length);
-      } else {
-        // Jika tidak ada data, mulai dengan intro
+  // Fungsi untuk memulai atau memuat sesi chat
+  const startOrLoadSession = async () => {
+    try {
+      const token = localStorage.getItem('access');
+      if (!token) {
+        console.warn('User not logged in, using local session only');
+        const introMessage = getStepData('intro');
         setMessages([{ 
           from: 'bot', 
           text: introMessage.message,
           data: introMessage
         }]);
-      }
-      
-      // Load progress dari localStorage
-      if (localProgress) {
-        const parsedProgress = JSON.parse(localProgress);
-        if (!parsedProgress.visited) {
-          parsedProgress.visited = ['intro'];
+        
+        const savedProgress = localStorage.getItem('chatbot-progress');
+        if (savedProgress) {
+          const parsedProgress = JSON.parse(savedProgress);
+          if (!parsedProgress.visited) {
+            parsedProgress.visited = ['intro'];
+          }
+          setProgress(parsedProgress);
         }
-        setProgress(parsedProgress);
-        console.log('Loaded local progress:', parsedProgress);
+        return;
       }
-      
-      // Buat session ID lokal
-      const localSessionId = `local_session_${Date.now()}`;
-      setCurrentSession(localSessionId);
-      localStorage.setItem('current_session_id', localSessionId);
-      
-      return;
-    }
 
-    // User sudah login, gunakan backend
-    const sessionId = localStorage.getItem('current_session_id') || `session_${Date.now()}`;
-    
-    const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        session_id: sessionId
-      })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      setCurrentSession(data.session_id);
-      localStorage.setItem('current_session_id', data.session_id);
-      
-      await loadActivityHistory(data.current_activity);
-      
-    } else {
-      throw new Error('Failed to start session');
-    }
-  } catch (error) {
-    console.error('Error starting session:', error);
-    // Fallback ke local session
-    const introMessage = getStepData('intro');
-    setMessages([{ 
-      from: 'bot', 
-      text: introMessage.message,
-      data: introMessage
-    }]);
-    
-    const localSessionId = `local_session_${Date.now()}`;
-    setCurrentSession(localSessionId);
-    localStorage.setItem('current_session_id', localSessionId);
-  }
-};
-
-  // Fungsi untuk memuat history activity
-  const loadActivityHistory = async (activityId) => {
-    try {
-      const token = localStorage.getItem('token');
+      // Coba load session yang ada atau buat baru
       const sessionId = localStorage.getItem('current_session_id');
       
-      if (!token || !sessionId) return;
+      if (sessionId) {
+        // Load existing session
+        await loadSessionHistory(sessionId);
+      } else {
+        // Buat session baru
+        await createNewSession();
+      }
+      
+    } catch (error) {
+      console.error('Error starting session:', error);
+      const introMessage = getStepData('intro');
+      setMessages([{ 
+        from: 'bot', 
+        text: introMessage.message,
+        data: introMessage
+      }]);
+    }
+  };
 
-      const response = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/activity/${activityId}/`, {
-        method: 'GET',
+  // FUNGSI BARU: Membuat session baru
+  const createNewSession = async () => {
+    try {
+      const token = localStorage.getItem('access');
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
+        body: JSON.stringify({
+          comic_slug: comicSlug,
+          episode_slug: episodeSlug,
+          current_activity: currentStep
+        })
       });
 
       if (response.ok) {
         const data = await response.json();
+        setCurrentSession(data.session_id);
+        localStorage.setItem('current_session_id', data.session_id);
         
-        const historyMessages = [];
+        // Simpan pesan intro ke database
+        const introMessage = getStepData('intro');
+        await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
         
-        if (data.history.messages) {
-          data.history.messages.forEach(msg => {
-            if (msg.message_type === 'bot') {
-              historyMessages.push({
-                from: 'bot',
-                text: msg.message_text,
-                data: msg.message_data
-              });
-            } else if (msg.message_type === 'user') {
-              historyMessages.push({
-                from: 'user',
-                text: msg.message_text
-              });
-            }
-          });
-        }
-        
-        setMessages(historyMessages);
-        
-        const progressResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (progressResponse.ok) {
-          const progressData = await progressResponse.json();
-          updateProgressFromServer(progressData.overview);
-        }
+      } else {
+        throw new Error('Failed to create session');
       }
     } catch (error) {
-      console.error('Error loading activity history:', error);
+      console.error('Error creating new session:', error);
+      throw error;
     }
   };
 
-  // Fungsi untuk update progress dari server
-  const updateProgressFromServer = (overview) => {
-    const completed = [];
-    const visited = [];
-    
-    Object.entries(overview).forEach(([activityId, data]) => {
-      if (data.status === 'completed') {
-        completed.push(activityId);
+  // FUNGSI BARU: Memuat history session dari backend
+  const loadSessionHistory = async (sessionId) => {
+    try {
+      const token = localStorage.getItem('access');
+      if (!token) return;
+
+      // Coba load overview dulu untuk mendapatkan current activity
+      const overviewResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
+        method: 'GET',
+        headers: getAuthHeader()
+      });
+
+      if (overviewResponse.ok) {
+        const overviewData = await overviewResponse.json();
+        
+        // Update progress dari session data
+        if (overviewData.overview) {
+          setProgress(prev => ({
+            ...prev,
+            completed: overviewData.overview.completed_activities || [],
+            visited: overviewData.overview.visited_activities || ['intro']
+          }));
+        }
+
+        // Load history untuk current activity
+        const currentActivity = overviewData.current_activity || 'intro';
+        const historyResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/activity/${currentActivity}/`, {
+          method: 'GET',
+          headers: getAuthHeader()
+        });
+
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json();
+          
+          // Reconstruct messages dari history
+          const historyMessages = historyData.history?.messages?.map(msg => ({
+            from: msg.message_type,
+            text: msg.message_text,
+            data: msg.message_data || {}
+          })) || [];
+          
+          setMessages(historyMessages);
+          setCurrentSession(sessionId);
+          
+          console.log('Session history loaded:', historyMessages.length, 'messages');
+        } else {
+          throw new Error('Failed to load activity history');
+        }
+      } else {
+        throw new Error('Failed to load session overview');
       }
-      if (data.messages_count > 0) {
-        visited.push(activityId);
+    } catch (error) {
+      console.error('Error loading session history:', error);
+      // Jika gagal load history, buat session baru
+      await createNewSession();
+    }
+  };
+
+  // Fungsi untuk menyimpan pesan ke database - DIUBAH untuk menggunakan endpoint yang benar
+  const saveMessageToDatabase = async (messageType, character, messageText, stepId, messageData = {}) => {
+    try {
+      const token = localStorage.getItem('access');
+      const sessionId = localStorage.getItem('current_session_id');
+      
+      if (!token || !sessionId) {
+        console.log('No token or session ID, message saved locally only');
+        return null;
       }
-    });
-    
-    setProgress(prev => ({
-      ...prev,
-      completed,
-      visited: [...new Set([...prev.visited, ...visited])]
-    }));
+
+      // Gunakan endpoint yang sesuai dengan urls.py
+      const response = await fetch(`${API_BASE_URL}/chat/session/send/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          message_type: messageType,
+          character: character,
+          message_text: messageText,
+          step_id: stepId,
+          message_data: messageData,
+          current_activity: stepId,
+          comic_slug: comicSlug,
+          episode_slug: episodeSlug
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Message saved to database:', data);
+        return data;
+      } else {
+        console.error('Failed to save message to database:', response.status);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error saving message to database:', error);
+      return null;
+    }
+  };
+
+  // Fungsi untuk menyimpan jawaban ke database - DIUBAH untuk menggunakan endpoint yang benar
+  const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
+    try {
+      const token = localStorage.getItem('access');
+      const sessionId = localStorage.getItem('current_session_id');
+      
+      if (!token || !sessionId) {
+        // Fallback: save to localStorage
+        const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
+        savedAnswers.push({
+          question: questionData.text,
+          answer,
+          aspect: getAspectFromStep(currentStep),
+          kegiatan: currentStep,
+          question_id: questionData.id,
+          timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
+        return { status: 'saved_locally' };
+      }
+
+      // Gunakan endpoint yang sesuai dengan urls.py
+      const response = await fetch(`${API_BASE_URL}/chat/answer/submit/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader()
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          activity_id: currentStep,
+          question_data: questionData,
+          answer_text: answer,
+          answer_type: answerType,
+          comic_slug: comicSlug,
+          episode_slug: episodeSlug
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Answer saved to database:', data);
+        return data;
+      } else {
+        throw new Error('Failed to save answer to database');
+      }
+    } catch (error) {
+      console.error('Error saving answer to database:', error);
+      // Fallback to localStorage
+      const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
+      savedAnswers.push({
+        question: questionData.text,
+        answer,
+        aspect: getAspectFromStep(currentStep),
+        kegiatan: currentStep,
+        question_id: questionData.id,
+        timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
+      return { status: 'saved_locally' };
+    }
   };
 
   // Fungsi untuk load pertanyaan reflektif
@@ -578,187 +676,36 @@ const startOrLoadSession = async () => {
     }, 100);
   };
 
-  // Fungsi untuk menyimpan pesan ke database - DIPERBAIKI
-const saveMessageToDatabase = async (messageType, character, messageText, stepId, messageData = {}) => {
-  try {
-    const token = localStorage.getItem('token');
-    const sessionId = localStorage.getItem('current_session_id');
-    
-    if (!token || !sessionId) {
-      // FALLBACK: Simpan ke localStorage untuk user tidak login
-      const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
-      localMessages.push({
-        message_type: messageType,
-        character,
-        message_text: messageText,
-        step_id: stepId,
-        message_data: messageData,
-        timestamp: new Date().toISOString()
-      });
-      localStorage.setItem('local_chat_messages', JSON.stringify(localMessages));
-      return { status: 'saved_locally' };
-    }
-
-    const response = await fetch(`${API_BASE_URL}/chat/session/send/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        session_id: sessionId,
-        message_type: messageType,
-        character,
-        message_text: messageText,
-        step_id: stepId,
-        message_data: messageData,
-        current_activity: stepId
-      })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data;
-    }
-  } catch (error) {
-    console.error('Error saving message to database:', error);
-    // Fallback ke localStorage
-    const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
-    localMessages.push({
-      message_type: messageType,
-      character,
-      message_text: messageText,
-      step_id: stepId,
-      message_data: messageData,
-      timestamp: new Date().toISOString()
-    });
-    localStorage.setItem('local_chat_messages', JSON.stringify(localMessages));
-    return { status: 'saved_locally_fallback' };
-  }
-  return null;
-};
-
-// Fungsi untuk menampilkan data lokal (untuk debugging)
-const debugLocalStorage = () => {
-  const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
-  const localAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
-  const localProgress = JSON.parse(localStorage.getItem('chatbot-progress') || '{}');
-  
-  console.log('=== LOCAL STORAGE DEBUG ===');
-  console.log('Messages:', localMessages);
-  console.log('Answers:', localAnswers);
-  console.log('Progress:', localProgress);
-  console.log('Current Session:', currentSession);
-  console.log('Current Step:', currentStep);
-  console.log('Waiting for Answer:', waitingForAnswer);
-  console.log('===========================');
-};
-
-// Panggil fungsi debug saat diperlukan (opsional)
-useEffect(() => {
-  if (process.env.NODE_ENV === 'development') {
-    // debugLocalStorage(); // Uncomment untuk debugging
-  }
-}, [messages, progress]);
-
-  // Fungsi untuk menyimpan jawaban ke database - DIPERBAIKI
-const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
-  try {
-    const token = localStorage.getItem('token');
-    const sessionId = localStorage.getItem('current_session_id');
-    
-    if (!token || !sessionId) {
-      // FALLBACK: save to localStorage dengan struktur yang lebih baik
-      const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
-      const answerRecord = {
-        question: questionData.text,
-        answer,
-        aspect: getAspectFromStep(currentStep),
-        kegiatan: currentStep,
-        question_id: questionData.id,
-        storage_key: questionData.storage_key,
-        answer_type: answerType,
-        timestamp: new Date().toISOString(),
-        question_data: questionData // Simpan data pertanyaan lengkap
-      };
-      savedAnswers.push(answerRecord);
-      localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
-      
-      // Juga simpan di progress lokal
-      saveAnswer(questionData.storage_key, answer);
-      
-      return { status: 'saved_locally', data: answerRecord };
-    }
-
-    const response = await fetch(`${API_BASE_URL}/chat/answer/submit/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        session_id: sessionId,
-        activity_id: currentStep,
-        question_data: questionData,
-        answer_text: answer,
-        answer_type: answerType
-      })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      // Juga simpan di progress lokal
-      saveAnswer(questionData.storage_key, answer);
-      return data;
-    } else {
-      throw new Error('Failed to save answer to database');
-    }
-  } catch (error) {
-    console.error('Error saving answer to database:', error);
-    // Fallback to localStorage
-    const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
-    const answerRecord = {
-      question: questionData.text,
-      answer,
-      aspect: getAspectFromStep(currentStep),
-      kegiatan: currentStep,
-      question_id: questionData.id,
-      storage_key: questionData.storage_key,
-      answer_type: answerType,
-      timestamp: new Date().toISOString(),
-      question_data: questionData
-    };
-    savedAnswers.push(answerRecord);
-    localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
-    
-    // Juga simpan di progress lokal
-    saveAnswer(questionData.storage_key, answer);
-    
-    return { status: 'saved_locally_fallback', data: answerRecord };
-  }
-};
-
   // Fungsi untuk mendapatkan pertanyaan dari currentChatFlow berdasarkan kegiatan
   const getQuestionsForCurrentStep = () => {
     const stepData = getStepData(currentStep);
-    if (!stepData) return [];
+    if (!stepData) {
+      console.log('No data for currentStep:', currentStep);
+      return [];
+    }
+    
+    console.log('Current step data:', stepData);
     
     const questions = [];
     
     if (stepData.questions && Array.isArray(stepData.questions)) {
+      console.log('Found multiple questions:', stepData.questions);
       stepData.questions.forEach(question => {
         questions.push({
           ...question,
           aspect: getAspectFromStep(currentStep)
         });
       });
-    } else if (stepData.question) {
+    }
+    else if (stepData.question) {
+      console.log('Found single question:', stepData.question);
       questions.push({
         ...stepData.question,
         aspect: getAspectFromStep(currentStep)
       });
     }
     
+    console.log(`Total questions for ${currentStep}: ${questions.length}`, questions);
     return questions;
   };
 
@@ -780,37 +727,59 @@ const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') 
     return aspectMap[step] || 'General';
   };
 
-  // Fungsi untuk mendapatkan quick buttons
+  // FUNGSI DIPERBAIKI: Untuk mendapatkan quick buttons - PERBAIKAN UTAMA
   const getQuickButtons = (stepKey, messageText = '') => {
+    console.log('=== GET QUICK BUTTONS CALLED ===');
+    console.log('Step key:', stepKey);
+    console.log('Waiting for answer:', waitingForAnswer);
+    console.log('Current step:', currentStep);
+    
+    // JIKA SEDANG DALAM SESI PERTANYAAN, JANGAN TAMPILKAN QUICK BUTTONS
     if (waitingForAnswer) {
+      console.log('Not showing quick buttons - waiting for answer:', waitingForAnswer);
       return null;
     }
     
     const step = getStepData(stepKey);
-    if (!step || !step.next_keywords) return null;
+    console.log('Step data:', step);
+    
+    if (!step || !step.next_keywords) {
+      console.log('No step data or next_keywords for step:', stepKey);
+      return null;
+    }
+    
+    console.log('Getting quick buttons for step:', stepKey, 'Keywords:', step.next_keywords);
     
     const uniqueKeywords = [...new Set(step.next_keywords)];
     
+    // KHUSUS UNTUK FORUM: Hanya tampilkan "menu sebelumnya"
     if (stepKey === 'forum_diskusi') {
       return uniqueKeywords
         .filter(keyword => keyword.toLowerCase().includes('menu sebelumnya'))
         .map(keyword => {
           const buttonClass = "px-4 py-2 bg-lime-500 !text-lime-700 rounded-full text-sm !font-bold shadow-md hover:shadow-lg hover:bg-lime-600 border border-lime-600 transition-all duration-200";
-          return `<button class="${buttonClass}" data-text="Menu Sebelumnya">Menu Sebelumnya</button>`;
+          return `<button class="${buttonClass}" data-text="${keyword}">${keyword}</button>`;
         })
         .join('');
     }
     
-    return uniqueKeywords.map(keyword => {
+    // Untuk semua step lainnya, tampilkan semua keyword
+    const buttonsHTML = uniqueKeywords.map(keyword => {
+      // Berikan styling yang berbeda untuk tombol pertanyaan
       const isQuestionButton = keyword.toLowerCase().includes('pertanyaan') || 
                               keyword.toLowerCase().includes('merancang') || 
-                              keyword.toLowerCase().includes('kreasi');
+                              keyword.toLowerCase().includes('kreasi') ||
+                              keyword.toLowerCase().includes('eksplorasi selesai');
+      
       const buttonClass = isQuestionButton 
         ? "px-4 py-2 bg-lime-500 !text-lime-700 !font-bold rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-600 border border-lime-600 transition-all duration-200"
         : "px-4 py-2 bg-white !text-lime-700 !font-bold rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-50 hover:text-lime-600 border border-gray-200 transition-all duration-200";
       
       return `<button class="${buttonClass}" data-text="${keyword}">${keyword}</button>`;
     }).join('');
+    
+    console.log('Generated buttons HTML:', buttonsHTML);
+    return buttonsHTML;
   };
 
   // Fungsi untuk menyimpan jawaban
@@ -824,52 +793,44 @@ const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') 
     }));
   };
 
- // Fungsi untuk menandai kegiatan sebagai selesai - DIPERBAIKI
-const completeActivity = async (activityId) => {
-  // Update state lokal
-  setProgress(prev => {
-    const completed = [...prev.completed];
-    if (!completed.includes(activityId)) {
-      completed.push(activityId);
-    }
-    return {
-      ...prev,
-      completed,
-      current: activityId
-    };
-  });
-
-  try {
-    const token = localStorage.getItem('token');
-    const sessionId = localStorage.getItem('current_session_id');
-    
-    if (token && sessionId) {
-      await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          activity_id: activityId
-        })
-      });
-    } else {
-      // Untuk user tidak login, simpan progress ke localStorage
-      const localProgress = JSON.parse(localStorage.getItem('chatbot-progress') || '{}');
-      if (!localProgress.completed) localProgress.completed = [];
-      if (!localProgress.completed.includes(activityId)) {
-        localProgress.completed.push(activityId);
+  // Fungsi untuk menandai kegiatan sebagai selesai
+  const completeActivity = async (activityId) => {
+    setProgress(prev => {
+      const completed = [...prev.completed];
+      if (!completed.includes(activityId)) {
+        completed.push(activityId);
       }
-      localProgress.current = activityId;
-      localStorage.setItem('chatbot-progress', JSON.stringify(localProgress));
-      console.log('Progress saved locally:', localProgress);
+      return {
+        ...prev,
+        completed,
+        current: activityId
+      };
+    });
+
+    // Simpan ke database jika user login
+    try {
+      const token = localStorage.getItem('access');
+      const sessionId = localStorage.getItem('current_session_id');
+      
+      if (token && sessionId) {
+        await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            activity_id: activityId,
+            comic_slug: comicSlug,
+            episode_slug: episodeSlug
+          })
+        });
+      }
+    } catch (error) {
+      console.error('Error completing activity in database:', error);
     }
-  } catch (error) {
-    console.error('Error completing activity:', error);
-  }
-};
+  };
 
   // Fungsi untuk memeriksa apakah kegiatan dapat diakses
   const canAccessKegiatan = (kegiatanNum) => {
@@ -904,7 +865,6 @@ const completeActivity = async (activityId) => {
     const normalizedInput = input.toLowerCase().trim();
     const currentKegiatan = kegiatanList.find(k => location.pathname.includes(k.path));
     
-    // Deteksi tanya ecombot
     const tanyaEcombotPatterns = [
       /tanya ecombot/i,
       /tanya/i,
@@ -922,27 +882,22 @@ const completeActivity = async (activityId) => {
       }
     }
 
-    // Deteksi pertanyaan reflektif
     if (normalizedInput.includes('pertanyaan reflektif')) {
       return { stepKey: 'pertanyaan_reflektif' };
     }
     
-    // Deteksi mari merancang
     if (normalizedInput.includes('mari merancang')) {
       return { stepKey: 'mari_merancang' };
     }
     
-    // Deteksi ayo berkreasi
     if (normalizedInput.includes('ayo berkreasi')) {
       return { stepKey: 'ayo_berkreasi' };
     }
     
-    // Deteksi eksplorasi selesai
     if (normalizedInput.includes('eksplorasi selesai')) {
       return { stepKey: 'redirect_ecomic' };
     }
     
-    // Deteksi eksplorasi
     const eksplorasiMatch = normalizedInput.match(/(mulai\s+)?eksplorasi\s+(\d+)/i) || 
                            normalizedInput.match(/ke\s+eksplorasi\s+(\d+)/i) ||
                            normalizedInput.match(/eksplorasi\s+(\d+)/i) ||
@@ -956,12 +911,10 @@ const completeActivity = async (activityId) => {
       }
     }
     
-    // Deteksi completion
     if (normalizedInput.includes('Eksplorasi Selesai')) {
       return { stepKey: 'completion' };
     }
     
-    // Deteksi menu sebelumnya
     const kembaliPatterns = [
       /menu sebelumnya/i,
       /kembali/i,
@@ -999,6 +952,8 @@ const completeActivity = async (activityId) => {
   // FUNGSI BARU: Memproses pertanyaan forum dengan LangChain
   const processForumQuestion = async (question) => {
     try {
+      console.log('Processing forum question with LangChain:', question);
+      
       const response = await fetch(`${API_BASE_URL}/ask/`, {
         method: 'POST',
         headers: {
@@ -1030,6 +985,7 @@ const completeActivity = async (activityId) => {
   const redirectToEcomic = async () => {
     const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
     const token = localStorage.getItem("access");
+    console.debug("handleMarkFinish called", { comic: comicSlug, episode: episodeSlug, currentPage, tokenPresent: !!token });
 
     try {
       setMessages(prev => [...prev, { 
@@ -1049,9 +1005,17 @@ const completeActivity = async (activityId) => {
 
   // Fungsi untuk memulai sesi pertanyaan
   const startQuestionSession = () => {
+    console.log('=== STARTING QUESTION SESSION ===');
+    console.log('Current step:', currentStep);
+    
     const questions = getQuestionsForCurrentStep();
     
+    console.log('Questions found:', questions);
+    
     if (questions.length === 0) {
+      console.warn('No questions found for step:', currentStep);
+      console.log('Available data:', getStepData(currentStep));
+      
       setMessages(prev => [...prev, { 
         from: 'bot', 
         text: "Tidak ada pertanyaan untuk kegiatan ini."
@@ -1063,6 +1027,7 @@ const completeActivity = async (activityId) => {
     setCurrentQuestionIndex(0);
     
     const firstQuestion = questions[0];
+    console.log('Displaying first question:', firstQuestion);
     
     setMessages(prev => [...prev, { 
       from: 'bot', 
@@ -1071,127 +1036,124 @@ const completeActivity = async (activityId) => {
     }]);
     
     setWaitingForAnswer('question_0');
+    console.log('Set waitingForAnswer to: question_0');
+    
     scrollChat();
   };
 
-  // Fungsi untuk memproses jawaban pertanyaan - DIPERBAIKI
-const processQuestionAnswer = async (input) => {
-  if (!input.trim()) {
-    setMessages(prev => [...prev, { 
-      from: 'bot', 
-      text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
-      data: {
-        id: currentStep,
-        next_keywords: []
-      }
-    }]);
-    return;
-  }
-
-  const currentIndex = currentQuestionIndex;
-  const currentQuestion = currentQuestions[currentIndex];
-  
-  if (!currentQuestion) {
-    console.error('No current question found at index:', currentIndex);
-    return;
-  }
-  
-  // Simpan pesan user ke state DAN database
-  setMessages(prev => [...prev, { from: 'user', text: input }]);
-  await saveMessageToDatabase('user', 'User', input, currentStep);
-  
-  try {
-    const result = await saveAnswerToDatabase(currentQuestion, input, currentQuestion.type || 'essay');
-    console.log('Answer save result:', result);
-    
-    // Simpan juga di state lokal
-    saveAnswer(currentQuestion.storage_key, input);
-    
-    if (currentIndex < currentQuestions.length - 1) {
-      const nextIndex = currentIndex + 1;
-      const nextQuestion = currentQuestions[nextIndex];
-      
-      setCurrentQuestionIndex(nextIndex);
-      const nextMessage = { 
+  // Fungsi untuk memproses jawaban pertanyaan
+  const processQuestionAnswer = async (input) => {
+    if (!input.trim()) {
+      setMessages(prev => [...prev, { 
         from: 'bot', 
-        text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
-        data: {}
-      };
-      
-      setMessages(prev => [...prev, nextMessage]);
-      await saveMessageToDatabase('bot', 'Aquano', nextMessage.text, currentStep, nextMessage.data);
-      
-      setWaitingForAnswer(`question_${nextIndex}`);
-      
-    } else {
-      // Selesai semua pertanyaan
-      let nextKeywords = [];
-      const stepData = getStepData(currentStep);
-      
-      if (stepData && stepData.next_keywords) {
-        nextKeywords = [...stepData.next_keywords];
-      } else {
-        const navigationMap = {
-          'pertanyaan_1': ["mulai eksplorasi 2", "menu sebelumnya"],
-          'pertanyaan_2': ["mulai eksplorasi 3", "menu sebelumnya"],
-          'pertanyaan_3': ["mulai eksplorasi 4", "menu sebelumnya"],
-          'pertanyaan_4': ["mulai eksplorasi 5", "menu sebelumnya"],
-          'mari_merancang': ["mulai eksplorasi 6", "menu sebelumnya"],
-          'ayo_berkreasi': ["mulai eksplorasi 7", "menu sebelumnya"],
-          'pertanyaan_reflektif': ["Eksplorasi Selesai", "menu sebelumnya"]
-        };
-        
-        nextKeywords = navigationMap[currentStep] || ["menu sebelumnya"];
-      }
-      
-      const completionMessage = { 
-        from: 'bot', 
-        text: "🎉 **Terima kasih!**\nAnda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
+        text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
         data: {
           id: currentStep,
-          next_keywords: nextKeywords
+          next_keywords: []
         }
-      };
-      
-      setMessages(prev => [...prev, completionMessage]);
-      await saveMessageToDatabase('bot', 'Aquano', completionMessage.text, currentStep, completionMessage.data);
-      
-      setWaitingForAnswer(null);
-      setCurrentQuestions([]);
-      setCurrentQuestionIndex(0);
-      
-      // Tandai kegiatan sebagai selesai
-      let kegiatanStep = currentStep;
-      if (currentStep.startsWith('pertanyaan_')) {
-        kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
-      } else if (currentStep === 'mari_merancang') {
-        kegiatanStep = 'kegiatan_5';
-      } else if (currentStep === 'ayo_berkreasi') {
-        kegiatanStep = 'kegiatan_6';
-      }
-      
-      if (kegiatanStep !== currentStep) {
-        completeActivity(kegiatanStep);
-      }
+      }]);
+      return;
+    }
+
+    const currentIndex = currentQuestionIndex;
+    const currentQuestion = currentQuestions[currentIndex];
+    
+    if (!currentQuestion) {
+      console.error('No current question found at index:', currentIndex);
+      return;
     }
     
-  } catch (error) {
-    console.error('Error saving answer:', error);
-    const errorMessage = { 
-      from: 'bot', 
-      text: "⚠️ Jawaban Anda telah dicatat secara lokal. Terima kasih!",
-      data: {
-        id: currentStep,
-        next_keywords: []
-      }
-    };
+    console.log('Processing answer for question:', currentQuestion, 'Answer:', input);
     
-    setMessages(prev => [...prev, errorMessage]);
-    await saveMessageToDatabase('bot', 'Aquano', errorMessage.text, currentStep, errorMessage.data);
-  }
-  
-  scrollChat();
-};
+    // Simpan pesan user dan simpan ke database
+    setMessages(prev => [...prev, { from: 'user', text: input }]);
+    await saveMessageToDatabase('user', 'User', input, currentStep, { question_id: currentQuestion.id });
+    
+    // Simpan jawaban ke database
+    try {
+      const result = await saveAnswerToDatabase(currentQuestion, input, currentQuestion.type || 'essay');
+      console.log('Answer saved:', result);
+      
+      saveAnswer(currentQuestion.storage_key, input);
+      
+      if (currentIndex < currentQuestions.length - 1) {
+        const nextIndex = currentIndex + 1;
+        const nextQuestion = currentQuestions[nextIndex];
+        
+        setCurrentQuestionIndex(nextIndex);
+        setMessages(prev => [...prev, { 
+          from: 'bot', 
+          text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
+          data: {}
+        }]);
+        
+        setWaitingForAnswer(`question_${nextIndex}`);
+        console.log('Set waitingForAnswer to next question:', `question_${nextIndex}`);
+        
+      } else {
+        console.log('All questions completed for step:', currentStep);
+        
+        let nextKeywords = [];
+        const stepData = getStepData(currentStep);
+        
+        if (stepData && stepData.next_keywords) {
+          nextKeywords = [...stepData.next_keywords];
+        } else {
+          const navigationMap = {
+            'pertanyaan_1': ["mulai eksplorasi 2", "menu sebelumnya"],
+            'pertanyaan_2': ["mulai eksplorasi 3", "menu sebelumnya"],
+            'pertanyaan_3': ["mulai eksplorasi 4", "menu sebelumnya"],
+            'pertanyaan_4': ["mulai eksplorasi 5", "menu sebelumnya"],
+            'mari_merancang': ["mulai eksplorasi 6", "menu sebelumnya"],
+            'ayo_berkreasi': ["mulai eksplorasi 7", "menu sebelumnya"],
+            'pertanyaan_reflektif': ["Eksplorasi Selesai", "menu sebelumnya"]
+          };
+          
+          nextKeywords = navigationMap[currentStep] || ["menu sebelumnya"];
+        }
+        
+        setMessages(prev => [...prev, { 
+          from: 'bot', 
+          text: "🎉 **Terima kasih!**\nAnda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
+          data: {
+            id: currentStep,
+            next_keywords: nextKeywords
+          }
+        }]);
+        
+        setWaitingForAnswer(null);
+        setCurrentQuestions([]);
+        setCurrentQuestionIndex(0);
+        console.log('Reset question state - waitingForAnswer set to null');
+        
+        let kegiatanStep = currentStep;
+        if (currentStep.startsWith('pertanyaan_')) {
+          kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
+        } else if (currentStep === 'mari_merancang') {
+          kegiatanStep = 'kegiatan_5';
+        } else if (currentStep === 'ayo_berkreasi') {
+          kegiatanStep = 'kegiatan_6';
+        }
+        
+        if (kegiatanStep !== currentStep) {
+          completeActivity(kegiatanStep);
+        }
+      }
+      
+    } catch (error) {
+      console.error('Error saving answer:', error);
+      setMessages(prev => [...prev, { 
+        from: 'bot', 
+        text: "⚠️ Jawaban Anda telah dicatat secara lokal. Terima kasih!",
+        data: {
+          id: currentStep,
+          next_keywords: []
+        }
+      }]);
+    }
+    
+    scrollChat();
+  };
 
   // Fungsi untuk mendapatkan step berikutnya setelah selesai menjawab pertanyaan
   const getNextStepAfterQuestions = () => {
@@ -1258,6 +1220,10 @@ const processQuestionAnswer = async (input) => {
     const question = reflectiveQuestions[currentQuestionIndex];
     
     setMessages(prev => [...prev, { from: 'user', text: input }]);
+    await saveMessageToDatabase('user', 'User', input, 'pertanyaan_reflektif', { 
+      question: question,
+      question_index: currentQuestionIndex 
+    });
     
     try {
       const result = await saveAnswerToDatabase(
@@ -1265,6 +1231,7 @@ const processQuestionAnswer = async (input) => {
         input, 
         'reflective'
       );
+      console.log('Reflective answer saved:', result);
     } catch (error) {
       console.error('Error saving reflective answer:', error);
     }
@@ -1401,7 +1368,7 @@ const processQuestionAnswer = async (input) => {
     return [];
   };
 
-  // FUNGSI UTAMA: Memproses input user
+  // FUNGSI UTAMA: Memproses input user - DIUBAH untuk menyimpan semua pesan ke backend
   const processUserInput = async (input) => {
     if (!currentChatFlow) {
       console.error('currentChatFlow is undefined');
@@ -1410,8 +1377,16 @@ const processQuestionAnswer = async (input) => {
     
     const normalizedInput = input.toLowerCase().trim();
     
+    console.log('=== PROCESSING USER INPUT ===');
+    console.log('Input:', input);
+    console.log('Current step:', currentStep);
+    console.log('Previous steps:', previousSteps);
+    console.log('Waiting for answer:', waitingForAnswer);
+    
     // **PRIORITAS 1: Jika sedang menunggu jawaban untuk pertanyaan**
     if (waitingForAnswer) {
+      console.log('Processing answer for waiting question:', waitingForAnswer);
+      
       if (waitingForAnswer.startsWith('reflective_')) {
         await processReflectiveAnswer(input);
       } else if (waitingForAnswer.startsWith('question_')) {
@@ -1426,7 +1401,11 @@ const processQuestionAnswer = async (input) => {
     
     // **PRIORITAS 2: Cek untuk navigasi "eksplorasi selesai" - KE /ECOMIC**
     if (normalizedInput.includes('eksplorasi selesai')) {
+      console.log('Eksplorasi selesai detected, redirecting to /ecomic');
+      
       setMessages(prev => [...prev, { from: 'user', text: input }]);
+      await saveMessageToDatabase('user', 'User', input, currentStep);
+      
       setBotTyping(true);
       
       setTimeout(() => {
@@ -1453,7 +1432,11 @@ const processQuestionAnswer = async (input) => {
     
     for (const pattern of kembaliPatterns) {
       if (pattern.test(normalizedInput)) {
+        console.log('Menu sebelumnya detected:', input);
+        
         setMessages(prev => [...prev, { from: 'user', text: input }]);
+        await saveMessageToDatabase('user', 'User', input, currentStep);
+        
         setBotTyping(true);
         
         setTimeout(() => {
@@ -1462,6 +1445,9 @@ const processQuestionAnswer = async (input) => {
           if (currentStep === 'forum_diskusi' && previousSteps.length > 0) {
             const previousStep = previousSteps[previousSteps.length - 1];
             const newPreviousSteps = previousSteps.slice(0, -1);
+            
+            console.log('Keluar dari forum, kembali ke:', previousStep);
+            console.log('New previous steps:', newPreviousSteps);
             
             setPreviousSteps(newPreviousSteps);
             setCurrentStep(previousStep);
@@ -1476,11 +1462,15 @@ const processQuestionAnswer = async (input) => {
                 text: `Anda kembali ke kegiatan sebelumnya.\n\n${stepData.message}`,
                 data: stepData
               }]);
+              saveMessageToDatabase('bot', 'Aquano', stepData.message, previousStep, stepData);
             }
           } 
           else if (previousSteps.length > 1) {
             const previousStep = previousSteps[previousSteps.length - 2];
             const newPreviousSteps = previousSteps.slice(0, -1);
+            
+            console.log('Navigating back to previous step:', previousStep);
+            console.log('New previous steps:', newPreviousSteps);
             
             setPreviousSteps(newPreviousSteps);
             setCurrentStep(previousStep);
@@ -1494,6 +1484,7 @@ const processQuestionAnswer = async (input) => {
                 text: `Anda kembali ke langkah sebelumnya.\n\n${stepData.message}`,
                 data: stepData
               }]);
+              saveMessageToDatabase('bot', 'Aquano', stepData.message, previousStep, stepData);
             }
           } else {
             setMessages(prev => [...prev, { 
@@ -1522,28 +1513,39 @@ const processQuestionAnswer = async (input) => {
     
     for (const keyword of questionKeywords) {
       if (normalizedInput.includes(keyword)) {
+        console.log('Question keyword detected:', keyword);
+        console.log('Current step before question:', currentStep);
+        
         setMessages(prev => [...prev, { from: 'user', text: input }]);
+        await saveMessageToDatabase('user', 'User', input, currentStep);
         
         if (keyword === 'pertanyaan 1') {
           setCurrentStep('pertanyaan_1');
+          console.log('Set current step to: pertanyaan_1');
         }
         else if (keyword === 'pertanyaan 2') {
           setCurrentStep('pertanyaan_2');
+          console.log('Set current step to: pertanyaan_2');
         }
         else if (keyword === 'pertanyaan 3') {
           setCurrentStep('pertanyaan_3');
+          console.log('Set current step to: pertanyaan_3');
         }
         else if (keyword === 'pertanyaan 4') {
           setCurrentStep('pertanyaan_4');
+          console.log('Set current step to: pertanyaan_4');
         }
         else if (keyword === 'pertanyaan reflektif') {
           setCurrentStep('pertanyaan_reflektif');
+          console.log('Set current step to: pertanyaan_reflektif');
         }
         else if (keyword === 'mari merancang') {
           setCurrentStep('mari_merancang');
+          console.log('Set current step to: mari_merancang');
         }
         else if (keyword === 'ayo berkreasi') {
           setCurrentStep('ayo_berkreasi');
+          console.log('Set current step to: ayo_berkreasi');
         }
         
         scrollChat();
@@ -1567,13 +1569,17 @@ const processQuestionAnswer = async (input) => {
     
     for (const pattern of tanyaEcombotPatterns) {
       if (pattern.test(normalizedInput)) {
+        console.log('Tanya Ecombot detected:', input);
+        
         setMessages(prev => [...prev, { from: 'user', text: input }]);
+        await saveMessageToDatabase('user', 'User', input, currentStep);
         
         if (currentStep === 'forum_diskusi') {
           setMessages(prev => [...prev, { 
             from: 'bot', 
             text: "Silahkan ajukan pertanyaan Anda tentang berbagai topik pembelajaran. Saya akan membantu menjawabnya menggunakan sistem AI.\n\nKetik 'menu sebelumnya' untuk kembali ke alur pembelajaran."
           }]);
+          await saveMessageToDatabase('bot', 'Aquano', "Silahkan ajukan pertanyaan Anda tentang berbagai topik pembelajaran. Saya akan membantu menjawabnya menggunakan sistem AI.\n\nKetik 'menu sebelumnya' untuk kembali ke alur pembelajaran.", 'forum_diskusi');
         } else {
           setPreviousSteps(prev => [...prev, currentStep]);
           setCurrentStep('forum_diskusi');
@@ -1587,7 +1593,11 @@ const processQuestionAnswer = async (input) => {
     
     // **PRIORITAS 6: Jika di forum diskusi, proses pertanyaan dengan LangChain**
     if (currentStep === 'forum_diskusi' && !waitingForAnswer) {
+      console.log('Processing forum question with LangChain:', input);
+      
       setMessages(prev => [...prev, { from: 'user', text: input }]);
+      await saveMessageToDatabase('user', 'User', input, 'forum_diskusi');
+      
       setBotTyping(true);
       
       try {
@@ -1606,7 +1616,6 @@ const processQuestionAnswer = async (input) => {
           }
         }]);
         
-        await saveMessageToDatabase('user', 'User', input, 'forum_diskusi');
         await saveMessageToDatabase('bot', 'Aquano', answer, 'forum_diskusi');
         
       } catch (error) {
@@ -1632,6 +1641,8 @@ const processQuestionAnswer = async (input) => {
       
       if (allAnswered) {
         setMessages(prev => [...prev, { from: 'user', text: input }]);
+        await saveMessageToDatabase('user', 'User', input, currentStep);
+        
         setBotTyping(true);
         
         setTimeout(() => {
@@ -1641,6 +1652,8 @@ const processQuestionAnswer = async (input) => {
         }, 1000);
       } else {
         setMessages(prev => [...prev, { from: 'user', text: input }]);
+        await saveMessageToDatabase('user', 'User', input, currentStep);
+        
         setMessages(prev => [...prev, { 
           from: 'bot', 
           text: "Maaf, Anda harus menjawab semua pertanyaan terlebih dahulu sebelum dapat melanjutkan ke kegiatan berikutnya. Silakan selesaikan semua pertanyaan yang tersedia.",
@@ -1658,6 +1671,8 @@ const processQuestionAnswer = async (input) => {
     const targetKegiatan = getKegiatanFromText(input);
     if (targetKegiatan) {
       setMessages(prev => [...prev, { from: 'user', text: input }]);
+      await saveMessageToDatabase('user', 'User', input, currentStep);
+      
       setBotTyping(true);
       
       setTimeout(async () => {
@@ -1682,14 +1697,7 @@ const processQuestionAnswer = async (input) => {
             };
             
             setMessages(prev => [...prev, botMessage]);
-            
-            await saveMessageToDatabase(
-              'bot', 
-              stepData.character || 'Aquano', 
-              stepData.message, 
-              targetKegiatan.stepKey,
-              botMessage.data
-            );
+            await saveMessageToDatabase('bot', 'Aquano', stepData.message, targetKegiatan.stepKey, botMessage.data);
           }
           
           if (targetKegiatan.stepKey === 'forum_diskusi') {
@@ -1725,14 +1733,7 @@ const processQuestionAnswer = async (input) => {
             };
             
             setMessages(prev => [...prev, botMessage]);
-            
-            await saveMessageToDatabase(
-              'bot', 
-              kegiatanData.character || 'Aquano', 
-              kegiatanData.message, 
-              targetKegiatan.stepKey,
-              botMessage.data
-            );
+            await saveMessageToDatabase('bot', 'Aquano', kegiatanData.message, targetKegiatan.stepKey, botMessage.data);
             
             if (targetKegiatan.num !== 0) {
               completeActivity(targetKegiatan.stepKey);
@@ -1762,6 +1763,7 @@ const processQuestionAnswer = async (input) => {
               next_keywords: []
             }
           }]);
+          await saveMessageToDatabase('bot', 'Aquano', errorMessage, currentStep);
         }
         
         scrollChat();
@@ -1777,6 +1779,8 @@ const processQuestionAnswer = async (input) => {
       for (const [keyword, nextStep] of Object.entries(currentNavigation)) {
         if (normalizedInput.includes(keyword.toLowerCase())) {
           setMessages(prev => [...prev, { from: 'user', text: input }]);
+          await saveMessageToDatabase('user', 'User', input, currentStep);
+          
           setBotTyping(true);
           
           setTimeout(async () => {
@@ -1786,6 +1790,8 @@ const processQuestionAnswer = async (input) => {
               if (previousSteps.length > 0) {
                 const previousStep = previousSteps[previousSteps.length - 1];
                 const newPreviousSteps = previousSteps.slice(0, -1);
+                
+                console.log('Navigating back to previous step:', previousStep);
                 
                 setPreviousSteps(newPreviousSteps);
                 setCurrentStep(previousStep);
@@ -1805,14 +1811,7 @@ const processQuestionAnswer = async (input) => {
                   };
                   
                   setMessages(prev => [...prev, botMessage]);
-                  
-                  await saveMessageToDatabase(
-                    'bot', 
-                    stepData.character || 'Aquano', 
-                    botMessage.text, 
-                    previousStep,
-                    botMessage.data
-                  );
+                  await saveMessageToDatabase('bot', 'Aquano', botMessage.text, previousStep, botMessage.data);
                 }
               }
             } else if (nextStep === 'redirect_ecomic') {
@@ -1834,14 +1833,7 @@ const processQuestionAnswer = async (input) => {
                 };
                 
                 setMessages(prev => [...prev, botMessage]);
-                
-                await saveMessageToDatabase(
-                  'bot', 
-                  nextStepData.character || 'Aquano', 
-                  nextStepData.message, 
-                  nextStep,
-                  botMessage.data
-                );
+                await saveMessageToDatabase('bot', 'Aquano', nextStepData.message, nextStep, botMessage.data);
                 
                 if (!['intro', 'kimia_hijau', 'forum_diskusi', 'completion'].includes(nextStep)) {
                   completeActivity(nextStep);
@@ -1864,6 +1856,8 @@ const processQuestionAnswer = async (input) => {
     }
     
     // **PRIORITAS 10: Default response**
+    console.log('No matching command found, showing default response');
+    
     let defaultMessage = "Maaf, saya tidak memahami perintah tersebut. ";
     
     if (currentStep === 'forum_diskusi') {
@@ -1913,39 +1907,24 @@ const processQuestionAnswer = async (input) => {
   };
 
   const addChat = async (input, product) => {
-  // Simpan pesan user
-  setMessages(prev => [...prev, { from: 'user', text: input }]);
-  await saveMessageToDatabase('user', 'User', input, currentStep);
-  
-  scrollChat();
-
-  setTimeout(() => {
-    setBotTyping(true);
-    scrollChat();
-  }, 500);
-
-  setTimeout(async () => {
-    setBotTyping(false);
-    
-    // Buat objek pesan bot dengan data yang lengkap
-    const botMessage = { 
-      from: 'bot', 
-      text: product,
-      data: {
-        id: currentStep,
-        // Tambahkan next_keywords jika ada
-        next_keywords: getStepData(currentStep)?.next_keywords || []
-      }
-    };
-    
-    setMessages(prev => [...prev, botMessage]);
-    
-    // Simpan pesan bot ke database
-    await saveMessageToDatabase('bot', 'Aquano', product, currentStep, botMessage.data);
+    setMessages(prev => [...prev, { from: 'user', text: input }]);
+    await saveMessageToDatabase('user', 'User', input, currentStep);
     
     scrollChat();
-  }, 1000);
-};
+
+    setTimeout(() => {
+      setBotTyping(true);
+      scrollChat();
+    }, 500);
+
+    setTimeout(async () => {
+      setBotTyping(false);
+      setMessages(prev => [...prev, { from: 'bot', text: product }]);
+      await saveMessageToDatabase('bot', 'Aquano', product, currentStep);
+      
+      scrollChat();
+    }, 1000);
+  };
 
   const updateChat = () => {
     if (inputValue.trim()) {
@@ -1962,6 +1941,7 @@ const processQuestionAnswer = async (input) => {
     const handleQuickClick = (e) => {
       if (e.target.matches('#quick-buttons button')) {
         const text = e.target.getAttribute('data-text');
+        console.log('Quick button clicked:', text);
         
         setInputValue(text);
         setTimeout(() => {
@@ -2030,14 +2010,7 @@ const processQuestionAnswer = async (input) => {
           };
           
           setMessages(prev => [...prev, botMessage]);
-          
-          await saveMessageToDatabase(
-            'bot', 
-            stepData.character || 'Aquano', 
-            stepData.message, 
-            newStep,
-            botMessage.data
-          );
+          await saveMessageToDatabase('bot', 'Aquano', stepData.message, newStep, botMessage.data);
           
           if (kegiatan.num !== 0) {
             completeActivity(kegiatan.stepKey);
@@ -2046,7 +2019,6 @@ const processQuestionAnswer = async (input) => {
       }
       
       markAsVisited(kegiatan.stepKey);
-      await loadActivityHistory(kegiatan.stepKey);
     }
   };
 
@@ -2066,7 +2038,6 @@ const processQuestionAnswer = async (input) => {
     waitingForAnswer,
     setWaitingForAnswer,
     currentSession,
-    loadActivityHistory,
     previousSteps,
     setPreviousSteps
   };
@@ -2213,7 +2184,8 @@ const processQuestionAnswer = async (input) => {
                         )}
                     </div>
                     
-                    {message.from === 'bot' && message.data?.next_keywords && !waitingForAnswer && (
+                    {/* PERBAIKAN: Tampilkan quick buttons untuk semua pesan bot yang memiliki next_keywords */}
+                    {message.from === 'bot' && message.data?.next_keywords && message.data.next_keywords.length > 0 && !waitingForAnswer && (
                         <div 
                         id="quick-buttons" 
                         className="flex flex-wrap gap-2 mt-3"
