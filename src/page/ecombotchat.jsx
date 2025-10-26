@@ -196,16 +196,13 @@ const fallbackChatFlow = {
 export const AppContext = React.createContext();
 
 const EcombotChat = () => {
-  const params = useParams(); // expects route like /comics/:comic/:episode/ecombot (optional)
-  // try params.comic or params.comic_slug or fallback later
+  const params = useParams();
   const comicParam = params.comic || params.comic_slug || params.comicSlug || null;
   const episodeParam = params.episode || params.episode_slug || params.episodeSlug || null;
 
-  // determine comic/episode slugs (fallback to sensible defaults or localStorage)
   const comicSlug = comicParam || localStorage.getItem("last_comic_slug") || "my-comic";
   const episodeSlug = episodeParam || localStorage.getItem("last_episode_slug") || "e_001";
 
-  // determine currentPage from localStorage (saved by ComicReader)
   const storageKey = `comic_last_${comicSlug}_${episodeSlug}`;
   const savedPage = Number(localStorage.getItem(storageKey) ?? 0);
   const [permission, setPermission] = useState({ finish: false, last_page: savedPage });
@@ -263,40 +260,33 @@ const EcombotChat = () => {
     return currentChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
   };
 
-  // Fungsi untuk mendapatkan judul berdasarkan lokasi saat ini - DIPERBAIKI
-const getCurrentTitle = () => {
-  // Cek path lengkap termasuk /ecombot
-  const fullPath = location.pathname;
-  console.log('Current path:', fullPath);
-  
-  // Cari kegiatan yang sesuai dengan path lengkap
-  const currentKegiatan = kegiatanList.find(kegiatan => 
-    `/ecombot${kegiatan.path}` === fullPath || kegiatan.path === fullPath
-  );
-  
-  if (currentKegiatan) {
-    console.log('Found kegiatan:', currentKegiatan);
+  // Fungsi untuk mendapatkan judul berdasarkan lokasi saat ini
+  const getCurrentTitle = () => {
+    const fullPath = location.pathname;
+    
+    const currentKegiatan = kegiatanList.find(kegiatan => 
+      `/ecombot${kegiatan.path}` === fullPath || kegiatan.path === fullPath
+    );
+    
+    if (currentKegiatan) {
+      return {
+        materi: currentKegiatan.materi,
+        title: currentKegiatan.name
+      };
+    }
+    
+    if (fullPath === '/ecombot' || fullPath === '/ecombot/') {
+      return {
+        materi: 'Pengenalan',
+        title: 'Kimia Hijau'
+      };
+    }
+    
     return {
-      materi: currentKegiatan.materi,
-      title: currentKegiatan.name
-    };
-  }
-  
-  // Handle route khusus
-  if (fullPath === '/ecombot' || fullPath === '/ecombot/') {
-    return {
-      materi: 'Pengenalan',
+      materi: 'Eksplorasi',
       title: 'Kimia Hijau'
     };
-  }
-  
-  // Fallback untuk path yang tidak dikenali
-  console.log('No matching kegiatan found for path:', fullPath);
-  return {
-    materi: 'Eksplorasi',
-    title: 'Kimia Hijau'
   };
-};
 
   const currentTitle = getCurrentTitle();
 
@@ -304,10 +294,7 @@ const getCurrentTitle = () => {
   useEffect(() => {
     const initializeChat = async () => {
       if (currentChatFlow && messages.length === 0) {
-        // Start new session atau load existing session
         await startOrLoadSession();
-        
-        // Load pertanyaan reflektif
         loadReflectiveQuestions();
       }
     };
@@ -315,44 +302,25 @@ const getCurrentTitle = () => {
     initializeChat();
   }, [currentChatFlow, messages.length]);
 
-  // Effect untuk auto-start question session ketika currentStep berubah ke step yang memiliki pertanyaan
+  // Effect untuk auto-start question session
   useEffect(() => {
-    console.log('=== CHECKING FOR QUESTION SESSION ===');
-    console.log('Current step:', currentStep);
-    
-    // Cek apakah step saat ini memiliki pertanyaan
     const stepData = getStepData(currentStep);
     if (stepData) {
       const hasQuestions = (stepData.questions && Array.isArray(stepData.questions) && stepData.questions.length > 0) || 
                           stepData.question;
       
       if (hasQuestions) {
-        console.log('Step has questions, starting question session:', currentStep);
         startQuestionSession();
-      } else {
-        console.log('Step has no questions:', currentStep);
       }
     }
   }, [currentStep, currentChatFlow]);
 
-  // Debug useEffect untuk memantau perubahan state
-  useEffect(() => {
-    console.log('=== STATE UPDATE ===');
-    console.log('Current step:', currentStep);
-    console.log('Previous steps:', previousSteps);
-    console.log('Waiting for answer:', waitingForAnswer);
-    console.log('Current questions:', currentQuestions.length);
-    console.log('Current question index:', currentQuestionIndex);
-  }, [currentStep, previousSteps, waitingForAnswer, currentQuestions, currentQuestionIndex]);
-
   // Fungsi untuk memulai atau memuat sesi chat
   const startOrLoadSession = async () => {
     try {
-      // Cek apakah user sudah login
       const token = localStorage.getItem('token');
       if (!token) {
         console.warn('User not logged in, using local session only');
-        // Gunakan fallback untuk user tidak login
         const introMessage = getStepData('intro');
         setMessages([{ 
           from: 'bot', 
@@ -371,7 +339,6 @@ const getCurrentTitle = () => {
         return;
       }
 
-      // Jika user sudah login, coba load atau buat session
       const sessionId = localStorage.getItem('current_session_id') || `session_${Date.now()}`;
       
       const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
@@ -390,7 +357,6 @@ const getCurrentTitle = () => {
         setCurrentSession(data.session_id);
         localStorage.setItem('current_session_id', data.session_id);
         
-        // Load chat history untuk activity saat ini
         await loadActivityHistory(data.current_activity);
         
       } else {
@@ -398,7 +364,6 @@ const getCurrentTitle = () => {
       }
     } catch (error) {
       console.error('Error starting session:', error);
-      // Fallback ke local session
       const introMessage = getStepData('intro');
       setMessages([{ 
         from: 'bot', 
@@ -426,10 +391,8 @@ const getCurrentTitle = () => {
       if (response.ok) {
         const data = await response.json();
         
-        // Reconstruct messages from history
         const historyMessages = [];
         
-        // Add bot messages
         if (data.history.messages) {
           data.history.messages.forEach(msg => {
             if (msg.message_type === 'bot') {
@@ -449,7 +412,6 @@ const getCurrentTitle = () => {
         
         setMessages(historyMessages);
         
-        // Load progress
         const progressResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
           method: 'GET',
           headers: {
@@ -459,7 +421,6 @@ const getCurrentTitle = () => {
         
         if (progressResponse.ok) {
           const progressData = await progressResponse.json();
-          // Update local progress state based on server data
           updateProgressFromServer(progressData.overview);
         }
       }
@@ -508,12 +469,10 @@ const getCurrentTitle = () => {
       if (data.reflective_questions) {
         setReflectiveQuestions(data.reflective_questions);
       } else {
-        // Jika tidak ada reflective_questions, gunakan fallback
         useFallbackReflectiveQuestions();
       }
     } catch (error) {
       console.error('Error loading reflective questions:', error);
-      // Gunakan fallback questions
       useFallbackReflectiveQuestions();
     }
   };
@@ -540,7 +499,6 @@ const getCurrentTitle = () => {
     const inForum = currentStep === 'forum_diskusi';
     setIsInForum(inForum);
     
-    // Jika baru masuk forum, tampilkan pesan selamat datang
     if (inForum && messages[messages.length - 1]?.from !== 'bot' || 
         (messages[messages.length - 1]?.text !== getStepData('forum_diskusi')?.message && inForum)) {
       const forumMessage = getStepData('forum_diskusi');
@@ -668,7 +626,6 @@ const getCurrentTitle = () => {
       }
     } catch (error) {
       console.error('Error saving answer to database:', error);
-      // Fallback to localStorage
       const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
       savedAnswers.push({
         question: questionData.text,
@@ -686,36 +643,24 @@ const getCurrentTitle = () => {
   // Fungsi untuk mendapatkan pertanyaan dari currentChatFlow berdasarkan kegiatan
   const getQuestionsForCurrentStep = () => {
     const stepData = getStepData(currentStep);
-    if (!stepData) {
-      console.log('No data for currentStep:', currentStep);
-      return [];
-    }
-    
-    console.log('Current step data:', stepData);
+    if (!stepData) return [];
     
     const questions = [];
     
-    // Cek apakah ada multiple questions (format array)
     if (stepData.questions && Array.isArray(stepData.questions)) {
-      console.log('Found multiple questions:', stepData.questions);
       stepData.questions.forEach(question => {
         questions.push({
           ...question,
           aspect: getAspectFromStep(currentStep)
         });
       });
-    }
-    
-    // Cek apakah ada pertanyaan tunggal (format object)
-    else if (stepData.question) {
-      console.log('Found single question:', stepData.question);
+    } else if (stepData.question) {
       questions.push({
         ...stepData.question,
         aspect: getAspectFromStep(currentStep)
       });
     }
     
-    console.log(`Total questions for ${currentStep}: ${questions.length}`, questions);
     return questions;
   };
 
@@ -737,23 +682,17 @@ const getCurrentTitle = () => {
     return aspectMap[step] || 'General';
   };
 
-  // Fungsi untuk mendapatkan quick buttons - DIPERBAIKI: TIDAK TAMPIL SAAT PERTANYAAN
+  // Fungsi untuk mendapatkan quick buttons
   const getQuickButtons = (stepKey, messageText = '') => {
-    // JIKA SEDANG DALAM SESI PERTANYAAN, JANGAN TAMPILKAN QUICK BUTTONS
     if (waitingForAnswer) {
-      console.log('Not showing quick buttons - waiting for answer:', waitingForAnswer);
       return null;
     }
     
     const step = getStepData(stepKey);
     if (!step || !step.next_keywords) return null;
     
-    console.log('Getting quick buttons for step:', stepKey, 'Keywords:', step.next_keywords);
-    
-    // Filter untuk menghilangkan duplikasi dan urutkan
     const uniqueKeywords = [...new Set(step.next_keywords)];
     
-    // KHUSUS UNTUK FORUM: Hanya tampilkan "menu sebelumnya"
     if (stepKey === 'forum_diskusi') {
       return uniqueKeywords
         .filter(keyword => keyword.toLowerCase().includes('menu sebelumnya'))
@@ -765,7 +704,6 @@ const getCurrentTitle = () => {
     }
     
     return uniqueKeywords.map(keyword => {
-      // Berikan styling yang berbeda untuk tombol pertanyaan
       const isQuestionButton = keyword.toLowerCase().includes('pertanyaan') || 
                               keyword.toLowerCase().includes('merancang') || 
                               keyword.toLowerCase().includes('kreasi');
@@ -802,7 +740,6 @@ const getCurrentTitle = () => {
       };
     });
 
-    // Simpan ke database jika user login
     try {
       const token = localStorage.getItem('token');
       const sessionId = localStorage.getItem('current_session_id');
@@ -843,10 +780,8 @@ const getCurrentTitle = () => {
   const checkAllQuestionsAnswered = () => {
     const questions = getQuestionsForCurrentStep();
     
-    // Jika tidak ada pertanyaan, langsung return true
     if (questions.length === 0) return true;
     
-    // Periksa apakah semua pertanyaan telah dijawab
     const allAnswered = questions.every((question, index) => {
       const answerKey = question.storage_key || `question_${index}`;
       return progress.answers[answerKey] && progress.answers[answerKey].trim() !== '';
@@ -860,7 +795,7 @@ const getCurrentTitle = () => {
     const normalizedInput = input.toLowerCase().trim();
     const currentKegiatan = kegiatanList.find(k => location.pathname.includes(k.path));
     
-    // Deteksi tanya ecombot - PRIORITAS TINGGI
+    // Deteksi tanya ecombot
     const tanyaEcombotPatterns = [
       /tanya ecombot/i,
       /tanya/i,
@@ -893,7 +828,7 @@ const getCurrentTitle = () => {
       return { stepKey: 'ayo_berkreasi' };
     }
     
-    // Deteksi eksplorasi selesai - PRIORITAS BARU
+    // Deteksi eksplorasi selesai
     if (normalizedInput.includes('eksplorasi selesai')) {
       return { stepKey: 'redirect_ecomic' };
     }
@@ -933,7 +868,6 @@ const getCurrentTitle = () => {
     
     for (const pattern of kembaliPatterns) {
       if (pattern.test(normalizedInput)) {
-        // Kembali ke langkah sebelumnya dari history
         if (previousSteps.length > 0) {
           const previousStep = previousSteps[previousSteps.length - 1];
           return { stepKey: previousStep };
@@ -956,8 +890,6 @@ const getCurrentTitle = () => {
   // FUNGSI BARU: Memproses pertanyaan forum dengan LangChain
   const processForumQuestion = async (question) => {
     try {
-      console.log('Processing forum question with LangChain:', question);
-      
       const response = await fetch(`${API_BASE_URL}/ask/`, {
         method: 'POST',
         headers: {
@@ -989,12 +921,8 @@ const getCurrentTitle = () => {
   const redirectToEcomic = async () => {
     const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
     const token = localStorage.getItem("access");
-    console.debug("handleMarkFinish called", { comic: comicSlug, episode: episodeSlug, currentPage, tokenPresent: !!token });
 
     try {
-      // Panggil API mark finish jika diperlukan
-      // const result = await markFinishApi(comicSlug, episodeSlug, currentPage, { complete: true });
-      
       setMessages(prev => [...prev, { 
         from: 'bot', 
         text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
@@ -1005,25 +933,16 @@ const getCurrentTitle = () => {
     } catch (err) {
       console.error("markFinishApi error:", err);
       if (err.status === 401) {
-        // token invalid / user harus login ulang
         navigate('/login');
       }
     }
   }
 
-  // Fungsi untuk memulai sesi pertanyaan - DIPERBAIKI: TANPA QUICK BUTTONS
+  // Fungsi untuk memulai sesi pertanyaan
   const startQuestionSession = () => {
-    console.log('=== STARTING QUESTION SESSION ===');
-    console.log('Current step:', currentStep);
-    
     const questions = getQuestionsForCurrentStep();
     
-    console.log('Questions found:', questions);
-    
     if (questions.length === 0) {
-      console.warn('No questions found for step:', currentStep);
-      console.log('Available data:', getStepData(currentStep));
-      
       setMessages(prev => [...prev, { 
         from: 'bot', 
         text: "Tidak ada pertanyaan untuk kegiatan ini."
@@ -1034,9 +953,7 @@ const getCurrentTitle = () => {
     setCurrentQuestions(questions);
     setCurrentQuestionIndex(0);
     
-    // Tampilkan pertanyaan pertama
     const firstQuestion = questions[0];
-    console.log('Displaying first question:', firstQuestion);
     
     setMessages(prev => [...prev, { 
       from: 'bot', 
@@ -1044,23 +961,19 @@ const getCurrentTitle = () => {
       data: {}
     }]);
     
-    // SET WAITING FOR ANSWER STATE
     setWaitingForAnswer('question_0');
-    console.log('Set waitingForAnswer to: question_0');
-    
     scrollChat();
   };
 
-  // Fungsi untuk memproses jawaban pertanyaan - DIPERBAIKI: TANPA QUICK BUTTONS SELAMA PERTANYAAN
+  // Fungsi untuk memproses jawaban pertanyaan
   const processQuestionAnswer = async (input) => {
-    // Validasi: jika jawaban kosong, beri peringatan
     if (!input.trim()) {
       setMessages(prev => [...prev, { 
         from: 'bot', 
         text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
         data: {
           id: currentStep,
-          next_keywords: [] // TIDAK ADA QUICK BUTTONS
+          next_keywords: []
         }
       }]);
       return;
@@ -1074,20 +987,13 @@ const getCurrentTitle = () => {
       return;
     }
     
-    console.log('Processing answer for question:', currentQuestion, 'Answer:', input);
-    
-    // Simpan jawaban user ke state
     setMessages(prev => [...prev, { from: 'user', text: input }]);
     
-    // Simpan jawaban ke database
     try {
       const result = await saveAnswerToDatabase(currentQuestion, input, currentQuestion.type || 'essay');
-      console.log('Answer saved:', result);
       
-      // Simpan juga di state lokal
       saveAnswer(currentQuestion.storage_key, input);
       
-      // Cek apakah masih ada pertanyaan berikutnya
       if (currentIndex < currentQuestions.length - 1) {
         const nextIndex = currentIndex + 1;
         const nextQuestion = currentQuestions[nextIndex];
@@ -1099,21 +1005,15 @@ const getCurrentTitle = () => {
           data: {}
         }]);
         
-        // SET WAITING FOR ANSWER UNTUK PERTANYAAN BERIKUTNYA
         setWaitingForAnswer(`question_${nextIndex}`);
-        console.log('Set waitingForAnswer to next question:', `question_${nextIndex}`);
         
       } else {
-        // Selesai semua pertanyaan - tampilkan pesan konfirmasi dan pilihan navigasi
-        console.log('All questions completed for step:', currentStep);
-        
         let nextKeywords = [];
         const stepData = getStepData(currentStep);
         
         if (stepData && stepData.next_keywords) {
           nextKeywords = [...stepData.next_keywords];
         } else {
-          // Fallback navigation berdasarkan step
           const navigationMap = {
             'pertanyaan_1': ["mulai eksplorasi 2", "menu sebelumnya"],
             'pertanyaan_2': ["mulai eksplorasi 3", "menu sebelumnya"],
@@ -1132,17 +1032,14 @@ const getCurrentTitle = () => {
           text: "🎉 **Terima kasih!**\nAnda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
           data: {
             id: currentStep,
-            next_keywords: nextKeywords // HANYA TAMPILKAN QUICK BUTTONS DI SINI
+            next_keywords: nextKeywords
           }
         }]);
         
-        // RESET STATE PERTANYAAN - PENTING!
         setWaitingForAnswer(null);
         setCurrentQuestions([]);
         setCurrentQuestionIndex(0);
-        console.log('Reset question state - waitingForAnswer set to null');
         
-        // Tandai kegiatan sebagai selesai
         let kegiatanStep = currentStep;
         if (currentStep.startsWith('pertanyaan_')) {
           kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
@@ -1164,7 +1061,7 @@ const getCurrentTitle = () => {
         text: "⚠️ Jawaban Anda telah dicatat secara lokal. Terima kasih!",
         data: {
           id: currentStep,
-          next_keywords: [] // TIDAK ADA QUICK BUTTONS PADA ERROR
+          next_keywords: []
         }
       }]);
     }
@@ -1193,7 +1090,7 @@ const getCurrentTitle = () => {
     return stepMap[currentStep];
   };
 
-  // Fungsi untuk memulai sesi pertanyaan reflektif - DIPERBAIKI: TANPA QUICK BUTTONS
+  // Fungsi untuk memulai sesi pertanyaan reflektif
   const startReflectiveQuestions = () => {
     if (reflectiveQuestions.length === 0) {
       setMessages(prev => [...prev, { 
@@ -1201,7 +1098,7 @@ const getCurrentTitle = () => {
         text: "Maaf, pertanyaan reflektif belum tersedia saat ini.",
         data: {
           id: 'pertanyaan_reflektif',
-          next_keywords: [] // TIDAK ADA QUICK BUTTONS
+          next_keywords: []
         }
       }]);
       return;
@@ -1213,22 +1110,21 @@ const getCurrentTitle = () => {
       text: `Mari kita mulai sesi pertanyaan reflektif!\n\nPertanyaan 1: ${reflectiveQuestions[0]}\n\nSilahkan ketik jawaban Anda:`,
       data: {
         id: 'pertanyaan_reflektif',
-        next_keywords: [] // TIDAK ADA QUICK BUTTONS SELAMA PERTANYAAN
+        next_keywords: []
       }
     }]);
     setWaitingForAnswer('reflective_0');
   };
 
-  // Fungsi untuk memproses pertanyaan reflektif - DIPERBAIKI: TANPA QUICK BUTTONS SELAMA PERTANYAAN
+  // Fungsi untuk memproses pertanyaan reflektif
   const processReflectiveAnswer = async (input) => {
-    // Validasi: jika jawaban kosong, beri peringatan
     if (!input.trim()) {
       setMessages(prev => [...prev, { 
         from: 'bot', 
         text: "Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
         data: {
           id: 'pertanyaan_reflektif',
-          next_keywords: [] // TIDAK ADA QUICK BUTTONS
+          next_keywords: []
         }
       }]);
       return;
@@ -1237,22 +1133,18 @@ const getCurrentTitle = () => {
     const currentQuestionIndex = currentReflectiveQuestion;
     const question = reflectiveQuestions[currentQuestionIndex];
     
-    // Simpan jawaban user ke state
     setMessages(prev => [...prev, { from: 'user', text: input }]);
     
-    // Simpan jawaban reflektif
     try {
       const result = await saveAnswerToDatabase(
         { id: `reflective_${currentQuestionIndex}`, text: question, storage_key: `reflective_${currentQuestionIndex}` }, 
         input, 
         'reflective'
       );
-      console.log('Reflective answer saved:', result);
     } catch (error) {
       console.error('Error saving reflective answer:', error);
     }
     
-    // Cek apakah masih ada pertanyaan berikutnya
     if (currentQuestionIndex < reflectiveQuestions.length - 1) {
       const nextQuestionIndex = currentQuestionIndex + 1;
       setCurrentReflectiveQuestion(nextQuestionIndex);
@@ -1261,18 +1153,17 @@ const getCurrentTitle = () => {
         text: `Terima kasih! Jawaban Anda telah dicatat.\n\nPertanyaan ${nextQuestionIndex + 1}: ${reflectiveQuestions[nextQuestionIndex]}\n\nSilakan ketik jawaban Anda:`,
         data: {
           id: 'pertanyaan_reflektif',
-          next_keywords: [] // TIDAK ADA QUICK BUTTONS SELAMA PERTANYAAN
+          next_keywords: []
         }
       }]);
       setWaitingForAnswer(`reflective_${nextQuestionIndex}`);
     } else {
-      // Selesai semua pertanyaan reflektif - TAMPILKAN QUICK BUTTONS DI SINI
       setMessages(prev => [...prev, { 
         from: 'bot', 
         text: "Terima kasih! Anda telah menyelesaikan semua pertanyaan reflektif. Jawaban Anda telah disimpan untuk refleksi pembelajaran.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
         data: {
           id: 'pertanyaan_reflektif',
-          next_keywords: ["Eksplorasi Selesai", "menu sebelumnya"] // HANYA DI SINI QUICK BUTTONS TAMPIL
+          next_keywords: ["Eksplorasi Selesai", "menu sebelumnya"]
         }
       }]);
       setWaitingForAnswer(null);
@@ -1308,21 +1199,13 @@ const getCurrentTitle = () => {
   const processMessageText = (text) => {
     if (!text) return '';
     
-    // Jika teks mengandung HTML tags, gunakan dangerouslySetInnerHTML nanti
     if (text.includes('<') && text.includes('>')) {
       return text;
     }
     
-    // Process simple markdown-like syntax
     let processedText = text;
-    
-    // Convert **text** to <strong>text</strong>
     processedText = processedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Convert *text* to <em>text</em>
     processedText = processedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    
-    // Convert \n to <br />
     processedText = processedText.replace(/\n/g, '<br />');
     
     return processedText;
@@ -1332,7 +1215,6 @@ const getCurrentTitle = () => {
   const renderMessageText = (text) => {
     const processedText = processMessageText(text);
     
-    // Jika mengandung HTML tags, render dengan dangerouslySetInnerHTML
     if (processedText.includes('<') && processedText.includes('>')) {
       return (
         <div 
@@ -1342,7 +1224,6 @@ const getCurrentTitle = () => {
       );
     }
     
-    // Jika plain text, render biasa
     return (
       <div className="whitespace-pre-line">
         {text}
@@ -1354,17 +1235,14 @@ const getCurrentTitle = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     
-    // Jika path sudah absolute atau dari public folder
     if (imagePath.startsWith('http') || imagePath.startsWith('/')) {
       return imagePath;
     }
     
-    // Jika path relatif dari assets di public folder
     if (imagePath.startsWith('assets/')) {
       return `/${imagePath}`;
     }
     
-    // Default: anggap dari public folder
     return `/${imagePath}`;
   };
 
@@ -1372,7 +1250,6 @@ const getCurrentTitle = () => {
   const processImages = (imagesData) => {
     if (!imagesData) return [];
     
-    // Handle legacy single image format
     if (typeof imagesData === 'string') {
       return [{
         url: getImageUrl(imagesData),
@@ -1381,7 +1258,6 @@ const getCurrentTitle = () => {
       }];
     }
     
-    // Handle array of images
     if (Array.isArray(imagesData)) {
       return imagesData.map(img => ({
         url: getImageUrl(img.url || img.image_url),
@@ -1390,7 +1266,6 @@ const getCurrentTitle = () => {
       }));
     }
     
-    // Handle object with url/source
     if (imagesData.url || imagesData.image_url) {
       return [{
         url: getImageUrl(imagesData.url || imagesData.image_url),
@@ -1402,7 +1277,7 @@ const getCurrentTitle = () => {
     return [];
   };
 
-  // FUNGSI UTAMA: Memproses input user - DIPERBAIKI UNTUK FORUM DAN MENU SEBELUMNYA
+  // FUNGSI UTAMA: Memproses input user
   const processUserInput = async (input) => {
     if (!currentChatFlow) {
       console.error('currentChatFlow is undefined');
@@ -1411,16 +1286,8 @@ const getCurrentTitle = () => {
     
     const normalizedInput = input.toLowerCase().trim();
     
-    console.log('=== PROCESSING USER INPUT ===');
-    console.log('Input:', input);
-    console.log('Current step:', currentStep);
-    console.log('Previous steps:', previousSteps);
-    console.log('Waiting for answer:', waitingForAnswer);
-    
     // **PRIORITAS 1: Jika sedang menunggu jawaban untuk pertanyaan**
     if (waitingForAnswer) {
-      console.log('Processing answer for waiting question:', waitingForAnswer);
-      
       if (waitingForAnswer.startsWith('reflective_')) {
         await processReflectiveAnswer(input);
       } else if (waitingForAnswer.startsWith('question_')) {
@@ -1435,8 +1302,6 @@ const getCurrentTitle = () => {
     
     // **PRIORITAS 2: Cek untuk navigasi "eksplorasi selesai" - KE /ECOMIC**
     if (normalizedInput.includes('eksplorasi selesai')) {
-      console.log('Eksplorasi selesai detected, redirecting to /ecomic');
-      
       setMessages(prev => [...prev, { from: 'user', text: input }]);
       setBotTyping(true);
       
@@ -1448,7 +1313,7 @@ const getCurrentTitle = () => {
       return;
     }
     
-    // **PRIORITAS 3: Cek untuk navigasi "menu sebelumnya" - TERLEBIH DAHULU!**
+    // **PRIORITAS 3: Cek untuk navigasi "menu sebelumnya"**
     const kembaliPatterns = [
       /menu sebelumnya/i,
       /kembali/i,
@@ -1464,27 +1329,20 @@ const getCurrentTitle = () => {
     
     for (const pattern of kembaliPatterns) {
       if (pattern.test(normalizedInput)) {
-        console.log('Menu sebelumnya detected:', input);
-        
         setMessages(prev => [...prev, { from: 'user', text: input }]);
         setBotTyping(true);
         
         setTimeout(() => {
           setBotTyping(false);
           
-          // Jika di forum diskusi dan ada langkah sebelumnya
           if (currentStep === 'forum_diskusi' && previousSteps.length > 0) {
             const previousStep = previousSteps[previousSteps.length - 1];
             const newPreviousSteps = previousSteps.slice(0, -1);
-            
-            console.log('Keluar dari forum, kembali ke:', previousStep);
-            console.log('New previous steps:', newPreviousSteps);
             
             setPreviousSteps(newPreviousSteps);
             setCurrentStep(previousStep);
             setIsInForum(false);
             
-            // Handle navigation berdasarkan step
             handleStepNavigation(previousStep);
             
             const stepData = getStepData(previousStep);
@@ -1496,18 +1354,13 @@ const getCurrentTitle = () => {
               }]);
             }
           } 
-          // Jika ada langkah sebelumnya dalam history
           else if (previousSteps.length > 1) {
             const previousStep = previousSteps[previousSteps.length - 2];
             const newPreviousSteps = previousSteps.slice(0, -1);
             
-            console.log('Navigating back to previous step:', previousStep);
-            console.log('New previous steps:', newPreviousSteps);
-            
             setPreviousSteps(newPreviousSteps);
             setCurrentStep(previousStep);
             
-            // Handle navigation berdasarkan step
             handleStepNavigation(previousStep);
             
             const stepData = getStepData(previousStep);
@@ -1519,7 +1372,6 @@ const getCurrentTitle = () => {
               }]);
             }
           } else {
-            // Jika tidak ada history, beri pesan error
             setMessages(prev => [...prev, { 
               from: 'bot', 
               text: "Maaf, tidak ada langkah sebelumnya yang dapat ditampilkan. Silakan lanjutkan eksplorasi Anda."
@@ -1546,39 +1398,28 @@ const getCurrentTitle = () => {
     
     for (const keyword of questionKeywords) {
       if (normalizedInput.includes(keyword)) {
-        console.log('Question keyword detected:', keyword);
-        console.log('Current step before question:', currentStep);
-        
         setMessages(prev => [...prev, { from: 'user', text: input }]);
         
-        // SET STATE BERDASARKAN KEYWORD
         if (keyword === 'pertanyaan 1') {
           setCurrentStep('pertanyaan_1');
-          console.log('Set current step to: pertanyaan_1');
         }
         else if (keyword === 'pertanyaan 2') {
           setCurrentStep('pertanyaan_2');
-          console.log('Set current step to: pertanyaan_2');
         }
         else if (keyword === 'pertanyaan 3') {
           setCurrentStep('pertanyaan_3');
-          console.log('Set current step to: pertanyaan_3');
         }
         else if (keyword === 'pertanyaan 4') {
           setCurrentStep('pertanyaan_4');
-          console.log('Set current step to: pertanyaan_4');
         }
         else if (keyword === 'pertanyaan reflektif') {
           setCurrentStep('pertanyaan_reflektif');
-          console.log('Set current step to: pertanyaan_reflektif');
         }
         else if (keyword === 'mari merancang') {
           setCurrentStep('mari_merancang');
-          console.log('Set current step to: mari_merancang');
         }
         else if (keyword === 'ayo berkreasi') {
           setCurrentStep('ayo_berkreasi');
-          console.log('Set current step to: ayo_berkreasi');
         }
         
         scrollChat();
@@ -1602,18 +1443,14 @@ const getCurrentTitle = () => {
     
     for (const pattern of tanyaEcombotPatterns) {
       if (pattern.test(normalizedInput)) {
-        console.log('Tanya Ecombot detected:', input);
-        
         setMessages(prev => [...prev, { from: 'user', text: input }]);
         
-        // Jika sudah di forum, tunggu pertanyaan user
         if (currentStep === 'forum_diskusi') {
           setMessages(prev => [...prev, { 
             from: 'bot', 
             text: "Silahkan ajukan pertanyaan Anda tentang berbagai topik pembelajaran. Saya akan membantu menjawabnya menggunakan sistem AI.\n\nKetik 'menu sebelumnya' untuk kembali ke alur pembelajaran."
           }]);
         } else {
-          // Pindah ke forum - simpan langkah saat ini ke history
           setPreviousSteps(prev => [...prev, currentStep]);
           setCurrentStep('forum_diskusi');
           setIsInForum(true);
@@ -1626,8 +1463,6 @@ const getCurrentTitle = () => {
     
     // **PRIORITAS 6: Jika di forum diskusi, proses pertanyaan dengan LangChain**
     if (currentStep === 'forum_diskusi' && !waitingForAnswer) {
-      console.log('Processing forum question with LangChain:', input);
-      
       setMessages(prev => [...prev, { from: 'user', text: input }]);
       setBotTyping(true);
       
@@ -1636,7 +1471,6 @@ const getCurrentTitle = () => {
         
         setBotTyping(false);
         
-        // FORMAT JAWABAN YANG LEBIH BAIK DENGAN PETUNJUK KELUAR
         const formattedAnswer = `${answer}\n\n---\n*Ketik 'menu sebelumnya' untuk kembali ke alur pembelajaran.*`;
         
         setMessages(prev => [...prev, { 
@@ -1648,7 +1482,6 @@ const getCurrentTitle = () => {
           }
         }]);
         
-        // Simpan ke database
         await saveMessageToDatabase('user', 'User', input, 'forum_diskusi');
         await saveMessageToDatabase('bot', 'Aquano', answer, 'forum_diskusi');
         
@@ -1671,11 +1504,9 @@ const getCurrentTitle = () => {
     
     // **PRIORITAS 7: Cek untuk navigasi ke kegiatan berikutnya dengan keyword "pertanyaan"**
     if (normalizedInput.includes('pertanyaan') && !normalizedInput.includes('reflektif')) {
-      // Periksa apakah semua pertanyaan telah dijawab
       const allAnswered = checkAllQuestionsAnswered();
       
       if (allAnswered) {
-        // Jika sudah menjawab semua pertanyaan, lanjut ke kegiatan berikutnya
         setMessages(prev => [...prev, { from: 'user', text: input }]);
         setBotTyping(true);
         
@@ -1685,14 +1516,13 @@ const getCurrentTitle = () => {
           scrollChat();
         }, 1000);
       } else {
-        // Jika belum menjawab semua pertanyaan, tampilkan pesan error
         setMessages(prev => [...prev, { from: 'user', text: input }]);
         setMessages(prev => [...prev, { 
           from: 'bot', 
           text: "Maaf, Anda harus menjawab semua pertanyaan terlebih dahulu sebelum dapat melanjutkan ke kegiatan berikutnya. Silakan selesaikan semua pertanyaan yang tersedia.",
           data: {
             id: currentStep,
-            next_keywords: [] // TIDAK ADA QUICK BUTTONS PADA ERROR
+            next_keywords: []
           }
         }]);
         scrollChat();
@@ -1709,7 +1539,6 @@ const getCurrentTitle = () => {
       setTimeout(async () => {
         setBotTyping(false);
         
-        // Handle khusus untuk navigasi ke forum_diskusi atau completion atau redirect_ecomic
         if (targetKegiatan.stepKey === 'forum_diskusi' || targetKegiatan.stepKey === 'completion' || targetKegiatan.stepKey === 'redirect_ecomic') {
           
           if (targetKegiatan.stepKey === 'redirect_ecomic') {
@@ -1717,7 +1546,6 @@ const getCurrentTitle = () => {
             return;
           }
           
-          // Simpan langkah saat ini ke history sebelum pindah
           setPreviousSteps(prev => [...prev, currentStep]);
           setCurrentStep(targetKegiatan.stepKey);
           
@@ -1751,7 +1579,6 @@ const getCurrentTitle = () => {
         }
         
         if (canAccessKegiatan(targetKegiatan.num)) {
-          // Simpan langkah saat ini ke history sebelum navigasi
           setPreviousSteps(prev => [...prev, currentStep]);
           
           navigate(`/ecombot${targetKegiatan.path}`);
@@ -1760,7 +1587,6 @@ const getCurrentTitle = () => {
           
           const kegiatanData = getStepData(targetKegiatan.stepKey);
           if (kegiatanData) {
-            // Process images untuk format baru (array) dan legacy (single)
             const processedImages = processImages(kegiatanData.images || kegiatanData.image_url);
             
             const botMessage = { 
@@ -1768,9 +1594,7 @@ const getCurrentTitle = () => {
               text: kegiatanData.message,
               data: {
                 ...kegiatanData,
-                // Gunakan images array untuk format baru
                 images: processedImages.length > 0 ? processedImages : undefined,
-                // Tetap sertakan legacy fields untuk kompatibilitas
                 image_url: processedImages.length === 1 ? processedImages[0].url : undefined,
                 image_source: processedImages.length === 1 ? processedImages[0].source : undefined
               }
@@ -1778,7 +1602,6 @@ const getCurrentTitle = () => {
             
             setMessages(prev => [...prev, botMessage]);
             
-            // Simpan pesan bot ke database
             await saveMessageToDatabase(
               'bot', 
               kegiatanData.character || 'Aquano', 
@@ -1812,7 +1635,7 @@ const getCurrentTitle = () => {
             text: errorMessage,
             data: {
               id: currentStep,
-              next_keywords: [] // TIDAK ADA QUICK BUTTONS PADA ERROR
+              next_keywords: []
             }
           }]);
         }
@@ -1835,24 +1658,18 @@ const getCurrentTitle = () => {
           setTimeout(async () => {
             setBotTyping(false);
             
-            // Handle khusus untuk menu sebelumnya di forum diskusi
             if (nextStep === 'previous_step') {
-              // Kembali ke step sebelumnya dari history
               if (previousSteps.length > 0) {
                 const previousStep = previousSteps[previousSteps.length - 1];
                 const newPreviousSteps = previousSteps.slice(0, -1);
                 
-                console.log('Navigating back to previous step:', previousStep);
-                
                 setPreviousSteps(newPreviousSteps);
                 setCurrentStep(previousStep);
                 
-                // Jika keluar dari forum, set isInForum ke false
                 if (currentStep === 'forum_diskusi') {
                   setIsInForum(false);
                 }
                 
-                // Handle navigation berdasarkan step
                 handleStepNavigation(previousStep);
                 
                 const stepData = getStepData(previousStep);
@@ -1875,10 +1692,8 @@ const getCurrentTitle = () => {
                 }
               }
             } else if (nextStep === 'redirect_ecomic') {
-              // Handle redirect ke /ecomic
               redirectToEcomic();
             } else {
-              // Simpan langkah saat ini ke history sebelum navigasi
               setPreviousSteps(prev => [...prev, currentStep]);
               setCurrentStep(nextStep);
               
@@ -1889,16 +1704,13 @@ const getCurrentTitle = () => {
                   text: nextStepData.message,
                   data: {
                     ...nextStepData,
-                    // Perbaiki path gambar
                     image_url: getImageUrl(nextStepData.image_url),
-                    // Sertakan image_source jika ada
                     image_source: nextStepData.image_source
                   }
                 };
                 
                 setMessages(prev => [...prev, botMessage]);
                 
-                // Simpan pesan bot ke database
                 await saveMessageToDatabase(
                   'bot', 
                   nextStepData.character || 'Aquano', 
@@ -1927,10 +1739,7 @@ const getCurrentTitle = () => {
       }
     }
     
-    // **PRIORITAS 10: Default response - HANYA JIKA TIDAK ADA YANG COCOK DI ATAS**
-    console.log('No matching command found, showing default response');
-    
-    // PESAN DEFAULT YANG LEBIH INFORMATIF
+    // **PRIORITAS 10: Default response**
     let defaultMessage = "Maaf, saya tidak memahami perintah tersebut. ";
     
     if (currentStep === 'forum_diskusi') {
@@ -1982,7 +1791,6 @@ const getCurrentTitle = () => {
   const addChat = async (input, product) => {
     setMessages(prev => [...prev, { from: 'user', text: input }]);
     
-    // Simpan pesan user ke database
     await saveMessageToDatabase('user', 'User', input, currentStep);
     
     scrollChat();
@@ -1996,7 +1804,6 @@ const getCurrentTitle = () => {
       setBotTyping(false);
       setMessages(prev => [...prev, { from: 'bot', text: product }]);
       
-      // Simpan pesan bot ke database
       await saveMessageToDatabase('bot', 'Aquano', product, currentStep);
       
       scrollChat();
@@ -2018,11 +1825,10 @@ const getCurrentTitle = () => {
     const handleQuickClick = (e) => {
       if (e.target.matches('#quick-buttons button')) {
         const text = e.target.getAttribute('data-text');
-        console.log('Quick button clicked:', text);
         
         setInputValue(text);
         setTimeout(() => {
-          processUserInput(text); // Biarkan processUserInput yang handle state change
+          processUserInput(text);
           setInputValue('');
         }, 300);
       }
@@ -2054,7 +1860,6 @@ const getCurrentTitle = () => {
   const handleKegiatanChange = async (kegiatanNum) => {
     const kegiatan = activeKegiatanList[kegiatanNum];
     if (kegiatan && kegiatan.active) {
-      // Simpan langkah saat ini ke history sebelum navigasi
       setPreviousSteps(prev => [...prev, currentStep]);
       
       navigate(`/ecombot${kegiatan.path}`);
@@ -2082,16 +1887,13 @@ const getCurrentTitle = () => {
             text: stepData.message,
             data: {
               ...stepData,
-              // Perbaiki path gambar
               image_url: getImageUrl(stepData.image_url),
-              // Sertakan image_source jika ada
               image_source: stepData.image_source
             }
           };
           
           setMessages(prev => [...prev, botMessage]);
           
-          // Simpan pesan bot ke database
           await saveMessageToDatabase(
             'bot', 
             stepData.character || 'Aquano', 
@@ -2107,8 +1909,6 @@ const getCurrentTitle = () => {
       }
       
       markAsVisited(kegiatan.stepKey);
-      
-      // Load history untuk kegiatan yang dipilih
       await loadActivityHistory(kegiatan.stepKey);
     }
   };
@@ -2208,13 +2008,11 @@ const getCurrentTitle = () => {
                         ? 'rounded-bl-none bg-white text-gray-700 border border-gray-200 shadow-sm'
                         : 'rounded-br-none bg-lime-500 text-white'
                     } max-w-xs`}>
-                        {/* Gunakan message_html jika ada, fallback ke message */}
                         {message.data?.title && (
                           <h3 className="font-bold text-lime-700 text-lg" dangerouslySetInnerHTML={{__html: message.data.title}} />
                         )}
                         {renderMessageText(message.data?.message_html || message.text)}
                         
-                        {/* Tampilkan multiple images */}
                         {message.data?.images && message.data.images.length > 0 && (
                         <div className="!my-2 !space-y-3">
                             {message.data.images.map((image, imgIndex) => (
@@ -2246,7 +2044,6 @@ const getCurrentTitle = () => {
                         </div>
                         )}
                         
-                        {/* Fallback untuk legacy single image format */}
                         {(!message.data?.images || message.data.images.length === 0) && 
                         message.data?.image_url && (
                         <div className="!my-2 w-full">
@@ -2270,7 +2067,6 @@ const getCurrentTitle = () => {
                         </div>
                         )}
                         
-                        {/* Tampilkan source jika ada */}
                         {message.data?.source && (
                         <div className="mt-2 pt-2 border-t border-gray-200">
                             <p className="text-xs text-gray-500 italic">
@@ -2280,7 +2076,6 @@ const getCurrentTitle = () => {
                         )}
                     </div>
                     
-                    {/* HANYA TAMPILKAN QUICK BUTTONS JIKA TIDAK SEDANG MENUNGGU JAWABAN */}
                     {message.from === 'bot' && message.data?.next_keywords && !waitingForAnswer && (
                         <div 
                         id="quick-buttons" 
@@ -2444,7 +2239,6 @@ const getCurrentTitle = () => {
                           <span className="!ml-2 text-xs bg-white text-lime-600 rounded-full text-center !px-2 !py-1">✓ Selesai</span>
                         )}
                       </div>
-                      {/* Tampilkan gambar jika ada */}
                       {kegiatan.imageUrl && (
                         <div className="!mt-2">
                           <img 
@@ -2456,7 +2250,6 @@ const getCurrentTitle = () => {
                               e.target.style.display = 'none';
                             }}
                           />
-                          {/* Tampilkan sumber gambar jika ada */}
                           {kegiatan.imageSource && (
                             <p className="text-xs text-gray-200 !mt-1 text-center">
                               Sumber: 
