@@ -1,4 +1,3 @@
-// ecombotchat.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Routes, Route, useParams } from 'react-router-dom';
 import Aquano from "../assets/aquano.png";
@@ -17,77 +16,6 @@ import { useChatFlow } from '../hooks/useChatFlow';
 
 // Konstanta untuk base URL API
 const API_BASE_URL = 'https://backendecombot-production.up.railway.app/api';
-
-// Helper: ambil token JWT dengan error handling yang lebih baik
-const getAuthHeader = () => {
-  try {
-    // Coba beberapa kemungkinan key token
-    const token = localStorage.getItem("access") || 
-                  localStorage.getItem("token") || 
-                  localStorage.getItem("jwt") || 
-                  localStorage.getItem("auth_token");
-    
-    if (!token) {
-      console.warn('No JWT token found in localStorage');
-      return {};
-    }
-    
-    // Validasi format token dasar
-    if (typeof token !== 'string' || token.trim() === '') {
-      console.error('Invalid token format');
-      return {};
-    }
-    
-    return { Authorization: `Bearer ${token.trim()}` };
-  } catch (error) {
-    console.error('Error getting auth header:', error);
-    return {};
-  }
-};
-
-// Helper: cek apakah user sudah login
-const isUserLoggedIn = () => {
-  try {
-    const token = localStorage.getItem("access") || 
-                  localStorage.getItem("token") || 
-                  localStorage.getItem("jwt");
-    return !!token;
-  } catch (error) {
-    console.error('Error checking login status:', error);
-    return false;
-  }
-};
-
-// Helper: simpan token dengan konsisten
-const saveAuthToken = (token) => {
-  try {
-    if (!token) {
-      console.error('No token provided to save');
-      return false;
-    }
-    
-    // Simpan dengan key utama 'access' untuk konsistensi
-    localStorage.setItem("access", token);
-    localStorage.setItem("token", token); // Backup dengan key umum
-    
-    console.log('Token saved successfully');
-    return true;
-  } catch (error) {
-    console.error('Error saving token:', error);
-    return false;
-  }
-};
-
-// Helper: hapus token (untuk logout)
-const clearAuthTokens = () => {
-  try {
-    const keysToRemove = ['access', 'token', 'jwt', 'auth_token', 'refresh'];
-    keysToRemove.forEach(key => localStorage.removeItem(key));
-    console.log('All auth tokens cleared');
-  } catch (error) {
-    console.error('Error clearing tokens:', error);
-  }
-};
 
 // Fallback data jika loading gagal
 const fallbackChatFlow = {
@@ -294,14 +222,14 @@ const EcombotChat = () => {
   const [currentSession, setCurrentSession] = useState(null);
   
   // STATE BARU: Menyimpan langkah sebelumnya untuk navigasi "menu sebelumnya"
-  const [previousSteps, setPreviousSteps] = useState([]);
+  const [previousSteps, setPreviousSteps] = useState(['intro']);
   
   // State untuk progres kegiatan dan jawaban
   const [progress, setProgress] = useState({
-    completed: [],
+    completed: ['intro'],
     current: 'intro',
     answers: {},
-    visited: []
+    visited: ['intro']
   });
   
   const messagesEndRef = useRef(null);
@@ -362,66 +290,9 @@ const EcombotChat = () => {
 
   const currentTitle = getCurrentTitle();
 
-  // Initialize chat session dan load history - DIPERBAIKI
+  // Initialize chat session dan load history
   useEffect(() => {
     const initializeChat = async () => {
-      // Load history percakapan dari localStorage terlebih dahulu
-      const savedMessages = localStorage.getItem('ecombot_chat_history');
-      const savedProgress = localStorage.getItem('chatbot-progress');
-      const savedPreviousSteps = localStorage.getItem('ecombot_previous_steps');
-      const savedCurrentStep = localStorage.getItem('ecombot_current_step');
-
-      if (savedMessages) {
-        try {
-          const parsedMessages = JSON.parse(savedMessages);
-          setMessages(parsedMessages);
-        } catch (e) {
-          console.error('Error parsing saved messages:', e);
-        }
-      }
-
-      if (savedProgress) {
-        try {
-          const parsedProgress = JSON.parse(savedProgress);
-          setProgress(parsedProgress);
-        } catch (e) {
-          console.error('Error parsing saved progress:', e);
-        }
-      }
-
-      if (savedPreviousSteps) {
-        try {
-          const parsedSteps = JSON.parse(savedPreviousSteps);
-          setPreviousSteps(parsedSteps);
-        } catch (e) {
-          console.error('Error parsing previous steps:', e);
-        }
-      }
-
-      if (savedCurrentStep) {
-        setCurrentStep(savedCurrentStep);
-      }
-
-      // Jika tidak ada pesan yang tersimpan, mulai dengan intro
-      if (!savedMessages || JSON.parse(savedMessages).length === 0) {
-        const introMessage = getStepData('intro');
-        setMessages([{ 
-          from: 'bot', 
-          text: introMessage.message,
-          data: introMessage
-        }]);
-        
-        // Set progress awal
-        setProgress(prev => ({
-          ...prev,
-          visited: ['intro'],
-          current: 'intro'
-        }));
-        
-        setPreviousSteps([]);
-      }
-
-      // Load data dari backend jika tersedia
       if (currentChatFlow && messages.length === 0) {
         await startOrLoadSession();
         loadReflectiveQuestions();
@@ -429,27 +300,7 @@ const EcombotChat = () => {
     };
     
     initializeChat();
-  }, [currentChatFlow]);
-
-  // Simpan history percakapan ke localStorage setiap kali messages berubah - DIPERBAIKI
-  useEffect(() => {
-    localStorage.setItem('ecombot_chat_history', JSON.stringify(messages));
-  }, [messages]);
-
-  // Simpan progress ke localStorage
-  useEffect(() => {
-    localStorage.setItem('chatbot-progress', JSON.stringify(progress));
-  }, [progress]);
-
-  // Simpan previous steps ke localStorage
-  useEffect(() => {
-    localStorage.setItem('ecombot_previous_steps', JSON.stringify(previousSteps));
-  }, [previousSteps]);
-
-  // Simpan current step ke localStorage
-  useEffect(() => {
-    localStorage.setItem('ecombot_current_step', currentStep);
-  }, [currentStep]);
+  }, [currentChatFlow, messages.length]);
 
   // Effect untuk auto-start question session
   useEffect(() => {
@@ -464,109 +315,107 @@ const EcombotChat = () => {
     }
   }, [currentStep, currentChatFlow]);
 
-  // Fungsi untuk memulai atau memuat sesi chat - DIPERBAIKI DENGAN AUTH YANG KONSISTEN
-  const startOrLoadSession = async () => {
-    try {
-      const isLoggedIn = isUserLoggedIn();
+  // Fungsi untuk memulai atau memuat sesi chat - DIPERBAIKI
+const startOrLoadSession = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    // Cek apakah ada data lokal yang tersimpan
+    const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
+    const localProgress = localStorage.getItem('chatbot-progress');
+    
+    if (!token) {
+      console.warn('User not logged in, using local session only');
+      const introMessage = getStepData('intro');
       
-      // Cek apakah ada data lokal yang tersimpan
-      const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
-      const localProgress = localStorage.getItem('chatbot-progress');
-      
-      if (!isLoggedIn) {
-        console.warn('User not logged in, using local session only');
-        
-        // Jika ada data lokal, load dari localStorage
-        if (localMessages.length > 0) {
-          const loadedMessages = localMessages.map(msg => ({
-            from: msg.message_type === 'bot' ? 'bot' : 'user',
-            text: msg.message_text,
-            data: msg.message_data || {}
-          }));
-          setMessages(loadedMessages);
-          console.log('Loaded local messages:', loadedMessages.length);
-        }
-        
-        // Load progress dari localStorage
-        if (localProgress) {
-          const parsedProgress = JSON.parse(localProgress);
-          if (!parsedProgress.visited) {
-            parsedProgress.visited = ['intro'];
-          }
-          setProgress(parsedProgress);
-          console.log('Loaded local progress:', parsedProgress);
-        }
-        
-        // Buat session ID lokal
-        const localSessionId = `local_session_${Date.now()}`;
-        setCurrentSession(localSessionId);
-        localStorage.setItem('current_session_id', localSessionId);
-        
-        return;
-      }
-
-      // User sudah login, gunakan backend dengan auth header yang benar
-      const sessionId = localStorage.getItem('current_session_id') || `session_${Date.now()}`;
-      
-      const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader() // Gunakan helper function yang sudah diperbaiki
-        },
-        body: JSON.stringify({
-          session_id: sessionId
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCurrentSession(data.session_id);
-        localStorage.setItem('current_session_id', data.session_id);
-        
-        await loadActivityHistory(data.current_activity);
-        
-      } else if (response.status === 401) {
-        console.warn('Token expired or invalid, clearing tokens and using local session');
-        clearAuthTokens();
-        // Fallback ke local session
-        const introMessage = getStepData('intro');
+      // Jika ada data lokal, load dari localStorage
+      if (localMessages.length > 0) {
+        const loadedMessages = localMessages.map(msg => ({
+          from: msg.message_type === 'bot' ? 'bot' : 'user',
+          text: msg.message_text,
+          data: msg.message_data || {}
+        }));
+        setMessages(loadedMessages);
+        console.log('Loaded local messages:', loadedMessages.length);
+      } else {
+        // Jika tidak ada data, mulai dengan intro
         setMessages([{ 
           from: 'bot', 
           text: introMessage.message,
           data: introMessage
         }]);
-      } else {
-        throw new Error(`Failed to start session: ${response.status}`);
       }
-    } catch (error) {
-      console.error('Error starting session:', error);
-      // Fallback ke local session
-      const introMessage = getStepData('intro');
-      setMessages([{ 
-        from: 'bot', 
-        text: introMessage.message,
-        data: introMessage
-      }]);
       
+      // Load progress dari localStorage
+      if (localProgress) {
+        const parsedProgress = JSON.parse(localProgress);
+        if (!parsedProgress.visited) {
+          parsedProgress.visited = ['intro'];
+        }
+        setProgress(parsedProgress);
+        console.log('Loaded local progress:', parsedProgress);
+      }
+      
+      // Buat session ID lokal
       const localSessionId = `local_session_${Date.now()}`;
       setCurrentSession(localSessionId);
       localStorage.setItem('current_session_id', localSessionId);
+      
+      return;
     }
-  };
 
-  // Fungsi untuk memuat history activity - DIPERBAIKI DENGAN AUTH
+    // User sudah login, gunakan backend
+    const sessionId = localStorage.getItem('current_session_id') || `session_${Date.now()}`;
+    
+    const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        session_id: sessionId
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setCurrentSession(data.session_id);
+      localStorage.setItem('current_session_id', data.session_id);
+      
+      await loadActivityHistory(data.current_activity);
+      
+    } else {
+      throw new Error('Failed to start session');
+    }
+  } catch (error) {
+    console.error('Error starting session:', error);
+    // Fallback ke local session
+    const introMessage = getStepData('intro');
+    setMessages([{ 
+      from: 'bot', 
+      text: introMessage.message,
+      data: introMessage
+    }]);
+    
+    const localSessionId = `local_session_${Date.now()}`;
+    setCurrentSession(localSessionId);
+    localStorage.setItem('current_session_id', localSessionId);
+  }
+};
+
+  // Fungsi untuk memuat history activity
   const loadActivityHistory = async (activityId) => {
     try {
-      const isLoggedIn = isUserLoggedIn();
+      const token = localStorage.getItem('token');
       const sessionId = localStorage.getItem('current_session_id');
       
-      if (!isLoggedIn || !sessionId) return;
+      if (!token || !sessionId) return;
 
       const response = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/activity/${activityId}/`, {
         method: 'GET',
         headers: {
-          ...getAuthHeader()
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -597,7 +446,7 @@ const EcombotChat = () => {
         const progressResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
           method: 'GET',
           headers: {
-            ...getAuthHeader()
+            'Authorization': `Bearer ${token}`
           }
         });
         
@@ -605,9 +454,6 @@ const EcombotChat = () => {
           const progressData = await progressResponse.json();
           updateProgressFromServer(progressData.overview);
         }
-      } else if (response.status === 401) {
-        console.warn('Token expired while loading activity history');
-        clearAuthTokens();
       }
     } catch (error) {
       console.error('Error loading activity history:', error);
@@ -674,6 +520,11 @@ const EcombotChat = () => {
     setReflectiveQuestions(fallbackQuestions);
   };
 
+  // Save progress ke localStorage (fallback)
+  useEffect(() => {
+    localStorage.setItem('chatbot-progress', JSON.stringify(progress));
+  }, [progress]);
+
   // Effect untuk mengatur status forum
   useEffect(() => {
     const inForum = currentStep === 'forum_diskusi';
@@ -727,66 +578,14 @@ const EcombotChat = () => {
     }, 100);
   };
 
-  // Fungsi untuk menyimpan pesan ke database - DIPERBAIKI DENGAN AUTH YANG KONSISTEN
-  const saveMessageToDatabase = async (messageType, character, messageText, stepId, messageData = {}) => {
-    try {
-      const isLoggedIn = isUserLoggedIn();
-      const sessionId = localStorage.getItem('current_session_id');
-      
-      if (!isLoggedIn || !sessionId) {
-        // FALLBACK: Simpan ke localStorage untuk user tidak login
-        const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
-        localMessages.push({
-          message_type: messageType,
-          character,
-          message_text: messageText,
-          step_id: stepId,
-          message_data: messageData,
-          timestamp: new Date().toISOString()
-        });
-        localStorage.setItem('local_chat_messages', JSON.stringify(localMessages));
-        return { status: 'saved_locally' };
-      }
-
-      const response = await fetch(`${API_BASE_URL}/chat/session/send/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader()
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          message_type: messageType,
-          character,
-          message_text: messageText,
-          step_id: stepId,
-          message_data: messageData,
-          current_activity: stepId
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data;
-      } else if (response.status === 401) {
-        console.warn('Token expired while saving message');
-        clearAuthTokens();
-        // Fallback ke localStorage
-        const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
-        localMessages.push({
-          message_type: messageType,
-          character,
-          message_text: messageText,
-          step_id: stepId,
-          message_data: messageData,
-          timestamp: new Date().toISOString()
-        });
-        localStorage.setItem('local_chat_messages', JSON.stringify(localMessages));
-        return { status: 'saved_locally_fallback' };
-      }
-    } catch (error) {
-      console.error('Error saving message to database:', error);
-      // Fallback ke localStorage
+  // Fungsi untuk menyimpan pesan ke database - DIPERBAIKI
+const saveMessageToDatabase = async (messageType, character, messageText, stepId, messageData = {}) => {
+  try {
+    const token = localStorage.getItem('token');
+    const sessionId = localStorage.getItem('current_session_id');
+    
+    if (!token || !sessionId) {
+      // FALLBACK: Simpan ke localStorage untuk user tidak login
       const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
       localMessages.push({
         message_type: messageType,
@@ -797,89 +596,79 @@ const EcombotChat = () => {
         timestamp: new Date().toISOString()
       });
       localStorage.setItem('local_chat_messages', JSON.stringify(localMessages));
-      return { status: 'saved_locally_fallback' };
+      return { status: 'saved_locally' };
     }
-    return null;
-  };
 
-  // Fungsi untuk menyimpan jawaban ke database - DIPERBAIKI DENGAN AUTH
-  const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
-    try {
-      const isLoggedIn = isUserLoggedIn();
-      const sessionId = localStorage.getItem('current_session_id');
-      
-      if (!isLoggedIn || !sessionId) {
-        // FALLBACK: save to localStorage dengan struktur yang lebih baik
-        const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
-        const answerRecord = {
-          question: questionData.text,
-          answer,
-          aspect: getAspectFromStep(currentStep),
-          kegiatan: currentStep,
-          question_id: questionData.id,
-          storage_key: questionData.storage_key,
-          answer_type: answerType,
-          timestamp: new Date().toISOString(),
-          question_data: questionData // Simpan data pertanyaan lengkap
-        };
-        savedAnswers.push(answerRecord);
-        localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
-        
-        // Juga simpan di progress lokal
-        saveAnswer(questionData.storage_key, answer);
-        
-        return { status: 'saved_locally', data: answerRecord };
-      }
+    const response = await fetch(`${API_BASE_URL}/chat/session/send/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        message_type: messageType,
+        character,
+        message_text: messageText,
+        step_id: stepId,
+        message_data: messageData,
+        current_activity: stepId
+      })
+    });
 
-      const response = await fetch(`${API_BASE_URL}/chat/answer/submit/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader()
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          activity_id: currentStep,
-          question_data: questionData,
-          answer_text: answer,
-          answer_type: answerType
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        // Juga simpan di progress lokal
-        saveAnswer(questionData.storage_key, answer);
-        return data;
-      } else if (response.status === 401) {
-        console.warn('Token expired while saving answer');
-        clearAuthTokens();
-        // Fallback to localStorage
-        const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
-        const answerRecord = {
-          question: questionData.text,
-          answer,
-          aspect: getAspectFromStep(currentStep),
-          kegiatan: currentStep,
-          question_id: questionData.id,
-          storage_key: questionData.storage_key,
-          answer_type: answerType,
-          timestamp: new Date().toISOString(),
-          question_data: questionData
-        };
-        savedAnswers.push(answerRecord);
-        localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
-        
-        // Juga simpan di progress lokal
-        saveAnswer(questionData.storage_key, answer);
-        
-        return { status: 'saved_locally_fallback', data: answerRecord };
-      } else {
-        throw new Error('Failed to save answer to database');
-      }
-    } catch (error) {
-      console.error('Error saving answer to database:', error);
-      // Fallback to localStorage
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+  } catch (error) {
+    console.error('Error saving message to database:', error);
+    // Fallback ke localStorage
+    const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
+    localMessages.push({
+      message_type: messageType,
+      character,
+      message_text: messageText,
+      step_id: stepId,
+      message_data: messageData,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('local_chat_messages', JSON.stringify(localMessages));
+    return { status: 'saved_locally_fallback' };
+  }
+  return null;
+};
+
+// Fungsi untuk menampilkan data lokal (untuk debugging)
+const debugLocalStorage = () => {
+  const localMessages = JSON.parse(localStorage.getItem('local_chat_messages') || '[]');
+  const localAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
+  const localProgress = JSON.parse(localStorage.getItem('chatbot-progress') || '{}');
+  
+  console.log('=== LOCAL STORAGE DEBUG ===');
+  console.log('Messages:', localMessages);
+  console.log('Answers:', localAnswers);
+  console.log('Progress:', localProgress);
+  console.log('Current Session:', currentSession);
+  console.log('Current Step:', currentStep);
+  console.log('Waiting for Answer:', waitingForAnswer);
+  console.log('===========================');
+};
+
+// Panggil fungsi debug saat diperlukan (opsional)
+useEffect(() => {
+  if (process.env.NODE_ENV === 'development') {
+    // debugLocalStorage(); // Uncomment untuk debugging
+  }
+}, [messages, progress]);
+
+  // Fungsi untuk menyimpan jawaban ke database - DIPERBAIKI
+const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
+  try {
+    const token = localStorage.getItem('token');
+    const sessionId = localStorage.getItem('current_session_id');
+    
+    if (!token || !sessionId) {
+      // FALLBACK: save to localStorage dengan struktur yang lebih baik
       const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
       const answerRecord = {
         question: questionData.text,
@@ -890,7 +679,7 @@ const EcombotChat = () => {
         storage_key: questionData.storage_key,
         answer_type: answerType,
         timestamp: new Date().toISOString(),
-        question_data: questionData
+        question_data: questionData // Simpan data pertanyaan lengkap
       };
       savedAnswers.push(answerRecord);
       localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
@@ -898,9 +687,56 @@ const EcombotChat = () => {
       // Juga simpan di progress lokal
       saveAnswer(questionData.storage_key, answer);
       
-      return { status: 'saved_locally_fallback', data: answerRecord };
+      return { status: 'saved_locally', data: answerRecord };
     }
-  };
+
+    const response = await fetch(`${API_BASE_URL}/chat/answer/submit/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        activity_id: currentStep,
+        question_data: questionData,
+        answer_text: answer,
+        answer_type: answerType
+      })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      // Juga simpan di progress lokal
+      saveAnswer(questionData.storage_key, answer);
+      return data;
+    } else {
+      throw new Error('Failed to save answer to database');
+    }
+  } catch (error) {
+    console.error('Error saving answer to database:', error);
+    // Fallback to localStorage
+    const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
+    const answerRecord = {
+      question: questionData.text,
+      answer,
+      aspect: getAspectFromStep(currentStep),
+      kegiatan: currentStep,
+      question_id: questionData.id,
+      storage_key: questionData.storage_key,
+      answer_type: answerType,
+      timestamp: new Date().toISOString(),
+      question_data: questionData
+    };
+    savedAnswers.push(answerRecord);
+    localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
+    
+    // Juga simpan di progress lokal
+    saveAnswer(questionData.storage_key, answer);
+    
+    return { status: 'saved_locally_fallback', data: answerRecord };
+  }
+};
 
   // Fungsi untuk mendapatkan pertanyaan dari currentChatFlow berdasarkan kegiatan
   const getQuestionsForCurrentStep = () => {
@@ -944,7 +780,7 @@ const EcombotChat = () => {
     return aspectMap[step] || 'General';
   };
 
-  // PERBAIKAN: Fungsi untuk mendapatkan quick buttons - DIPERBAIKI UNTUK MENAMPILKAN BUTTON "SIAP"
+  // Fungsi untuk mendapatkan quick buttons
   const getQuickButtons = (stepKey, messageText = '') => {
     if (waitingForAnswer) {
       return null;
@@ -965,14 +801,10 @@ const EcombotChat = () => {
         .join('');
     }
     
-    // PERBAIKAN: Tampilkan semua button termasuk "siap" untuk step intro
     return uniqueKeywords.map(keyword => {
       const isQuestionButton = keyword.toLowerCase().includes('pertanyaan') || 
                               keyword.toLowerCase().includes('merancang') || 
-                              keyword.toLowerCase().includes('kreasi') ||
-                              keyword.toLowerCase().includes('siap') ||
-                              keyword.toLowerCase().includes('sudah') ||
-                              keyword.toLowerCase().includes('mulai');
+                              keyword.toLowerCase().includes('kreasi');
       const buttonClass = isQuestionButton 
         ? "px-4 py-2 bg-lime-500 !text-lime-700 !font-bold rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-600 border border-lime-600 transition-all duration-200"
         : "px-4 py-2 bg-white !text-lime-700 !font-bold rounded-full text-sm font-medium shadow-md hover:shadow-lg hover:bg-lime-50 hover:text-lime-600 border border-gray-200 transition-all duration-200";
@@ -992,57 +824,52 @@ const EcombotChat = () => {
     }));
   };
 
-  // Fungsi untuk menandai kegiatan sebagai selesai - DIPERBAIKI DENGAN AUTH
-  const completeActivity = async (activityId) => {
-    // Update state lokal
-    setProgress(prev => {
-      const completed = [...prev.completed];
-      if (!completed.includes(activityId)) {
-        completed.push(activityId);
-      }
-      return {
-        ...prev,
-        completed,
-        current: activityId
-      };
-    });
-
-    try {
-      const isLoggedIn = isUserLoggedIn();
-      const sessionId = localStorage.getItem('current_session_id');
-      
-      if (isLoggedIn && sessionId) {
-        const response = await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader()
-          },
-          body: JSON.stringify({
-            session_id: sessionId,
-            activity_id: activityId
-          })
-        });
-
-        if (response.status === 401) {
-          console.warn('Token expired while completing activity');
-          clearAuthTokens();
-        }
-      } else {
-        // Untuk user tidak login, simpan progress ke localStorage
-        const localProgress = JSON.parse(localStorage.getItem('chatbot-progress') || '{}');
-        if (!localProgress.completed) localProgress.completed = [];
-        if (!localProgress.completed.includes(activityId)) {
-          localProgress.completed.push(activityId);
-        }
-        localProgress.current = activityId;
-        localStorage.setItem('chatbot-progress', JSON.stringify(localProgress));
-        console.log('Progress saved locally:', localProgress);
-      }
-    } catch (error) {
-      console.error('Error completing activity:', error);
+ // Fungsi untuk menandai kegiatan sebagai selesai - DIPERBAIKI
+const completeActivity = async (activityId) => {
+  // Update state lokal
+  setProgress(prev => {
+    const completed = [...prev.completed];
+    if (!completed.includes(activityId)) {
+      completed.push(activityId);
     }
-  };
+    return {
+      ...prev,
+      completed,
+      current: activityId
+    };
+  });
+
+  try {
+    const token = localStorage.getItem('token');
+    const sessionId = localStorage.getItem('current_session_id');
+    
+    if (token && sessionId) {
+      await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          activity_id: activityId
+        })
+      });
+    } else {
+      // Untuk user tidak login, simpan progress ke localStorage
+      const localProgress = JSON.parse(localStorage.getItem('chatbot-progress') || '{}');
+      if (!localProgress.completed) localProgress.completed = [];
+      if (!localProgress.completed.includes(activityId)) {
+        localProgress.completed.push(activityId);
+      }
+      localProgress.current = activityId;
+      localStorage.setItem('chatbot-progress', JSON.stringify(localProgress));
+      console.log('Progress saved locally:', localProgress);
+    }
+  } catch (error) {
+    console.error('Error completing activity:', error);
+  }
+};
 
   // Fungsi untuk memeriksa apakah kegiatan dapat diakses
   const canAccessKegiatan = (kegiatanNum) => {
@@ -1199,9 +1026,10 @@ const EcombotChat = () => {
     }
   };
 
-  // FUNGSI BARU: Redirect ke /ecomic - DIPERBAIKI DENGAN AUTH
+  // FUNGSI BARU: Redirect ke /ecomic
   const redirectToEcomic = async () => {
     const currentPage = Number(localStorage.getItem(storageKey) ?? 0);
+    const token = localStorage.getItem("access");
 
     try {
       setMessages(prev => [...prev, { 
@@ -1209,32 +1037,11 @@ const EcombotChat = () => {
         text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
       }]);
       setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
-      
-      // Cek apakah user login untuk menandai penyelesaian di backend
-      const isLoggedIn = isUserLoggedIn();
-      if (isLoggedIn) {
-        const sessionId = localStorage.getItem('current_session_id');
-        if (sessionId) {
-          await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...getAuthHeader()
-            },
-            body: JSON.stringify({
-              session_id: sessionId,
-              activity_id: 'completion'
-            })
-          });
-        }
-      }
-      
       setTimeout(() => navigate('/ecomic'), 3000);
       
     } catch (err) {
       console.error("markFinishApi error:", err);
       if (err.status === 401) {
-        clearAuthTokens();
         navigate('/login');
       }
     }
@@ -1268,123 +1075,123 @@ const EcombotChat = () => {
   };
 
   // Fungsi untuk memproses jawaban pertanyaan - DIPERBAIKI
-  const processQuestionAnswer = async (input) => {
-    if (!input.trim()) {
-      setMessages(prev => [...prev, { 
-        from: 'bot', 
-        text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
-        data: {
-          id: currentStep,
-          next_keywords: []
-        }
-      }]);
-      return;
-    }
+const processQuestionAnswer = async (input) => {
+  if (!input.trim()) {
+    setMessages(prev => [...prev, { 
+      from: 'bot', 
+      text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
+      data: {
+        id: currentStep,
+        next_keywords: []
+      }
+    }]);
+    return;
+  }
 
-    const currentIndex = currentQuestionIndex;
-    const currentQuestion = currentQuestions[currentIndex];
+  const currentIndex = currentQuestionIndex;
+  const currentQuestion = currentQuestions[currentIndex];
+  
+  if (!currentQuestion) {
+    console.error('No current question found at index:', currentIndex);
+    return;
+  }
+  
+  // Simpan pesan user ke state DAN database
+  setMessages(prev => [...prev, { from: 'user', text: input }]);
+  await saveMessageToDatabase('user', 'User', input, currentStep);
+  
+  try {
+    const result = await saveAnswerToDatabase(currentQuestion, input, currentQuestion.type || 'essay');
+    console.log('Answer save result:', result);
     
-    if (!currentQuestion) {
-      console.error('No current question found at index:', currentIndex);
-      return;
-    }
+    // Simpan juga di state lokal
+    saveAnswer(currentQuestion.storage_key, input);
     
-    // Simpan pesan user ke state DAN database
-    setMessages(prev => [...prev, { from: 'user', text: input }]);
-    await saveMessageToDatabase('user', 'User', input, currentStep);
-    
-    try {
-      const result = await saveAnswerToDatabase(currentQuestion, input, currentQuestion.type || 'essay');
-      console.log('Answer save result:', result);
+    if (currentIndex < currentQuestions.length - 1) {
+      const nextIndex = currentIndex + 1;
+      const nextQuestion = currentQuestions[nextIndex];
       
-      // Simpan juga di state lokal
-      saveAnswer(currentQuestion.storage_key, input);
+      setCurrentQuestionIndex(nextIndex);
+      const nextMessage = { 
+        from: 'bot', 
+        text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
+        data: {}
+      };
       
-      if (currentIndex < currentQuestions.length - 1) {
-        const nextIndex = currentIndex + 1;
-        const nextQuestion = currentQuestions[nextIndex];
-        
-        setCurrentQuestionIndex(nextIndex);
-        const nextMessage = { 
-          from: 'bot', 
-          text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
-          data: {}
-        };
-        
-        setMessages(prev => [...prev, nextMessage]);
-        await saveMessageToDatabase('bot', 'Aquano', nextMessage.text, currentStep, nextMessage.data);
-        
-        setWaitingForAnswer(`question_${nextIndex}`);
-        
+      setMessages(prev => [...prev, nextMessage]);
+      await saveMessageToDatabase('bot', 'Aquano', nextMessage.text, currentStep, nextMessage.data);
+      
+      setWaitingForAnswer(`question_${nextIndex}`);
+      
+    } else {
+      // Selesai semua pertanyaan
+      let nextKeywords = [];
+      const stepData = getStepData(currentStep);
+      
+      if (stepData && stepData.next_keywords) {
+        nextKeywords = [...stepData.next_keywords];
       } else {
-        // Selesai semua pertanyaan
-        let nextKeywords = [];
-        const stepData = getStepData(currentStep);
-        
-        if (stepData && stepData.next_keywords) {
-          nextKeywords = [...stepData.next_keywords];
-        } else {
-          const navigationMap = {
-            'pertanyaan_1': ["mulai eksplorasi 2", "menu sebelumnya"],
-            'pertanyaan_2': ["mulai eksplorasi 3", "menu sebelumnya"],
-            'pertanyaan_3': ["mulai eksplorasi 4", "menu sebelumnya"],
-            'pertanyaan_4': ["mulai eksplorasi 5", "menu sebelumnya"],
-            'mari_merancang': ["mulai eksplorasi 6", "menu sebelumnya"],
-            'ayo_berkreasi': ["mulai eksplorasi 7", "menu sebelumnya"],
-            'pertanyaan_reflektif': ["Eksplorasi Selesai", "menu sebelumnya"]
-          };
-          
-          nextKeywords = navigationMap[currentStep] || ["menu sebelumnya"];
-        }
-        
-        const completionMessage = { 
-          from: 'bot', 
-          text: "🎉 **Terima kasih!**\nAnda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
-          data: {
-            id: currentStep,
-            next_keywords: nextKeywords
-          }
+        const navigationMap = {
+          'pertanyaan_1': ["mulai eksplorasi 2", "menu sebelumnya"],
+          'pertanyaan_2': ["mulai eksplorasi 3", "menu sebelumnya"],
+          'pertanyaan_3': ["mulai eksplorasi 4", "menu sebelumnya"],
+          'pertanyaan_4': ["mulai eksplorasi 5", "menu sebelumnya"],
+          'mari_merancang': ["mulai eksplorasi 6", "menu sebelumnya"],
+          'ayo_berkreasi': ["mulai eksplorasi 7", "menu sebelumnya"],
+          'pertanyaan_reflektif': ["Eksplorasi Selesai", "menu sebelumnya"]
         };
         
-        setMessages(prev => [...prev, completionMessage]);
-        await saveMessageToDatabase('bot', 'Aquano', completionMessage.text, currentStep, completionMessage.data);
-        
-        setWaitingForAnswer(null);
-        setCurrentQuestions([]);
-        setCurrentQuestionIndex(0);
-        
-        // Tandai kegiatan sebagai selesai
-        let kegiatanStep = currentStep;
-        if (currentStep.startsWith('pertanyaan_')) {
-          kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
-        } else if (currentStep === 'mari_merancang') {
-          kegiatanStep = 'kegiatan_5';
-        } else if (currentStep === 'ayo_berkreasi') {
-          kegiatanStep = 'kegiatan_6';
-        }
-        
-        if (kegiatanStep !== currentStep) {
-          completeActivity(kegiatanStep);
-        }
+        nextKeywords = navigationMap[currentStep] || ["menu sebelumnya"];
       }
       
-    } catch (error) {
-      console.error('Error saving answer:', error);
-      const errorMessage = { 
+      const completionMessage = { 
         from: 'bot', 
-        text: "⚠️ Jawaban Anda telah dicatat secara lokal. Terima kasih!",
+        text: "🎉 **Terima kasih!**\nAnda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
         data: {
           id: currentStep,
-          next_keywords: []
+          next_keywords: nextKeywords
         }
       };
       
-      setMessages(prev => [...prev, errorMessage]);
-      await saveMessageToDatabase('bot', 'Aquano', errorMessage.text, currentStep, errorMessage.data);
+      setMessages(prev => [...prev, completionMessage]);
+      await saveMessageToDatabase('bot', 'Aquano', completionMessage.text, currentStep, completionMessage.data);
+      
+      setWaitingForAnswer(null);
+      setCurrentQuestions([]);
+      setCurrentQuestionIndex(0);
+      
+      // Tandai kegiatan sebagai selesai
+      let kegiatanStep = currentStep;
+      if (currentStep.startsWith('pertanyaan_')) {
+        kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
+      } else if (currentStep === 'mari_merancang') {
+        kegiatanStep = 'kegiatan_5';
+      } else if (currentStep === 'ayo_berkreasi') {
+        kegiatanStep = 'kegiatan_6';
+      }
+      
+      if (kegiatanStep !== currentStep) {
+        completeActivity(kegiatanStep);
+      }
     }
     
-    scrollChat();
-  };
+  } catch (error) {
+    console.error('Error saving answer:', error);
+    const errorMessage = { 
+      from: 'bot', 
+      text: "⚠️ Jawaban Anda telah dicatat secara lokal. Terima kasih!",
+      data: {
+        id: currentStep,
+        next_keywords: []
+      }
+    };
+    
+    setMessages(prev => [...prev, errorMessage]);
+    await saveMessageToDatabase('bot', 'Aquano', errorMessage.text, currentStep, errorMessage.data);
+  }
+  
+  scrollChat();
+};
 
   // Fungsi untuk mendapatkan step berikutnya setelah selesai menjawab pertanyaan
   const getNextStepAfterQuestions = () => {
@@ -2261,10 +2068,7 @@ const EcombotChat = () => {
     currentSession,
     loadActivityHistory,
     previousSteps,
-    setPreviousSteps,
-    isUserLoggedIn, // Export fungsi baru
-    getAuthHeader, // Export fungsi baru
-    clearAuthTokens // Export fungsi baru
+    setPreviousSteps
   };
 
   // Tampilkan loading atau error state
@@ -2546,7 +2350,9 @@ const EcombotChat = () => {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                   <h2 className="text-4xl font-bold text-lime-700 text-center">Daftar Eksplorasi</h2>
-                  
+                  {currentSession && (
+                    <p className="text-xs text-gray-500">Session: {currentSession}</p>
+                  )}
                 </div>
                 <div className="!p-4 flex flex-col gap-4">
                   {activeKegiatanList.map((kegiatan) => (
