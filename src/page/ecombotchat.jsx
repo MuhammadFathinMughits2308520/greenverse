@@ -14,6 +14,9 @@ import Kegiatan6 from "./Kegiatan6";
 import Kegiatan7 from "./Kegiatan7";
 import { useChatFlow } from '../hooks/useChatFlow';
 
+// Konstanta untuk base URL API
+const API_BASE_URL = 'https://backendecombot-production.up.railway.app/api';
+
 // Fallback data jika loading gagal
 const fallbackChatFlow = {
   chatbot_flow: {
@@ -371,7 +374,7 @@ const getCurrentTitle = () => {
       // Jika user sudah login, coba load atau buat session
       const sessionId = localStorage.getItem('current_session_id') || `session_${Date.now()}`;
       
-      const response = await fetch('http://localhost:8000/api/chat/session/start/', {
+      const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -413,7 +416,7 @@ const getCurrentTitle = () => {
       
       if (!token || !sessionId) return;
 
-      const response = await fetch(`http://localhost:8000/api/chat/session/${sessionId}/activity/${activityId}/`, {
+      const response = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/activity/${activityId}/`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -447,7 +450,7 @@ const getCurrentTitle = () => {
         setMessages(historyMessages);
         
         // Load progress
-        const progressResponse = await fetch(`http://localhost:8000/api/chat/session/${sessionId}/overview/`, {
+        const progressResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -594,7 +597,7 @@ const getCurrentTitle = () => {
       
       if (!token || !sessionId) return null;
 
-      const response = await fetch('http://localhost:8000/api/chat/session/send/', {
+      const response = await fetch(`${API_BASE_URL}/chat/session/send/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -642,7 +645,7 @@ const getCurrentTitle = () => {
         return { status: 'saved_locally' };
       }
 
-      const response = await fetch('http://localhost:8000/api/chat/answer/submit/', {
+      const response = await fetch(`${API_BASE_URL}/chat/answer/submit/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -805,7 +808,7 @@ const getCurrentTitle = () => {
       const sessionId = localStorage.getItem('current_session_id');
       
       if (token && sessionId) {
-        await fetch('http://localhost:8000/api/chat/activity/complete/', {
+        await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -955,7 +958,7 @@ const getCurrentTitle = () => {
     try {
       console.log('Processing forum question with LangChain:', question);
       
-      const response = await fetch('http://localhost:8000/api/ask/', {
+      const response = await fetch(`${API_BASE_URL}/ask/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -973,7 +976,7 @@ const getCurrentTitle = () => {
       console.error('Error fetching from Django API:', error);
       
       if (error.message.includes('Failed to fetch') || error.message.includes('Network')) {
-        return "Maaf, tidak dapat terhubung ke server forum. Pastikan backend Django sedang berjalan di http://localhost:8000";
+        return "Maaf, tidak dapat terhubung ke server forum. Pastikan backend Django sedang berjalan.";
       } else if (error.message.includes('500')) {
         return "Maaf, server mengalami masalah internal. Silakan coba lagi nati.";
       } else {
@@ -989,18 +992,16 @@ const getCurrentTitle = () => {
     console.debug("handleMarkFinish called", { comic: comicSlug, episode: episodeSlug, currentPage, tokenPresent: !!token });
 
     try {
-      const result = await markFinishApi(comicSlug, episodeSlug, currentPage, { complete: true });
-      console.log("markFinish result:", result);
-      if (result.finish) {
-        setMessages(prev => [...prev, { 
-          from: 'bot', 
-          text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
-        }]);
-        setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
-        setTimeout(() => navigate('/ecomic'), 3000);
-      } else {
-        alert(result.message || "Gagal menandai selesai");
-      }
+      // Panggil API mark finish jika diperlukan
+      // const result = await markFinishApi(comicSlug, episodeSlug, currentPage, { complete: true });
+      
+      setMessages(prev => [...prev, { 
+        from: 'bot', 
+        text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman ecomic..."
+      }]);
+      setPermission(p => ({ ...p, finish: true, last_page: Math.max(p.last_page ?? 0, currentPage) }));
+      setTimeout(() => navigate('/ecomic'), 3000);
+      
     } catch (err) {
       console.error("markFinishApi error:", err);
       if (err.status === 401) {
@@ -2531,4 +2532,3 @@ const getCurrentTitle = () => {
 };
 
 export default EcombotChat;
-
