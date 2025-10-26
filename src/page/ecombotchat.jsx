@@ -15,7 +15,7 @@ import Kegiatan7 from "./Kegiatan7";
 import { useChatFlow } from '../hooks/useChatFlow';
 
 // Konstanta untuk base URL API
-const API_BASE_URL = 'https://backendecombot-production.up.railway.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://backendecombot-production.up.railway.app/api'; 
 
 // Helper: ambil token JWT (jika ada)
 const getAuthHeader = () => {
