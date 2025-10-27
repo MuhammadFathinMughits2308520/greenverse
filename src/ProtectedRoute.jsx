@@ -119,12 +119,12 @@ function ProtectedRoute({ children }) {
           }
         `}</style>
       </div>
-    );
-  }
+      );
+    }
 
-  // Redirect ke login jika tidak terautentikasi
-  if (!isAuth) {
-    return <Navigate to="/login" replace />;
+    // Redirect ke login jika tidak terautentikasi
+    if (!isAuth) {
+      return <Navigate to="/login" replace />;
   }
 
   // Render children jika terautentikasi

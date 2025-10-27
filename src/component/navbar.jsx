@@ -70,6 +70,9 @@ function Navbar({ scrollToSection }) {
         <a onClick={() => handleNavClick('konten2')} className='link-team'>
           Riset
         </a>
+        <a onClick={() => handleNavClick('mulok')} className='link-team'>
+          Muatan Lokal
+        </a>
         <a onClick={() => handleNavClick('team')} className='link-konten1'>
           Tim Greenverse
         </a>

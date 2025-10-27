@@ -8,6 +8,7 @@ import ResearchBenefit from '../component/researchbenefit';
 import UrgensiKontribusi from '../component/urgensikontribusi';
 import Produk from '../component/produk';
 import FeedbackPage from '../component/feedback';
+import MuatanLokal from '../component/muatanlokal';
 
 function LandingPage() {
   return (
@@ -15,6 +16,9 @@ function LandingPage() {
       <div id='beranda'><Beranda /></div>
       <div id='konten1'>
         <AboutMedia />
+      </div>
+      <div id='mulok'>
+        <MuatanLokal/>
         <UrgensiKontribusi />
       </div>
       <div id='konten2'>
