@@ -1020,7 +1020,7 @@ const redirectToEcomic = async () => {
             comic: comicSlug, 
             episode: episodeSlug,
             finish: true,
-            last_page: lastPageIndex  // Kirim halaman terakhir ke backend
+            last_page: lastPageIndex  
           }),
         });
         console.log("Finish status saved to backend with last_page:", lastPageIndex);
