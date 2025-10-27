@@ -1,35 +1,60 @@
-/* Section Muatan Lokal */
+/* ===========================
+   MUATAN LOKAL SECTION
+   =========================== */
+
+/* Base Section */
 .muatan-lokal-section {
-  padding: 40px 20px;
+  padding: 80px 20px;
   background-color: var(--bg-light);
 }
 
 .muatan-lokal-container {
-  max-width: 1050px;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 20px;
 }
 
-/* Header Section */
+/* ===========================
+   HEADER SECTION
+   =========================== */
 .muatan-lokal-header {
   text-align: center;
   margin-bottom: 60px;
 }
 
 .muatan-lokal-title {
-  font-size: clamp(32px, 5vw, 48px);
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
   color: var(--primary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  line-height: 1.2;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.muatan-lokal-title.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s;
 }
 
 .muatan-lokal-description {
-  font-size: clamp(16px, 2vw, 20px);
+  font-size: clamp(1rem, 2vw, 1.25rem);
   line-height: 1.8;
   color: var(--text-dark);
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
-  padding: 0 20px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.muatan-lokal-description.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.2s;
 }
 
 .muatan-lokal-description strong {
@@ -37,17 +62,29 @@
   font-weight: 600;
 }
 
-/* Cards Section */
+/* ===========================
+   CARDS SECTION
+   =========================== */
 .muatan-lokal-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 30px;
-  margin-bottom: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.muatan-lokal-cards.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.3s;
 }
 
 .muatan-card {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  padding: 40px 20px;
+  padding: 40px 30px;
   border-radius: 20px;
   box-shadow: 0 4px 15px var(--shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -55,53 +92,87 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  min-height: 220px;
 }
 
 .muatan-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 8px 25px var(--shadow);
+  box-shadow: 0 8px 30px var(--shadow);
 }
 
 .muatan-card-title {
-  font-size: 1.4rem;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
   font-weight: 700;
   color: white;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
+  line-height: 1.3;
 }
 
 .muatan-card-text {
-  font-size: 1rem;
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
   line-height: 1.7;
   color: white;
-  text-align: justify;
+  text-align: center;
 }
 
-/* Gallery Section */
+/* ===========================
+   GALLERY SECTION
+   =========================== */
 .muatan-lokal-gallery {
   padding: 80px 20px;
   background-color: var(--card-light);
 }
 
 .gallery-title {
-  font-size: 2rem;
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
   color: var(--primary);
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  line-height: 1.2;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.gallery-title.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.1s;
 }
 
 .gallery-subtitle {
   text-align: center;
-  font-size: 1rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
   color: var(--text-dark);
-  opacity: 0.8;
-  margin-bottom: 40px;
+  opacity: 0;
+  margin-bottom: 50px;
+  line-height: 1.6;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.gallery-subtitle.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.2s;
 }
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.gallery-grid.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.3s;
 }
 
 .gallery-item {
@@ -110,11 +181,12 @@
   border-radius: 16px;
   box-shadow: 0 4px 15px var(--shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #f8f9fa;
 }
 
 .gallery-item:hover {
   transform: scale(1.03);
-  box-shadow: 0 8px 25px var(--shadow);
+  box-shadow: 0 8px 30px var(--shadow);
 }
 
 .image-wrapper {
@@ -126,7 +198,7 @@
 
 .image-wrapper img {
   width: 100%;
-  height: 280px;
+  height: 300px;
   object-fit: cover;
   display: block;
   transition: transform 0.5s ease;
@@ -141,8 +213,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-  padding: 18px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.3) 70%, transparent);
+  padding: 20px 18px;
   transform: translateY(100%);
   transition: transform 0.3s ease;
   display: flex;
@@ -159,17 +231,42 @@
   font-size: 0.95rem;
   font-weight: 500;
   margin: 0;
-  line-height: 1.3;
-}
-.image-source a {
-  color: rgba(255,255,255,0.95);
-  text-decoration: underline;
+  line-height: 1.4;
 }
 
-/* Responsive Design */
+.overlay-caption {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.image-source {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.image-source a {
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.image-source a:hover {
+  opacity: 0.8;
+}
+
+/* ===========================
+   RESPONSIVE DESIGN
+   =========================== */
+
+/* Tablet Landscape (1024px) */
 @media (max-width: 1024px) {
-  .muatan-lokal-title {
-    font-size: 2.2rem;
+  .muatan-lokal-section,
+  .muatan-lokal-gallery {
+    padding: 70px 20px;
+  }
+
+  .muatan-lokal-container {
+    padding: 0 15px;
   }
 
   .muatan-lokal-cards {
@@ -179,40 +276,42 @@
 
   .gallery-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 25px;
+  }
+
+  .image-wrapper img {
+    height: 280px;
   }
 }
 
+/* Tablet Portrait (768px) */
 @media (max-width: 768px) {
-  .muatan-lokal-section {
+  .muatan-lokal-section,
+  .muatan-lokal-gallery {
     padding: 60px 15px;
   }
 
   .muatan-lokal-header {
-    margin-bottom: 40px;
-  }
-
-  .muatan-lokal-title {
-    font-size: 2rem;
+    margin-bottom: 50px;
   }
 
   .muatan-lokal-description {
-    font-size: 1rem;
+    text-align: justify;
     padding: 0 10px;
   }
 
   .muatan-lokal-cards {
     grid-template-columns: 1fr;
     gap: 20px;
-    margin-bottom: 60px;
   }
 
   .muatan-card {
-    padding: 35px 25px;
+    padding: 35px 30px;
+    min-height: 200px;
   }
 
-  .gallery-title {
-    font-size: 1.8rem;
+  .muatan-card-text {
+    text-align: justify;
   }
 
   .gallery-grid {
@@ -221,51 +320,116 @@
   }
 
   .image-wrapper img {
-    height: 240px;
+    height: 250px;
+  }
+
+  /* Disable hover effects on touch devices */
+  .gallery-item:hover {
+    transform: none;
+  }
+
+  .gallery-item:hover .image-wrapper img {
+    transform: none;
+  }
+
+  /* Show overlay by default on mobile */
+  .image-overlay {
+    transform: translateY(0);
+    background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2) 60%, transparent);
   }
 }
 
+/* Mobile (480px) */
 @media (max-width: 480px) {
-  .muatan-lokal-section {
+  .muatan-lokal-section,
+  .muatan-lokal-gallery {
     padding: 50px 15px;
   }
 
-  .muatan-lokal-title {
-    font-size: 1.8rem;
+  .muatan-lokal-header {
+    margin-bottom: 40px;
   }
 
-  .muatan-lokal-description {
-    font-size: 0.95rem;
+  .muatan-lokal-title,
+  .gallery-title {
+    margin-bottom: 20px;
+  }
+
+  .muatan-lokal-description,
+  .gallery-subtitle {
     text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .muatan-lokal-cards {
+    gap: 18px;
   }
 
   .muatan-card {
-    padding: 30px 20px;
-  }
-
-  .muatan-card-title {
-    font-size: 1.3rem;
+    padding: 30px 25px;
+    min-height: 180px;
   }
 
   .muatan-card-text {
-    font-size: 0.95rem;
     text-align: center;
   }
 
-  .gallery-title {
-    font-size: 1.6rem;
+  .gallery-grid {
+    gap: 18px;
   }
 
-  .gallery-subtitle {
+  .image-wrapper img {
+    height: 220px;
+  }
+
+  .image-overlay {
+    padding: 16px 14px;
+  }
+
+  .image-overlay p {
     font-size: 0.9rem;
+  }
+
+  .overlay-caption {
+    font-size: 0.95rem;
+  }
+
+  .image-source {
+    font-size: 0.8rem;
+  }
+
+  /* Reduce animation distance on mobile for smoother experience */
+  .muatan-lokal-title,
+  .muatan-lokal-description,
+  .muatan-lokal-cards,
+  .gallery-title,
+  .gallery-subtitle,
+  .gallery-grid {
+    transform: translateY(20px);
+  }
+
+  .muatan-lokal-title.visible,
+  .muatan-lokal-description.visible,
+  .muatan-lokal-cards.visible,
+  .gallery-title.visible,
+  .gallery-subtitle.visible,
+  .gallery-grid.visible {
+    transform: translateY(0);
+  }
+}
+
+/* Extra Small Mobile (360px) */
+@media (max-width: 360px) {
+  .muatan-lokal-section,
+  .muatan-lokal-gallery {
+    padding: 40px 12px;
+  }
+
+  .muatan-card {
+    padding: 25px 20px;
   }
 
   .image-wrapper img {
     height: 200px;
-  }
-
-  .image-overlay p {
-    font-size: 0.85rem;
-    padding: 15px;
   }
 }
