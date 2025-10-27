@@ -1,11 +1,11 @@
 /* Section Muatan Lokal */
 .muatan-lokal-section {
-  padding: 80px 20px;
+  padding: 40px 20px;
   background-color: var(--bg-light);
 }
 
 .muatan-lokal-container {
-  max-width: 1200px;
+  max-width: 1050px;
   margin: 0 auto;
 }
 
@@ -47,7 +47,7 @@
 
 .muatan-card {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  padding: 40px 30px;
+  padding: 40px 20px;
   border-radius: 20px;
   box-shadow: 0 4px 15px var(--shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -80,7 +80,6 @@
 .muatan-lokal-gallery {
   padding: 80px 20px;
   background-color: var(--card-light);
-  margin-top: 60px;
 }
 
 .gallery-title {
