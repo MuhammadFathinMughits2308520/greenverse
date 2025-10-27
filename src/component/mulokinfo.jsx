@@ -15,29 +15,23 @@ Mapag Hujan sebagai tradisi masyarakat Jawa Barat, khususnya Subang dan Bandung 
 
         <div className="muatan-lokal-cards">
           <div className="muatan-card">
-            <h3 className="muatan-card-title">Tradisi Mapag Hujan</h3>
+            <h3 className="muatan-card-title">Mitigasi banjir dan Pengelolaan sampah</h3>
             <p className="muatan-card-text">
-              Mapag Hujan sebagai tradisi masyarakat Jawa Barat, khususnya Subang dan Bandung 
-              untuk menyambut datangnya musim hujan. Tradisi ini memiliki nilai-nilai literasi 
-              lingkungan dan budaya.
+              Upaya pelestarian lingkungan dalam gerakan “Maraton Bebersih Walungan dan Susukan”
             </p>
           </div>
 
           <div className="muatan-card">
-            <h3 className="muatan-card-title">Fokus di Bandung</h3>
+            <h3 className="muatan-card-title">Gotong Royong</h3>
             <p className="muatan-card-text">
-              Di Bandung, Mapag Hujan lebih difokuskan pada mitigasi banjir melalui peningkatan 
-              resapan air, pengelolaan sampah, dan pelestarian lingkungan yang melibatkan masyarakat, 
-              pemerintah setempat, dan komunitas.
+              Kerja sama melibatkan masyarakat, komunitas, dan pemerintah setempat
             </p>
           </div>
 
           <div className="muatan-card">
-            <h3 className="muatan-card-title">Maraton Bebersih</h3>
+            <h3 className="muatan-card-title">Seni dan Budaya Lokal</h3>
             <p className="muatan-card-text">
-              Gerakan "Maraton Bebersih Walungan dan Susukan" menjadi wujud nyata dari nilai-nilai 
-              literasi lingkungan yang menekankan kesadaran, pemahaman, dan tindakan nyata dalam 
-              menjaga kelestarian alam.
+              Pertunjukkan seni dan budaya yang memadukan ekspresi dan rasa syukur terhadap alam.
             </p>
           </div>
         </div>
