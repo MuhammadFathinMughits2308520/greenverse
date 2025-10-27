@@ -751,3 +751,415 @@
 .teacher-table-container::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
+/* ===== TAMBAHAN STYLES UNTUK FITUR BARU ===== */
+
+/* Page Header */
+.teacher-page-header {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-page-header h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.75rem;
+  color: var(--text-primary, #2c3e50);
+}
+
+.teacher-page-header p {
+  margin: 0;
+  color: var(--text-secondary, #7f8c8d);
+  font-size: 0.95rem;
+}
+
+/* Error Message */
+.teacher-error-message {
+  padding: 1rem 1.5rem;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c00;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Filter Actions */
+.teacher-filter-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.teacher-btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.teacher-btn-secondary:hover {
+  background: #5a6268;
+  transform: translateY(-2px);
+}
+
+/* Table Enhancements */
+.teacher-student-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.teacher-user-id {
+  font-size: 0.75rem;
+  color: var(--text-muted, #95a5a6);
+  font-weight: normal;
+}
+
+.teacher-comic-cell {
+  max-width: 200px;
+}
+
+.teacher-comic-info {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teacher-activity-cell {
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #7f8c8d);
+}
+
+.teacher-text-center {
+  text-align: center;
+  font-weight: 600;
+}
+
+.teacher-date-cell {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #7f8c8d);
+  white-space: nowrap;
+}
+
+.teacher-count-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: var(--badge-bg, #e3f2fd);
+  color: var(--badge-color, #1976d2);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Pagination */
+.teacher-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-pagination-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-color, #3498db);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.teacher-pagination-btn:hover:not(:disabled) {
+  background: var(--primary-hover, #2980b9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.teacher-pagination-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.teacher-pagination-info {
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.teacher-pagination-total {
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: var(--text-secondary, #7f8c8d);
+}
+
+/* Answer Card Enhancements */
+.teacher-answer-id {
+  font-size: 0.75rem;
+  color: var(--text-muted, #95a5a6);
+  font-weight: normal;
+}
+
+.teacher-answer-badges {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.teacher-answer-image {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, #ecf0f1);
+}
+
+.teacher-answer-image label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary, #2c3e50);
+  margin-bottom: 0.75rem;
+}
+
+.teacher-answer-img {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #ecf0f1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge Variants */
+.teacher-badge-essay {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.teacher-badge-discussion {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.teacher-badge-challenge {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.teacher-badge-creative {
+  background: #fce4ec;
+  color: #c2185b;
+}
+
+.teacher-badge-reflective {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* Dark Mode Support */
+.dark-mode .teacher-page-header {
+  background: var(--dark-card-bg, #2c3e50);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .teacher-page-header h2 {
+  color: var(--dark-text-primary, #ecf0f1);
+}
+
+.dark-mode .teacher-page-header p {
+  color: var(--dark-text-secondary, #bdc3c7);
+}
+
+.dark-mode .teacher-error-message {
+  background: #5c0000;
+  border-color: #8b0000;
+  color: #ffaaaa;
+}
+
+.dark-mode .teacher-pagination {
+  background: var(--dark-card-bg, #2c3e50);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .teacher-pagination-info {
+  color: var(--dark-text-primary, #ecf0f1);
+}
+
+.dark-mode .teacher-pagination-total {
+  color: var(--dark-text-secondary, #bdc3c7);
+}
+
+.dark-mode .teacher-count-badge {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+}
+
+.dark-mode .teacher-answer-img {
+  border-color: var(--dark-border-color, #34495e);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .teacher-page-header {
+    padding: 1rem;
+  }
+
+  .teacher-page-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .teacher-filter-actions {
+    flex-direction: column;
+  }
+
+  .teacher-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .teacher-pagination {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .teacher-pagination-btn {
+    width: 100%;
+  }
+
+  .teacher-comic-cell {
+    max-width: 150px;
+  }
+
+  /* Hide less important columns on mobile */
+  .teacher-data-table th:nth-child(10),
+  .teacher-data-table td:nth-child(10) {
+    display: none;
+  }
+
+  .teacher-answer-img {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .teacher-data-table th:nth-child(4),
+  .teacher-data-table td:nth-child(4),
+  .teacher-data-table th:nth-child(6),
+  .teacher-data-table td:nth-child(6) {
+    display: none;
+  }
+}
+
+/* Loading States */
+.teacher-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  min-height: 400px;
+}
+
+.teacher-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(52, 152, 219, 0.2);
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: teacher-spin 1s linear infinite;
+}
+
+@keyframes teacher-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.teacher-empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.teacher-empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary, #2c3e50);
+  font-size: 1.5rem;
+}
+
+.teacher-empty-state p {
+  margin: 0;
+  color: var(--text-secondary, #7f8c8d);
+}
+
+.dark-mode .teacher-empty-state {
+  background: var(--dark-card-bg, #2c3e50);
+}
+
+.dark-mode .teacher-empty-state h3 {
+  color: var(--dark-text-primary, #ecf0f1);
+}
+
+.dark-mode .teacher-empty-state p {
+  color: var(--dark-text-secondary, #bdc3c7);
+}
+
+/* Smooth Transitions */
+.teacher-data-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.teacher-data-table tbody tr:hover {
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+.dark-mode .teacher-data-table tbody tr:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+/* Print Styles */
+@media print {
+  .teacher-navigation,
+  .teacher-filters-card,
+  .teacher-pagination,
+  .teacher-dark-mode-toggle {
+    display: none !important;
+  }
+
+  .teacher-data-table {
+    font-size: 0.85rem;
+  }
+
+  .teacher-page-header {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
