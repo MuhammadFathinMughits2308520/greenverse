@@ -534,68 +534,103 @@ const EcombotChat = () => {
   };
 
   // Fungsi untuk menyimpan jawaban ke database - DIUBAH untuk menggunakan endpoint yang benar
-  const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
+const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
     try {
-      const token = localStorage.getItem('access');
-      const sessionId = localStorage.getItem('current_session_id');
-      
-      if (!token || !sessionId) {
-        // Fallback: save to localStorage
+        const token = localStorage.getItem('access');
+        const sessionId = localStorage.getItem('current_session_id');
+        
+        console.log('=== saveAnswerToDatabase DEBUG ===');
+        console.log('Question Data:', questionData);
+        console.log('Answer length:', answer.length);
+        console.log('Answer Type:', answerType);
+        console.log('Session ID:', sessionId);
+        console.log('Current Step:', currentStep);
+        
+        if (!token || !sessionId) {
+            console.log('No token or session, saving to localStorage');
+            const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
+            savedAnswers.push({
+                question: questionData.text,
+                answer: answer,
+                aspect: getAspectFromStep(currentStep),
+                kegiatan: currentStep,
+                question_id: questionData.id,
+                storage_key: questionData.storage_key,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
+            return { status: 'saved_locally' };
+        }
+
+        // ⭐⭐ STRUCTURE YANG DIPERBAIKI - SESUAI DENGAN BACKEND ⭐⭐
+        const submitData = {
+            session_id: sessionId,
+            step_id: currentStep,  // Pastikan ini sesuai
+            question_data: {
+                id: questionData.id || `question_${Date.now()}`,
+                storage_key: questionData.storage_key || `storage_${questionData.id}`,
+                text: questionData.text || questionData.question_text || 'Pertanyaan tidak tersedia',
+                type: questionData.type || answerType
+            },
+            answer_text: answer.substring(0, 5000),  // Batasi panjang
+            answer_type: answerType
+        };
+
+        console.log('Submitting answer data to backend:', submitData);
+
+        // Kirim ke backend
+        const response = await fetch(`${API_BASE_URL}/chat/answer/submit/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader()
+            },
+            body: JSON.stringify(submitData)
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Answer saved to database successfully:', data);
+            return data;
+        } else {
+            // Dapatkan detail error
+            let errorMessage = `HTTP ${response.status}: Failed to save answer`;
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorMessage;
+                console.error('Error response from backend:', errorData);
+            } catch (e) {
+                console.error('Error parsing error response:', e);
+            }
+            
+            throw new Error(errorMessage);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error saving answer to database:', error);
+        
+        // Fallback to localStorage
         const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
         savedAnswers.push({
-          question: questionData.text,
-          answer,
-          aspect: getAspectFromStep(currentStep),
-          kegiatan: currentStep,
-          question_id: questionData.id,
-          timestamp: new Date().toISOString()
+            question: questionData.text,
+            answer: answer,
+            aspect: getAspectFromStep(currentStep),
+            kegiatan: currentStep,
+            question_id: questionData.id,
+            storage_key: questionData.storage_key,
+            timestamp: new Date().toISOString(),
+            error: error.message
         });
         localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
-        return { status: 'saved_locally' };
-      }
-
-      // Gunakan endpoint yang sesuai dengan urls.py
-      const response = await fetch(`${API_BASE_URL}/chat/answer/submit/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader()
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          activity_id: currentStep,
-          question_data: questionData,
-          answer_text: answer,
-          answer_type: answerType,
-          comic_slug: comicSlug,
-          episode_slug: episodeSlug
-        })
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Answer saved to database:', data);
-        return data;
-      } else {
-        throw new Error('Failed to save answer to database');
-      }
-    } catch (error) {
-      console.error('Error saving answer to database:', error);
-      // Fallback to localStorage
-      const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
-      savedAnswers.push({
-        question: questionData.text,
-        answer,
-        aspect: getAspectFromStep(currentStep),
-        kegiatan: currentStep,
-        question_id: questionData.id,
-        timestamp: new Date().toISOString()
-      });
-      localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
-      return { status: 'saved_locally' };
+        
+        return { 
+            status: 'saved_locally',
+            error: error.message
+        };
     }
-  };
-
+};
   // Fungsi untuk load pertanyaan reflektif
   const loadReflectiveQuestions = async () => {
     try {
@@ -812,44 +847,45 @@ const EcombotChat = () => {
   };
 
   // Fungsi untuk menandai kegiatan sebagai selesai
-  const completeActivity = async (activityId) => {
+const completeActivity = async (stepId) => {  // ⭐⭐ Ubah parameter jadi stepId ⭐⭐
     setProgress(prev => {
-      const completed = [...prev.completed];
-      if (!completed.includes(activityId)) {
-        completed.push(activityId);
-      }
-      return {
-        ...prev,
-        completed,
-        current: activityId
-      };
+        const completed = [...prev.completed];
+        if (!completed.includes(stepId)) {
+            completed.push(stepId);
+        }
+        return {
+            ...prev,
+            completed,
+            current: stepId
+        };
     });
 
     // Simpan ke database jika user login
     try {
-      const token = localStorage.getItem('access');
-      const sessionId = localStorage.getItem('current_session_id');
-      
-      if (token && sessionId) {
-        await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader()
-          },
-          body: JSON.stringify({
-            session_id: sessionId,
-            activity_id: activityId,
-            comic_slug: comicSlug,
-            episode_slug: episodeSlug
-          })
-        });
-      }
+        const token = localStorage.getItem('access');
+        const sessionId = localStorage.getItem('current_session_id');
+        
+        if (token && sessionId) {
+            await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    step_id: stepId,  // ⭐⭐ GUNAKAN step_id ⭐⭐
+                    comic_slug: comicSlug,
+                    episode_slug: episodeSlug
+                })
+            });
+            
+            console.log(`✅ Step ${stepId} marked as completed`);
+        }
     } catch (error) {
-      console.error('Error completing activity in database:', error);
+        console.error('Error completing activity in database:', error);
     }
-  };
-
+};
   // Fungsi untuk memeriksa apakah kegiatan dapat diakses
   const canAccessKegiatan = (kegiatanNum) => {
     const targetKegiatan = kegiatanList.find(k => k.num === kegiatanNum);
@@ -1106,25 +1142,26 @@ const redirectToEcomic = async () => {
   };
 
   // Fungsi untuk memproses jawaban pertanyaan
-  const processQuestionAnswer = async (input) => {
+  // Fungsi untuk memproses jawaban pertanyaan - VERSI DIPERBAIKI
+const processQuestionAnswer = async (input) => {
     if (!input.trim()) {
-      setMessages(prev => [...prev, { 
-        from: 'bot', 
-        text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
-        data: {
-          id: currentStep,
-          next_keywords: []
-        }
-      }]);
-      return;
+        setMessages(prev => [...prev, { 
+            from: 'bot', 
+            text: "❌ Jawaban tidak boleh kosong. Silakan ketik jawaban Anda untuk melanjutkan:",
+            data: {
+                id: currentStep,
+                next_keywords: []
+            }
+        }]);
+        return;
     }
 
     const currentIndex = currentQuestionIndex;
     const currentQuestion = currentQuestions[currentIndex];
     
     if (!currentQuestion) {
-      console.error('No current question found at index:', currentIndex);
-      return;
+        console.error('No current question found at index:', currentIndex);
+        return;
     }
     
     console.log('Processing answer for question:', currentQuestion, 'Answer:', input);
@@ -1133,91 +1170,124 @@ const redirectToEcomic = async () => {
     setMessages(prev => [...prev, { from: 'user', text: input }]);
     await saveMessageToDatabase('user', 'User', input, currentStep, { question_id: currentQuestion.id });
     
-    // Simpan jawaban ke database
+    // Simpan jawaban ke database - DENGAN ERROR HANDLING YANG LEBIH BAIK
     try {
-      const result = await saveAnswerToDatabase(currentQuestion, input, currentQuestion.type || 'essay');
-      console.log('Answer saved:', result);
-      
-      saveAnswer(currentQuestion.storage_key, input);
-      
-      if (currentIndex < currentQuestions.length - 1) {
-        const nextIndex = currentIndex + 1;
-        const nextQuestion = currentQuestions[nextIndex];
+        console.log('=== ATTEMPTING TO SAVE ANSWER ===');
+        const result = await saveAnswerToDatabase(currentQuestion, input, currentQuestion.type || 'essay');
+        console.log('✅ Answer saved result:', result);
         
-        setCurrentQuestionIndex(nextIndex);
-        setMessages(prev => [...prev, { 
-          from: 'bot', 
-          text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
-          data: {}
-        }]);
+        // Simpan ke state lokal juga
+        saveAnswer(currentQuestion.storage_key, input);
         
-        setWaitingForAnswer(`question_${nextIndex}`);
-        console.log('Set waitingForAnswer to next question:', `question_${nextIndex}`);
-        
-      } else {
-        console.log('All questions completed for step:', currentStep);
-        
-        let nextKeywords = [];
-        const stepData = getStepData(currentStep);
-        
-        if (stepData && stepData.next_keywords) {
-          nextKeywords = [...stepData.next_keywords];
+        if (currentIndex < currentQuestions.length - 1) {
+            const nextIndex = currentIndex + 1;
+            const nextQuestion = currentQuestions[nextIndex];
+            
+            setCurrentQuestionIndex(nextIndex);
+            setMessages(prev => [...prev, { 
+                from: 'bot', 
+                text: `✅ Terima kasih! Jawaban Anda telah disimpan.\n\n📝 **Pertanyaan berikutnya:**\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
+                data: {}
+            }]);
+            
+            setWaitingForAnswer(`question_${nextIndex}`);
+            console.log('Set waitingForAnswer to next question:', `question_${nextIndex}`);
+            
         } else {
-          const navigationMap = {
-            'pertanyaan_1': ["mulai eksplorasi 2", "menu sebelumnya"],
-            'pertanyaan_2': ["mulai eksplorasi 3", "menu sebelumnya"],
-            'pertanyaan_3': ["mulai eksplorasi 4", "menu sebelumnya"],
-            'pertanyaan_4': ["mulai eksplorasi 5", "menu sebelumnya"],
-            'mari_merancang': ["mulai eksplorasi 7", "menu sebelumnya"],
-            'ayo_berkreasi': ["mulai eksplorasi 8", "menu sebelumnya"],
-            'pertanyaan_reflektif': ["Eksplorasi Selesai", "menu sebelumnya"]
-          };
-          
-          nextKeywords = navigationMap[currentStep] || ["menu sebelumnya"];
+            console.log('All questions completed for step:', currentStep);
+            
+            let nextKeywords = [];
+            const stepData = getStepData(currentStep);
+            
+            if (stepData && stepData.next_keywords) {
+                nextKeywords = [...stepData.next_keywords];
+            } else {
+                const navigationMap = {
+                    'pertanyaan_1': ["mulai eksplorasi 2", "menu sebelumnya"],
+                    'pertanyaan_2': ["mulai eksplorasi 3", "menu sebelumnya"],
+                    'pertanyaan_3': ["mulai eksplorasi 4", "menu sebelumnya"],
+                    'pertanyaan_4': ["mulai eksplorasi 5", "menu sebelumnya"],
+                    'mari_merancang': ["mulai eksplorasi 7", "menu sebelumnya"],
+                    'ayo_berkreasi': ["mulai eksplorasi 8", "menu sebelumnya"],
+                    'pertanyaan_reflektif': ["Eksplorasi Selesai", "menu sebelumnya"]
+                };
+                
+                nextKeywords = navigationMap[currentStep] || ["menu sebelumnya"];
+            }
+            
+            setMessages(prev => [...prev, { 
+                from: 'bot', 
+                text: "🎉 **Terima kasih!**\nAnda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
+                data: {
+                    id: currentStep,
+                    next_keywords: nextKeywords
+                }
+            }]);
+            
+            setWaitingForAnswer(null);
+            setCurrentQuestions([]);
+            setCurrentQuestionIndex(0);
+            console.log('Reset question state - waitingForAnswer set to null');
+            
+            let kegiatanStep = currentStep;
+            if (currentStep.startsWith('pertanyaan_')) {
+                kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
+            } else if (currentStep === 'mari_merancang') {
+                kegiatanStep = 'kegiatan_6';
+            } else if (currentStep === 'ayo_berkreasi') {
+                kegiatanStep = 'kegiatan_7';
+            }
+            
+            if (kegiatanStep !== currentStep) {
+                completeActivity(kegiatanStep);
+            }
+        }
+        
+    } catch (error) {
+        console.error('❌ Error saving answer:', error);
+        
+        // Tampilkan pesan error yang lebih informatif
+        let errorMessage = "⚠️ Terjadi kesalahan saat menyimpan jawaban. ";
+        
+        if (error.message.includes('401')) {
+            errorMessage += "Sesi Anda mungkin telah berakhir. Silakan login kembali.";
+        } else if (error.message.includes('500')) {
+            errorMessage += "Server sedang mengalami masalah. Jawaban disimpan secara lokal.";
+        } else {
+            errorMessage += "Jawaban telah dicatat secara lokal dan akan disinkronisasi nanti.";
         }
         
         setMessages(prev => [...prev, { 
-          from: 'bot', 
-          text: "🎉 **Terima kasih!**\nAnda telah menyelesaikan semua pertanyaan untuk kegiatan ini. Jawaban Anda telah disimpan.\n\nSilakan pilih opsi berikut untuk melanjutkan:",
-          data: {
-            id: currentStep,
-            next_keywords: nextKeywords
-          }
+            from: 'bot', 
+            text: errorMessage,
+            data: {
+                id: currentStep,
+                next_keywords: []
+            }
         }]);
         
-        setWaitingForAnswer(null);
-        setCurrentQuestions([]);
-        setCurrentQuestionIndex(0);
-        console.log('Reset question state - waitingForAnswer set to null');
-        
-        let kegiatanStep = currentStep;
-        if (currentStep.startsWith('pertanyaan_')) {
-          kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
-        } else if (currentStep === 'mari_merancang') {
-          kegiatanStep = 'kegiatan_6';
-        } else if (currentStep === 'ayo_berkreasi') {
-          kegiatanStep = 'kegiatan_7';
+        // Tetap lanjutkan ke pertanyaan berikutnya meski ada error
+        if (currentIndex < currentQuestions.length - 1) {
+            const nextIndex = currentIndex + 1;
+            const nextQuestion = currentQuestions[nextIndex];
+            
+            setCurrentQuestionIndex(nextIndex);
+            setMessages(prev => [...prev, { 
+                from: 'bot', 
+                text: `Mari lanjut ke pertanyaan berikutnya:\n\n${nextQuestion.text}\n\nSilakan ketik jawaban Anda:`,
+                data: {}
+            }]);
+            setWaitingForAnswer(`question_${nextIndex}`);
+        } else {
+            // Selesaikan sesi pertanyaan meski ada error
+            setWaitingForAnswer(null);
+            setCurrentQuestions([]);
+            setCurrentQuestionIndex(0);
         }
-        
-        if (kegiatanStep !== currentStep) {
-          completeActivity(kegiatanStep);
-        }
-      }
-      
-    } catch (error) {
-      console.error('Error saving answer:', error);
-      setMessages(prev => [...prev, { 
-        from: 'bot', 
-        text: "⚠️ Jawaban Anda telah dicatat secara lokal. Terima kasih!",
-        data: {
-          id: currentStep,
-          next_keywords: []
-        }
-      }]);
     }
     
     scrollChat();
-  };
+};
 
   // Fungsi untuk mendapatkan step berikutnya setelah selesai menjawab pertanyaan
   const getNextStepAfterQuestions = () => {
