@@ -116,7 +116,7 @@ const fallbackChatFlow = {
       id: "forum_diskusi",
       type: "bot_message",
       character: "Aquano",
-      message: "Selamat datang di Tanya Ecombot! Silakan ajukan pertanyaan Anda tentang berbagai topik pembelajaran. Saya akan membantu menjawab pertanyaan Anda berdasarkan materi yang tersedia.\n\nAnda juga bisa kembali ke alur pembelajaran dengan mengetik 'menu sebelumnya'.",
+      message: "Selamat datang di Tanya ECOMBOT! Silakan ajukan pertanyaan Anda tentang berbagai topik pembelajaran. Saya akan membantu menjawab pertanyaan Anda berdasarkan materi yang tersedia.\n\nAnda juga bisa kembali ke alur pembelajaran dengan mengetik 'menu sebelumnya'.",
       next_keywords: ["menu sebelumnya"]
     }
   },
@@ -2219,21 +2219,21 @@ const processQuestionAnswer = async (input) => {
             </div>
             {/* AVATAR AQUANO */}
             <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center">
-              <div className="w-72 h-32 flex items-center justify-center">
+              <div className="w-56 h-32 flex items-center justify-center">
                 <img
                   src={Aquano}
                   alt="Aquano"
-                  className="w-96 h-auto transition-all duration-300"
+                  className="w-56 h-auto transition-all duration-300"
                 />
               </div>
               <span className="text-lime-700 font-semibold mt-1 z-20 relative bg-white !px-3 !py-0.5 rounded-full shadow-sm border border-gray-200 text-sm">
-                Ecombot
+                ECOMBOT
               </span>
             </div>
           </div>
 
           {/* ========== KANAN: HALAMAN CHAT ========== */}
-          <div className="w-full md:w-2/3 flex flex-col h-full border-l border-gray-300 bg-white relative">
+          <div className="w-full md:w-full flex flex-col h-full border-l border-gray-300 bg-white relative">
             {/* Tombol Menu */}
             <button
               onClick={() => setShowKegiatan(true)}
@@ -2412,7 +2412,7 @@ const processQuestionAnswer = async (input) => {
                 />
               </div>
               <span className="text-lime-700 font-semibold !mt-4 z-20 relative bg-white !px-3 !py-0.5 rounded-full shadow-sm border border-gray-200 text-xs">
-                Ecombot
+                ECOMBOT
               </span>
             </div>
 
