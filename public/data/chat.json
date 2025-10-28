@@ -12,7 +12,7 @@
       "type": "bot_message",
       "character": "Aquano",
       "title": "Kimia Hijau (<i>Green Chemistry</i>)",
-      "message": "Sebelum membahas tradisi Mapag Hujan, <i>Ecombot</i> akan mengulas terlebih dahulu materi kimia hijau atau <i>green chemistry</i>.\n\nKimia hijau (<i>green chemistry</i>) adalah pendekatan yang bertujuan menjaga lingkungan supaya tetap bersih dan aman. Intinya, semua proses dan produk kimia dibuat agar tidak menimbulkan limbah atau zat berbahaya bagi manusia dan alam. Ada 12 prinsip kimia hijau yang ditampilkan dalam gambar berikut ini!\n\nKimia hijau memiliki peranan penting dalam mewujudkan lingkungan agar tetap terjaga dan terhindar dari bencana alam, pemanasan global, dan terhindar dari paparan bahan kimia berbahaya.\n\nGimana? Apakah sudah paham dengan peran kimia hijau dan pentingnya kimia hijau? Jika belum, silahkan tanyakan dan diskusikan.",
+      "message": "Sebelum membahas tradisi Mapag Hujan, <i>Ecombot</i> akan mengulas terlebih dahulu materi kimia hijau atau <i>green chemistry</i>.\n\nKimia hijau (<i>green chemistry</i>) adalah pendekatan yang bertujuan menjaga lingkungan tetap bersih dengan meminimalkan limbah dan aman dari paparan bahan kimia berbahaya. Ada 12 prinsip kimia hijau yang ditampilkan dalam gambar berikut ini!\n\nKimia hijau memiliki peranan penting dalam mewujudkan lingkungan agar tetap terjaga dan terhindar dari bencana alam, pemanasan global, dan terhindar dari paparan bahan kimia berbahaya.\n\nGimana? Apakah sudah paham dengan peran kimia hijau dan pentingnya kimia hijau? Jika belum, silahkan tanyakan dan diskusikan.",
       "images": [
         {
           "url": "/assets/12-prinsip-kimia-hijau.png",
@@ -40,7 +40,7 @@
       "type": "bot_message",
       "character": "Aquano",
       "title": "Kegiatan Eksplorasi 1: Masalah Sampah dan Banjir",
-      "message": "Tahukah kamu? Musim hujan sering menimbulkan banjir di berbagai wilayah. Salah satu penyebab utama adalah menumpuknya sampah di sungai, selokan, dan gorong-gorong, sehingga aliran air menjadi tersumbat. \n\nSelain upaya pemerintah, masyarakat diminta berperan aktif dengan tidak membuang sampah sembarangan ke sungai maupun selokan. Kesadaran warga sangat penting karena meski pemerintah membersihkan, masalah banjir akan terus terjadi jika sampah tetap dibuang sembarangan.",
+      "message": "Tahukah kamu? Musim hujan sering menimbulkan banjir di berbagai wilayah karena terjadi peningkatan intensitas dan volume curah hujan yang signifikan. Banjir bahkan dapat diperparah oleh ulah manusia dengan adanya sampah yang menumpuk di sungai, selokan, dan gorong-gorong, sehingga aliran air tersumbat. \n\nSelain upaya pemerintah, masyarakat diminta berperan aktif dengan tidak membuang sampah sembarangan ke sungai maupun selokan. Kesadaran warga sangat penting karena meski pemerintah membersihkan, masalah banjir akan terus terjadi jika sampah tetap dibuang sembarangan.",
       "images": [
         {
           "url": "/assets/banjir.png",
@@ -189,7 +189,15 @@
       "id": "kegiatan_5",
       "type": "bot_message",
       "character": "Aquano",
-      "title": "Kegiatan Eksplorasi 5: Aspek Rekayasa (<i>Engineering</i>)",
+      "title": "Kegiatan Eksplorasi 5: Aspek Robotik (<i>Robotics</i>)",
+      "message": "Halo! Sekarang kamu memasuki aspek Robotics. Tahukah kamu? Aspek ini menekankan pemanfaatan media robot virtual berbentuk chatbot yang sedang kamu gunakan ini, yaitu ECOMBOT, sebagai pemandu eksplorasi dalam literasi lingkungan. Melalui ECOMBOT, kamu bisa berinteraksi langsung, mengeksplorasi informasi tentang tradisi Mapag Hujan, dan memahami bagaimana menjaga lingkungan secara menyenangkan dan interaktif. Mari lanjutkan untuk eksplorasi berikutnya!",
+      "next_keywords": ["Mulai Eksplorasi 6", "Tanya Ecombot", "Menu Sebelumnya"]
+    },
+    "kegiatan_6": {
+      "id": "kegiatan_6",
+      "type": "bot_message",
+      "character": "Aquano",
+      "title": "Kegiatan Eksplorasi 6: Aspek Rekayasa (<i>Engineering</i>)",
       "message": "Aspek ini berhubungan dengan cara membuat solusi nyata lewat rekayasa atau teknik sederhana. Dalam kegiatan Mapag Hujan, masyarakat menerapkan sistem drainase alami dengan membuat lubang biopori. Lubang ini membantu air hujan meresap ke tanah dan mencegah banjir, sekaligus mengubah sampah organik jadi kompos yang bermanfaat bagi tanah.",
       "next_keywords": ["Mari Merancang", "Tanya Ecombot", "Menu Sebelumnya"]
     },
@@ -199,22 +207,22 @@
       "character": "Aquano",
       "questions": [
         {
-          "id": "q_kegiatan_5",
+          "id": "q_kegiatan_6",
           "text": "Rancanglah biopori versi kelompokmu dengan menggunakan bahan yang ada di sekitar seperti botol bekas, ember, kaleng! Perhatikan bahan yang digunakan, ukuran lubang, dan cara penempatannya di lingkungan rumah atau sekolah.",
           "type": "challenge",
           "required": true,
-          "storage_key": "answer:kegiatan_5",
+          "storage_key": "answer:kegiatan_6",
           "max_length": 1000,
           "allow_image_upload": true
         }
       ],
-      "next_keywords": ["Mulai Eksplorasi 6", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 7", "Menu Sebelumnya"]
     },
-    "kegiatan_6": {
-      "id": "kegiatan_6",
+    "kegiatan_7": {
+      "id": "kegiatan_7",
       "type": "bot_message",
       "character": "Aquano",
-      "title": "Kegiatan Eksplorasi 6: Aspek Seni (<i>Arts</i>)",
+      "title": "Kegiatan Eksplorasi 7: Aspek Seni (<i>Arts</i>)",
       "message": "Mapag Hujan hadir dalam berbagai ekspresi budaya masyarakat. Di Subang, tradisi ini sering disertai dengan pembuatan poster maupun spanduk bertema lingkungan yang menekankan pentingnya menjaga kebersihan sungai. Selain itu, terdapat pula pertunjukan seni tradisional dan modern, seperti musik, tari, dan drama, yang dikemas dengan pesan moral tentang kelestarian lingkungan.",
       "images": [
         {
@@ -238,22 +246,22 @@
       "character": "Aquano",
       "questions": [
         {
-          "id": "q_kegiatan_6",
+          "id": "q_kegiatan_7",
           "text": "Ciptakan karya seni seperti gambar, poster, atau puisi yang bertema menjaga lingkungan berdasarkan prinsip kimia hijau!",
           "type": "creative",
           "required": true,
-          "storage_key": "answer:kegiatan_6",
+          "storage_key": "answer:kegiatan_7",
           "max_length": 2000,
           "allow_image_upload": true
         }
       ],
-      "next_keywords": ["Mulai Eksplorasi 7", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 8", "Menu Sebelumnya"]
     },
-    "kegiatan_7": {
-      "id": "kegiatan_7",
+    "kegiatan_8": {
+      "id": "kegiatan_8",
       "type": "bot_message",
       "character": "Aquano",
-      "title": "Kegiatan Eksplorasi 7: Aspek Matematika (<i>Mathematics</i>)",
+      "title": "Kegiatan Eksplorasi 8: Aspek Matematika (<i>Mathematics</i>)",
       "message": "Aspek ini digunakan untuk menganalisis efektivitas dukungan kegiatan Mapag Hujan dalam mendukung mitigasi banjir dan menjaga keseimbangan lingkungan. \n\nAnalisis kuantitatif memberikan gambaran konkret mengenai hasil dan dampak dari kegiatan tersebut, sebagai contoh, volume genangan banjir Kota Bandung mengalami penurunan signifikan dari lebih dari 99.000 m³ pada tahun 2015 menjadi 36.000 m³ pada tahun 2023. Besar penurunan volume dapat dihitung sebagai:\n\nPersentase penurunan volume genangan = (99.000-36.000)/99.000 × 100% = 63,6%\n\nArtinya, terjadi penurunan volume genangan air sebesar 63,6% dalam kurun waktu delapan tahun, menunjukkan adanya dampak nyata dari program pengendalian banjir dan pembangunan infrastruktur hijau. \n\nMeskipun hasil ini tidak sepenuhnya disebabkan oleh tradisi Mapag Hujan, kegiatan tersebut memiliki peran penting dalam meningkatkan kesadaran dan partisipasi masyarakat terhadap pentingnya menjaga kebersihan lingkungan dan pengelolaan air. Kesadaran kolektif inilah yang menjadi langkah awal dalam mendukung keberhasilan program mitigasi banjir secara berkelanjutan.",
       "next_keywords": ["Pertanyaan Reflektif", "Tanya Ecombot", "Menu Sebelumnya"]
     },
@@ -263,19 +271,19 @@
       "character": "Aquano",
       "questions": [
         {
-          "id": "q_kegiatan_7_1",
+          "id": "q_kegiatan_8_1",
           "text": "Menurutmu, apakah tradisi Mapag Hujan dapat terus dilestarikan untuk membantu mengurangi masalah lingkungan di masa depan? Jelaskan pendapatmu?",
           "type": "reflective",
           "required": true,
-          "storage_key": "answer:kegiatan_7_1",
+          "storage_key": "answer:kegiatan_8_1",
           "max_length": 500
         },
         {
-          "id": "q_kegiatan_7_2",
+          "id": "q_kegiatan_8_2",
           "text": "Bagaimana menurutmu, apakah adaptasi Tradisi Mapag Hujan sejalan dengan prinsip kimia hijau? Jelaskan",
           "type": "reflective",
           "required": true,
-          "storage_key": "answer:kegiatan_7_2",
+          "storage_key": "answer:kegiatan_8_2",
           "max_length": 500
         }
       ],
@@ -343,31 +351,36 @@
       "Menu Sebelumnya": "kegiatan_4"
     },
     "kegiatan_5": {
-      "Mari Merancang": "mari_merancang",
+      "Mulai Eksplorasi 6": "kegiatan_6",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_4"
     },
-    "mari_merancang": {
-      "Mulai Eksplorasi 6": "kegiatan_6",
-      "Menu Sebelumnya": "kegiatan_5"
-    },
     "kegiatan_6": {
-      "Ayo Berkreasi": "ayo_berkreasi",
+      "Mari Merancang": "mari_merancang",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_5"
     },
-    "ayo_berkreasi": {
+    "mari_merancang": {
       "Mulai Eksplorasi 7": "kegiatan_7",
       "Menu Sebelumnya": "kegiatan_6"
     },
     "kegiatan_7": {
-      "Pertanyaan Reflektif": "pertanyaan_reflektif",
+      "Ayo Berkreasi": "ayo_berkreasi",
       "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_6"
     },
+    "ayo_berkreasi": {
+      "Mulai Eksplorasi 8": "kegiatan_8",
+      "Menu Sebelumnya": "kegiatan_7"
+    },
+    "kegiatan_8": {
+      "Pertanyaan Reflektif": "pertanyaan_reflektif",
+      "Tanya Ecombot": "tanya_ecombot",
+      "Menu Sebelumnya": "kegiatan_7"
+    },
     "pertanyaan_reflektif": {
       "Eksplorasi Selesai": "completion",
-      "Menu Sebelumnya": "kegiatan_7"
+      "Menu Sebelumnya": "kegiatan_8"
     },
     "completion": {
       "Tanya Ecombot": "tanya_ecombot",

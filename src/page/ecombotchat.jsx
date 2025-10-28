@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Routes, Route, useParams } from 'react-router-dom';
-import Aquano from "../assets/aquano.png";
-import Head from "../assets/head.png";
-import User from "../assets/user.png";
+import Aquano from "../assets/aquano.webp";
+import Head from "../assets/head.webp";
+import User from "../assets/user.webp";
 import { ArrowRight } from "lucide-react";
 import KimiaHijau from "./KimiaHijau";
 import Kegiatan1 from "./Kegiatan1";
@@ -12,6 +12,7 @@ import Kegiatan4 from "./Kegiatan4";
 import Kegiatan5 from "./Kegiatan5";
 import Kegiatan6 from "./Kegiatan6";
 import Kegiatan7 from "./Kegiatan7";
+import Kegiatan8 from "./Kegiatan8";
 import { useChatFlow } from '../hooks/useChatFlow';
 
 // Konstanta untuk base URL API
@@ -79,21 +80,28 @@ const fallbackChatFlow = {
       id: "kegiatan_5",
       type: "bot_message",
       character: "Aquano",
-      message: "Ini adalah Eksplorasi 5: Inovasi Berkelanjutan. Mari kita rancang solusi hijau.",
-      next_keywords: ["mari merancang"]
+      message: "Ini adalah Eksplorasi 5: Robotika",
+      next_keywords: ["pertanyaan 5"]
     },
     kegiatan_6: {
       id: "kegiatan_6",
       type: "bot_message",
       character: "Aquano",
-      message: "Ini adalah Eksplorasi 6: Kreativitas Hijau. Saatnya berkreasi dengan prinsip kimia hijau.",
-      next_keywords: ["ayo berkreasi"]
+      message: "Ini adalah Eksplorasi 6: Inovasi Berkelanjutan. Mari kita rancang solusi hijau.",
+      next_keywords: ["mari merancang"]
     },
     kegiatan_7: {
       id: "kegiatan_7",
       type: "bot_message",
       character: "Aquano",
-      message: "Ini adalah Eksplorasi 7: Refleksi Pembelajaran. Mari kita renungkan apa yang telah dipelajari.",
+      message: "Ini adalah Eksplorasi 7: Kreativitas Hijau. Saatnya berkreasi dengan prinsip kimia hijau.",
+      next_keywords: ["ayo berkreasi"]
+    },
+    kegiatan_8: {
+      id: "kegiatan_8",
+      type: "bot_message",
+      character: "Aquano",
+      message: "Ini adalah Eksplorasi 8: Refleksi Pembelajaran. Mari kita renungkan apa yang telah dipelajari.",
       next_keywords: ["pertanyaan reflektif"]
     },
     completion: {
@@ -117,80 +125,88 @@ const fallbackChatFlow = {
       "siap": "kimia_hijau"
     },
     kimia_hijau: {
-      "tanya ecombot": "forum_diskusi",
+      "Tanya Ecombot": "tanya_ecombot",
       "sudah": "pre_kegiatan"
     },
+    tanya_ecombot: {
+      "Menu Sebelumnya": "kimia_hijau"
+    },
     pre_kegiatan: {
-      "mulai eksplorasi 1": "kegiatan_1",
-      "tanya ecombot": "forum_diskusi",
+      "Mulai Eksplorasi 1": "kegiatan_1",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kimia_hijau"
     },
     kegiatan_1: {
-      "pertanyaan 1": "pertanyaan_1",
-      "tanya ecombot": "forum_diskusi",
+      "Pertanyaan 1": "pertanyaan_1",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "pre_kegiatan"
     },
     pertanyaan_1: {
-      "mulai eksplorasi 2": "kegiatan_2",
+      "Mulai Eksplorasi 2": "kegiatan_2",
       "Menu Sebelumnya": "kegiatan_1"
     },
     kegiatan_2: {
-      "pertanyaan 2": "pertanyaan_2",
-      "tanya ecombot": "forum_diskusi",
+      "Pertanyaan 2": "pertanyaan_2",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_1"
     },
     pertanyaan_2: {
-      "mulai eksplorasi 3": "kegiatan_3",
+      "Mulai Eksplorasi 3": "kegiatan_3",
       "Menu Sebelumnya": "kegiatan_2"
     },
     kegiatan_3: {
-      "pertanyaan 3": "pertanyaan_3",
-      "tanya ecombot": "forum_diskusi",
+      "Pertanyaan 3": "pertanyaan_3",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_2"
     },
     pertanyaan_3: {
-      "mulai eksplorasi 4": "kegiatan_4",
+      "Mulai Eksplorasi 4": "kegiatan_4",
       "Menu Sebelumnya": "kegiatan_3"
     },
     kegiatan_4: {
-      "pertanyaan 4": "pertanyaan_4",
-      "tanya ecombot": "forum_diskusi",
+      "Pertanyaan 4": "pertanyaan_4",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_3"
     },
     pertanyaan_4: {
-      "mulai eksplorasi 5": "kegiatan_5",
+      "Mulai Eksplorasi 5": "kegiatan_5",
       "Menu Sebelumnya": "kegiatan_4"
     },
     kegiatan_5: {
-      "mari merancang": "mari_merancang",
-      "tanya ecombot": "forum_diskusi",
+      "Mulai Eksplorasi 6": "kegiatan_6",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_4"
     },
-    mari_merancang: {
-      "mulai eksplorasi 6": "kegiatan_6",
-      "Menu Sebelumnya": "kegiatan_5"
-    },
     kegiatan_6: {
-      "ayo berkreasi": "ayo_berkreasi",
-      "tanya ecombot": "forum_diskusi",
+      "Mari Merancang": "mari_merancang",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_5"
     },
-    ayo_berkreasi: {
-      "mulai eksplorasi 7": "kegiatan_7",
+    mari_merancang: {
+      "Mulai Eksplorasi 7": "kegiatan_7",
       "Menu Sebelumnya": "kegiatan_6"
     },
     kegiatan_7: {
-      "pertanyaan reflektif": "pertanyaan_reflektif",
+      "Ayo Berkreasi": "ayo_berkreasi",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_6"
+    },
+    ayo_berkreasi: {
+      "Mulai Eksplorasi 8": "kegiatan_8",
+      "Menu Sebelumnya": "kegiatan_7"
+    },
+    kegiatan_8: {
+      "Pertanyaan Reflektif": "pertanyaan_reflektif",
+      "Tanya Ecombot": "tanya_ecombot",
+      "Menu Sebelumnya": "kegiatan_7"
     },
     pertanyaan_reflektif: {
       "Eksplorasi Selesai": "completion",
-      "Menu Sebelumnya": "kegiatan_7"
+      "Menu Sebelumnya": "kegiatan_8"
     },
     completion: {
-      "tanya ecombot": "forum_diskusi",
-      "Menu Sebelumnya": "kegiatan_7",
-      "eksplorasi selesai": "redirect_ecomic"
+      "Tanya Ecombot": "tanya_ecombot",
+      "Menu Sebelumnya": "intro"
     },
     forum_diskusi: {
       "Menu Sebelumnya": "previous_step"
@@ -249,9 +265,10 @@ const EcombotChat = () => {
     { num: 2, path: '/kegiatan-2', name: 'Prinsip Kimia Hijau', stepKey: 'kegiatan_2', materi: 'Eksplorasi 2' },
     { num: 3, path: '/kegiatan-3', name: 'Aspek Sains (<i>Science</i>)', stepKey: 'kegiatan_3', materi: 'Eksplorasi 3' },
     { num: 4, path: '/kegiatan-4', name: 'Aspek Teknologi (<i>Technology</i>)', stepKey: 'kegiatan_4', materi: 'Eksplorasi 4' },
-    { num: 5, path: '/kegiatan-5', name: 'Aspek Rekayasa (<i>Engineering</i>)', stepKey: 'kegiatan_5', materi: 'Eksplorasi 5' },
-    { num: 6, path: '/kegiatan-6', name: 'Aspek Seni (<i>Arts</i>)', stepKey: 'kegiatan_6', materi: 'Eksplorasi 6' },
-    { num: 7, path: '/kegiatan-7', name: 'Aspek Matematika (<i>Mathematics</i>)', stepKey: 'kegiatan_7', materi: 'Eksplorasi 7' },
+    { num: 5, path: '/kegiatan-5', name: 'Aspek Robotika (<i>Robotics</i>)', stepKey: 'kegiatan_5', materi: 'Eksplorasi 5' },
+    { num: 6, path: '/kegiatan-6', name: 'Aspek Rekayasa (<i>Engineering</i>)', stepKey: 'kegiatan_6', materi: 'Eksplorasi 6' },
+    { num: 7, path: '/kegiatan-7', name: 'Aspek Seni (<i>Arts</i>)', stepKey: 'kegiatan_7', materi: 'Eksplorasi 7' },
+    { num: 8, path: '/kegiatan-8', name: 'Aspek Matematika (<i>Mathematics</i>)', stepKey: 'kegiatan_8', materi: 'Eksplorasi 8' },
   ];
 
   // Gunakan chatFlow yang aman (fallback jika undefined)
@@ -344,15 +361,15 @@ const EcombotChat = () => {
         }]);
         
         const savedProgress = localStorage.getItem('chatbot-progress');
-        if (savedProgress) {
-          const parsedProgress = JSON.parse(savedProgress);
-          if (!parsedProgress.visited) {
-            parsedProgress.visited = ['intro'];
-          }
-          setProgress(parsedProgress);
+      if (savedProgress) {
+        const parsedProgress = JSON.parse(savedProgress);
+        if (!parsedProgress.visited) {
+          parsedProgress.visited = ['intro'];
         }
-        return;
+        setProgress(parsedProgress);
       }
+      return; // Keluar tanpa menampilkan pesan
+    }
 
       // Coba load session yang ada atau buat baru
       const sessionId = localStorage.getItem('current_session_id');
@@ -368,11 +385,11 @@ const EcombotChat = () => {
     } catch (error) {
       console.error('Error starting session:', error);
       const introMessage = getStepData('intro');
-      setMessages([{ 
-        from: 'bot', 
-        text: introMessage.message,
-        data: introMessage
-      }]);
+    setMessages([{
+     from: 'bot',
+     text: introMessage.message,
+     data: introMessage
+    }]);
     }
   };
 
@@ -716,9 +733,10 @@ const EcombotChat = () => {
       'kegiatan_2': 'Environment', 
       'kegiatan_3': 'Science',
       'kegiatan_4': 'Technology',
-      'kegiatan_5': 'Engineering',
-      'kegiatan_6': 'Arts',
-      'kegiatan_7': 'Mathematic',
+      'kegiatan_5': 'Robotics',
+      'kegiatan_6': 'Engineering',
+      'kegiatan_7': 'Arts',
+      'kegiatan_8': 'Mathematic',
       'completion': 'Reflective',
       'mari_merancang': 'Engineering',
       'ayo_berkreasi': 'Arts'
@@ -1150,8 +1168,8 @@ const redirectToEcomic = async () => {
             'pertanyaan_2': ["mulai eksplorasi 3", "menu sebelumnya"],
             'pertanyaan_3': ["mulai eksplorasi 4", "menu sebelumnya"],
             'pertanyaan_4': ["mulai eksplorasi 5", "menu sebelumnya"],
-            'mari_merancang': ["mulai eksplorasi 6", "menu sebelumnya"],
-            'ayo_berkreasi': ["mulai eksplorasi 7", "menu sebelumnya"],
+            'mari_merancang': ["mulai eksplorasi 7", "menu sebelumnya"],
+            'ayo_berkreasi': ["mulai eksplorasi 8", "menu sebelumnya"],
             'pertanyaan_reflektif': ["Eksplorasi Selesai", "menu sebelumnya"]
           };
           
@@ -1176,9 +1194,9 @@ const redirectToEcomic = async () => {
         if (currentStep.startsWith('pertanyaan_')) {
           kegiatanStep = currentStep.replace('pertanyaan_', 'kegiatan_');
         } else if (currentStep === 'mari_merancang') {
-          kegiatanStep = 'kegiatan_5';
-        } else if (currentStep === 'ayo_berkreasi') {
           kegiatanStep = 'kegiatan_6';
+        } else if (currentStep === 'ayo_berkreasi') {
+          kegiatanStep = 'kegiatan_7';
         }
         
         if (kegiatanStep !== currentStep) {
@@ -1210,13 +1228,14 @@ const redirectToEcomic = async () => {
       'kegiatan_4': 'kegiatan_5',
       'kegiatan_5': 'kegiatan_6',
       'kegiatan_6': 'kegiatan_7',
-      'kegiatan_7': 'completion',
+      'kegiatan_7': 'kwgiatan_8',
+      'kegiatan_8': 'completion',
       'pertanyaan_1': 'kegiatan_2',
       'pertanyaan_2': 'kegiatan_3',
       'pertanyaan_3': 'kegiatan_4',
       'pertanyaan_4': 'kegiatan_5',
-      'mari_merancang': 'kegiatan_6',
-      'ayo_berkreasi': 'kegiatan_7'
+      'mari_merancang': 'kegiatan_7',
+      'ayo_berkreasi': 'kegiatan_8'
     };
     
     return stepMap[currentStep];
@@ -1927,15 +1946,16 @@ const redirectToEcomic = async () => {
       'kegiatan_5': '/ecombot/kegiatan-5',
       'kegiatan_6': '/ecombot/kegiatan-6',
       'kegiatan_7': '/ecombot/kegiatan-7',
+      'kegiatan_8': '/ecombot/kegiatan-8',
       'completion': '/ecombot',
       'forum_diskusi': '/ecombot',
       'pertanyaan_1': '/ecombot/kegiatan-1',
       'pertanyaan_2': '/ecombot/kegiatan-2',
       'pertanyaan_3': '/ecombot/kegiatan-3',
       'pertanyaan_4': '/ecombot/kegiatan-4',
-      'mari_merancang': '/ecombot/kegiatan-5',
-      'ayo_berkreasi': '/ecombot/kegiatan-6',
-      'pertanyaan_reflektif': '/ecombot/kegiatan-7'
+      'mari_merancang': '/ecombot/kegiatan-6',
+      'ayo_berkreasi': '/ecombot/kegiatan-7',
+      'pertanyaan_reflektif': '/ecombot/kegiatan-8'
     };
     
     if (stepMap[step]) {
@@ -2037,7 +2057,8 @@ const redirectToEcomic = async () => {
         '/ecombot/kegiatan-4': 'kegiatan_4',
         '/ecombot/kegiatan-5': 'kegiatan_5',
         '/ecombot/kegiatan-6': 'kegiatan_6',
-        '/ecombot/kegiatan-7': 'kegiatan_7'
+        '/ecombot/kegiatan-7': 'kegiatan_7',
+        '/ecombot/kegiatan-8': 'kegiatan_8'
       };
       
       const newStep = stepMap[`/ecombot${kegiatan.path}`];
@@ -2152,7 +2173,7 @@ const redirectToEcomic = async () => {
             </button>
 
             {/* AREA PESAN */}
-            <div className="flex-1 overflow-y-auto !p-4 !pb-48 !pt-20 !space-y-4 bg-cover bg-center bg-no-repeat bg-[url('/assets/background.png')]" id="messages">
+            <div className="flex-1 overflow-y-auto !p-4 !pb-48 !pt-20 !space-y-4 bg-cover bg-center bg-no-repeat bg-[url('/assets/BG.webp')]" id="messages">
                 {messages.map((message, index) => (
                 <div key={index} className={`flex items-end ${message.from === 'bot' ? '' : 'justify-end'}`}>
                     <div className={`flex flex-col !space-y-2 text-md leading-tight max-w-xs !mx-2 ${message.from === 'bot' ? 'order-2 items-start' : 'order-1 items-end'}`}>
@@ -2368,9 +2389,9 @@ const redirectToEcomic = async () => {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                   <h2 className="text-4xl font-bold text-lime-700 text-center">Daftar Eksplorasi</h2>
-                  {currentSession && (
+                  {/* {currentSession && (
                     <p className="text-xs text-gray-500">Session: {currentSession}</p>
-                  )}
+                  )} */}
                 </div>
                 <div className="!p-4 flex flex-col gap-4">
                   {activeKegiatanList.map((kegiatan) => (
@@ -2438,6 +2459,7 @@ const redirectToEcomic = async () => {
           <Route path="/ecombot/kegiatan-5" element={<Kegiatan5 />} />
           <Route path="/ecombot/kegiatan-6" element={<Kegiatan6 />} />
           <Route path="/ecombot/kegiatan-7" element={<Kegiatan7 />} />
+          <Route path="/ecombot/kegiatan-8" element={<Kegiatan8 />} />
         </Routes>
 
          <style>
