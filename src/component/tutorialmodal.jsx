@@ -15,19 +15,19 @@ const TutorialModal = ({ isOpen, onClose }) => {
         id: 1,
         image: '/item/laptop/tutor_1.webp',
         title: 'HALAMAN MASUK: AKSES AWAL MEDIA ECOMBOT',
-        description: 'Halaman ini menampilkan tampilan awal media ECOMBOT yang digunakan untuk masuk ke akun pengguna. Pengguna dapat mengakses dengan memasukkan username dan password.'
+        description: 'Halaman ini menampilkan tampilan awal media ECOMBOT yang digunakan untuk masuk ke akun pengguna. Pengguna dapat mengakses dengan memasukkan <i>username</i> dan <i>password</i>.'
       },
       {
         id: 2,
         image: '/item/laptop/tutor_2.webp',
         title: 'HALAMAN 1: <i>COVER</i> ECOMBOT',
-        description: 'Halaman ini menampilkan cover ECOMBOT yang dilengkapi dengan berbagai tombol navigasi seperti tombol untuk berpindah halaman, membaca petunjuk penggunaan, mengubah tema tampilan, dan keluar dari media.'
+        description: 'Halaman ini menampilkan <i>cover</i> ECOMBOT yang dilengkapi dengan berbagai tombol navigasi seperti tombol untuk berpindah halaman, membaca petunjuk penggunaan, mengubah tema tampilan, dan keluar dari media.'
       },
       {
         id: 3,
         image: '/item/laptop/tutor_3.webp',
         title: 'HALAMAN 2: ISI <i>E-COMIC</i>',
-        description: 'Halaman ini menampilkan isi utama e-comic dalam media ECOMBOT, yang berisi percakapan antar tokoh dengan latar lingkungan alam. Pada halaman ini juga terdapat tombol navigasi untuk kembali ke halaman sebelumnya atau menuju halaman berikutnya.'
+        description: 'Halaman ini menampilkan isi utama <i>e-comic</i> dalam media ECOMBOT, yang berisi percakapan antar tokoh dengan latar lingkungan alam. Pada halaman ini juga terdapat tombol navigasi untuk kembali ke halaman sebelumnya atau menuju halaman berikutnya.'
       },
       {
         id: 4,
@@ -59,19 +59,19 @@ const TutorialModal = ({ isOpen, onClose }) => {
         id: 1,
         image: '/item/mobile/tutor_1.webp',
         title: 'HALAMAN MASUK: AKSES AWAL MEDIA ECOMBOT',
-        description: 'Halaman ini menampilkan tampilan awal media ECOMBOT yang digunakan untuk masuk ke akun pengguna. Pengguna dapat mengakses dengan memasukkan username dan password.'
+        description: 'Halaman ini menampilkan tampilan awal media ECOMBOT yang digunakan untuk masuk ke akun pengguna. Pengguna dapat mengakses dengan memasukkan <i>username</i> dan <i>password</i>.'
       },
       {
         id: 2,
         image: '/item/mobile/tutor_2.webp',
         title: 'HALAMAN 1: <i>COVER</i> ECOMBOT',
-        description: 'Halaman ini menampilkan cover ECOMBOT yang dilengkapi dengan berbagai tombol navigasi seperti tombol untuk berpindah halaman, membaca petunjuk penggunaan, mengubah tema tampilan, dan keluar dari media.'
+        description: 'Halaman ini menampilkan <i>cover</i> ECOMBOT yang dilengkapi dengan berbagai tombol navigasi seperti tombol untuk berpindah halaman, membaca petunjuk penggunaan, mengubah tema tampilan, dan keluar dari media.'
       },
       {
         id: 3,
         image: '/item/mobile/tutor_3.webp',
         title: 'HALAMAN 2: ISI <i>E-COMIC</i>',
-        description: 'Halaman ini menampilkan isi utama e-comic dalam media ECOMBOT, yang berisi percakapan antar tokoh dengan latar lingkungan alam. Pada halaman ini juga terdapat tombol navigasi untuk kembali ke halaman sebelumnya atau menuju halaman berikutnya.'
+        description: 'Halaman ini menampilkan isi utama <i>e-comic</i> dalam media ECOMBOT, yang berisi percakapan antar tokoh dengan latar lingkungan alam. Pada halaman ini juga terdapat tombol navigasi untuk kembali ke halaman sebelumnya atau menuju halaman berikutnya.'
       },
       {
         id: 4,
