@@ -548,24 +548,32 @@
   }
 
   .tutorial-content {
-    padding: 70px 20px 20px;
+    padding: 70px 20px 16px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    align-items: flex-start;
   }
 
   .tutorial-slide {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
     align-items: flex-start;
+    width: 100%;
   }
 
   .tutorial-image-wrapper {
     width: 100%;
-    max-height: none;
-    aspect-ratio: 9/16;
+    height: auto;
+    max-height: 55vh;
+    min-height: 300px;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     border: 2px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
 
   .dark-mode .tutorial-image-wrapper {
@@ -574,8 +582,10 @@
   }
 
   .tutorial-image {
-    max-height: none;
-    height: 100%;
+    width: 100%;
+    height: auto;
+    max-height: 55vh;
+    object-fit: contain;
   }
 
   .tutorial-text {
@@ -670,11 +680,20 @@
 /* ===== Small Mobile (< 400px) ===== */
 @media (max-width: 399px) {
   .tutorial-content {
-    padding: 65px 16px 16px;
+    padding: 65px 16px 14px;
   }
 
   .tutorial-slide {
-    gap: 20px;
+    gap: 18px;
+  }
+
+  .tutorial-image-wrapper {
+    max-height: 50vh;
+    min-height: 280px;
+  }
+
+  .tutorial-image {
+    max-height: 50vh;
   }
 
   .tutorial-text {
@@ -752,16 +771,23 @@
   }
 
   .tutorial-image-wrapper {
-    max-height: 60vh;
-    aspect-ratio: 16/9;
+    max-height: 55vh;
+    min-height: auto;
+    height: 100%;
+  }
+
+  .tutorial-image {
+    max-height: 55vh;
+    width: 100%;
+    height: 100%;
   }
 
   .tutorial-text {
+    text-align: left;
     gap: 12px;
   }
 
   .tutorial-title {
-    text-align: left;
     font-size: 1rem;
   }
 
@@ -835,12 +861,6 @@
     left: 16px;
     bottom: 16px;
     border-width: 2px;
-  }
-  .tutorial-title{
-    text-align: center;
-  }
-  .tutorial-description{
-    text-align: justify;
   }
 }
 
