@@ -591,10 +591,10 @@
   .tutorial-text {
     gap: 16px;
     padding: 0 4px;
-    text-align: left;
   }
 
   .tutorial-title {
+    text-align: center;
     font-size: 1.25rem;
     line-height: 1.35;
   }
@@ -602,6 +602,7 @@
   .tutorial-description {
     font-size: 0.9375rem;
     line-height: 1.65;
+    text-align: justify;
     opacity: 0.85;
   }
 
