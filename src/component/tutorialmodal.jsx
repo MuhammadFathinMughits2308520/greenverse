@@ -13,53 +13,89 @@ const TutorialModal = ({ isOpen, onClose }) => {
     desktop: [
       {
         id: 1,
-        image: '/tutorial/desktop-1.png',
-        title: 'Selamat Datang di Comic Reader',
-        description: 'Pelajari cara menggunakan comic reader dengan mudah'
+        image: '/item/laptop/tutor_1.webp',
+        title: 'HALAMAN MASUK: AKSES AWAL MEDIA ECOMBOT',
+        description: 'Halaman ini menampilkan tampilan awal media ECOMBOT yang digunakan untuk masuk ke akun pengguna. Pengguna dapat mengakses dengan memasukkan username dan password.'
       },
       {
         id: 2,
-        image: '/tutorial/desktop-2.png',
-        title: 'Navigasi Halaman',
-        description: 'Gunakan tombol panah atau keyboard untuk berpindah halaman'
+        image: '/item/laptop/tutor_2.webp',
+        title: 'HALAMAN 1: <i>COVER</i> ECOMBOT',
+        description: 'Halaman ini menampilkan cover ECOMBOT yang dilengkapi dengan berbagai tombol navigasi seperti tombol untuk berpindah halaman, membaca petunjuk penggunaan, mengubah tema tampilan, dan keluar dari media.'
       },
       {
         id: 3,
-        image: '/tutorial/desktop-3.png',
-        title: 'Fitur Chatbot',
-        description: 'Klik ikon chatbot untuk eksplorasi dan membuka halaman berikutnya'
+        image: '/item/laptop/tutor_3.webp',
+        title: 'HALAMAN 2: ISI <i>E-COMIC</i>',
+        description: 'Halaman ini menampilkan isi utama e-comic dalam media ECOMBOT, yang berisi percakapan antar tokoh dengan latar lingkungan alam. Pada halaman ini juga terdapat tombol navigasi untuk kembali ke halaman sebelumnya atau menuju halaman berikutnya.'
       },
       {
         id: 4,
-        image: '/tutorial/desktop-4.png',
-        title: 'Mode Gelap',
-        description: 'Toggle mode gelap/terang untuk kenyamanan membaca'
+        image: '/item/laptop/tutor_4.webp',
+        title: 'HALAMAN 3: PENGENALAN ECOMBOT',
+        description: 'Halaman ini menampilkan pengenalan karakter ECOMBOT sebagai robot virtual (<i>ChatBot</i>) yang akan membantu pengguna untuk bereksplorasi dan berinteraksi secara langsung.'
+      },
+      {
+        id: 5,
+        image: '/item/laptop/tutor_5.webp',
+        title: 'EKSPLORASI BERSAMA ECOMBOT',
+        description: 'Halaman ini menampilkan fitur eksplorasi interaktif bersama ECOMBOT. Pengguna dapat berkomunikasi melalui chat untuk mempelajari materi. Pada halaman ini juga terdapat berbagai elemen interaktif seperti tombol daftar eksplorasi, kolom mengetik teks, dan tombol mengirimkan teks yang memudahkan pengguna dalam menjelajahi isi pembelajaran.'
+      },
+      {
+        id: 6,
+        image: '/item/laptop/tutor_6.webp',
+        title: 'EKSPLORASI BERSAMA ECOMBOT',
+        description: 'Halaman ini menampilkan daftar eksplorasi yang telah dan belum dilakukan oleh pengguna. Setiap eksplorasi harus diselesaikan terlebih dahulu sebelum pengguna dapat membuka dan melanjutkan ke eksplorasi berikutnya.'
+      },
+      {
+        id: 7,
+        image: '/item/laptop/tutor_7.webp',
+        title: 'HALAMAN 4: PENUTUP',
+        description: 'Halaman ini menampilkan bagian akhir dari media ECOMBOT. Pada bagian ini, cerita ditutup dengan tampilan <i>e-comic</i> yang merupakan lanjutan dari bagian sebelumnya. Halaman ini menjadi penanda selesainya eksplorasi pengguna dalam <i>e-comic</i>.'
       }
     ],
     mobile: [
       {
         id: 1,
-        image: '/tutorial/mobile-1.png',
-        title: 'Selamat Datang',
-        description: 'Panduan menggunakan comic reader di perangkat mobile'
+        image: '/item/mobile/tutor_1.webp',
+        title: 'HALAMAN MASUK: AKSES AWAL MEDIA ECOMBOT',
+        description: 'Halaman ini menampilkan tampilan awal media ECOMBOT yang digunakan untuk masuk ke akun pengguna. Pengguna dapat mengakses dengan memasukkan username dan password.'
       },
       {
         id: 2,
-        image: '/tutorial/mobile-2.png',
-        title: 'Swipe untuk Navigasi',
-        description: 'Geser ke kiri/kanan untuk berpindah halaman'
+        image: '/item/mobile/tutor_2.webp',
+        title: 'HALAMAN 1: <i>COVER</i> ECOMBOT',
+        description: 'Halaman ini menampilkan cover ECOMBOT yang dilengkapi dengan berbagai tombol navigasi seperti tombol untuk berpindah halaman, membaca petunjuk penggunaan, mengubah tema tampilan, dan keluar dari media.'
       },
       {
         id: 3,
-        image: '/tutorial/mobile-3.png',
-        title: 'Tap untuk Menu',
-        description: 'Ketuk gambar untuk menampilkan/menyembunyikan menu'
+        image: '/item/mobile/tutor_3.webp',
+        title: 'HALAMAN 2: ISI <i>E-COMIC</i>',
+        description: 'Halaman ini menampilkan isi utama e-comic dalam media ECOMBOT, yang berisi percakapan antar tokoh dengan latar lingkungan alam. Pada halaman ini juga terdapat tombol navigasi untuk kembali ke halaman sebelumnya atau menuju halaman berikutnya.'
       },
       {
         id: 4,
-        image: '/tutorial/mobile-4.png',
-        title: 'Chatbot & Fitur',
-        description: 'Akses chatbot dan fitur lainnya dengan mudah'
+        image: '/item/mobile/tutor_4.webp',
+        title: 'HALAMAN 3: PENGENALAN ECOMBOT',
+        description: 'Halaman ini menampilkan pengenalan karakter ECOMBOT sebagai robot virtual (<i>ChatBot</i>) yang akan membantu pengguna untuk bereksplorasi dan berinteraksi secara langsung.'
+      },
+      {
+        id: 5,
+        image: '/item/mobile/tutor_5.webp',
+        title: 'EKSPLORASI BERSAMA ECOMBOT',
+        description: 'Halaman ini menampilkan fitur eksplorasi interaktif bersama ECOMBOT. Pengguna dapat berkomunikasi melalui chat untuk mempelajari materi. Pada halaman ini juga terdapat berbagai elemen interaktif seperti tombol daftar eksplorasi, kolom mengetik teks, dan tombol mengirimkan teks yang memudahkan pengguna dalam menjelajahi isi pembelajaran.'
+      },
+      {
+        id: 6,
+        image: '/item/mobile/tutor_6.webp',
+        title: 'EKSPLORASI BERSAMA ECOMBOT',
+        description: 'Halaman ini menampilkan daftar eksplorasi yang telah dan belum dilakukan oleh pengguna. Setiap eksplorasi harus diselesaikan terlebih dahulu sebelum pengguna dapat membuka dan melanjutkan ke eksplorasi berikutnya.'
+      },
+      {
+        id: 7,
+        image: '/item/mobile/tutor_7.webp',
+        title: 'HALAMAN 4: PENUTUP',
+        description: 'Halaman ini menampilkan bagian akhir dari media ECOMBOT. Pada bagian ini, cerita ditutup dengan tampilan <i>e-comic</i> yang merupakan lanjutan dari bagian sebelumnya. Halaman ini menjadi penanda selesainya eksplorasi pengguna dalam <i>e-comic</i>.'
       }
     ]
   };
@@ -201,8 +237,8 @@ const TutorialModal = ({ isOpen, onClose }) => {
             </div>
             
             <div className="tutorial-text">
-              <h2 className="tutorial-title">{slides[currentSlide].title}</h2>
-              <p className="tutorial-description">{slides[currentSlide].description}</p>
+              <h3 className="tutorial-title" dangerouslySetInnerHTML={{ __html: slides[currentSlide].title }}></h3>
+              <p className="tutorial-description" dangerouslySetInnerHTML={{ __html: slides[currentSlide].description }}></p>
             </div>
           </div>
         </div>
