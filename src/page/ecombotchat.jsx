@@ -14,6 +14,7 @@ import Kegiatan6 from "./Kegiatan6";
 import Kegiatan7 from "./Kegiatan7";
 import Kegiatan8 from "./Kegiatan8";
 import { useChatFlow } from '../hooks/useChatFlow';
+import { apiGet, apiPost } from '../scripts/apiClient';
 
 // Konstanta untuk base URL API
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api'; 
@@ -399,31 +400,22 @@ const EcombotChat = () => {
       const token = localStorage.getItem('access');
       if (!token) return;
 
-      const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader()
-        },
-        body: JSON.stringify({
-          comic_slug: comicSlug,
-          episode_slug: episodeSlug,
-          current_activity: currentStep
-        })
+      // SEBELUM: Manual fetch
+      // const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {...});
+      
+      // SESUDAH: Gunakan apiPost (otomatis handle refresh)
+      const data = await apiPost('/chat/session/start/', {
+        comic_slug: comicSlug,
+        episode_slug: episodeSlug,
+        current_activity: currentStep
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setCurrentSession(data.session_id);
-        localStorage.setItem('current_session_id', data.session_id);
-        
-        // Simpan pesan intro ke database
-        const introMessage = getStepData('intro');
-        await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
-        
-      } else {
-        throw new Error('Failed to create session');
-      }
+      setCurrentSession(data.session_id);
+      localStorage.setItem('current_session_id', data.session_id);
+      
+      const introMessage = getStepData('intro');
+      await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
+      
     } catch (error) {
       console.error('Error creating new session:', error);
       throw error;
@@ -436,54 +428,34 @@ const EcombotChat = () => {
       const token = localStorage.getItem('access');
       if (!token) return;
 
-      // Coba load overview dulu untuk mendapatkan current activity
-      const overviewResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
-        method: 'GET',
-        headers: getAuthHeader()
-      });
-
-      if (overviewResponse.ok) {
-        const overviewData = await overviewResponse.json();
-        
-        // Update progress dari session data
-        if (overviewData.overview) {
-          setProgress(prev => ({
-            ...prev,
-            completed: overviewData.overview.completed_activities || [],
-            visited: overviewData.overview.visited_activities || ['intro']
-          }));
-        }
-
-        // Load history untuk current activity
-        const currentActivity = overviewData.current_activity || 'intro';
-        const historyResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/activity/${currentActivity}/`, {
-          method: 'GET',
-          headers: getAuthHeader()
-        });
-
-        if (historyResponse.ok) {
-          const historyData = await historyResponse.json();
-          
-          // Reconstruct messages dari history
-          const historyMessages = historyData.history?.messages?.map(msg => ({
-            from: msg.message_type,
-            text: msg.message_text,
-            data: msg.message_data || {}
-          })) || [];
-          
-          setMessages(historyMessages);
-          setCurrentSession(sessionId);
-          
-          console.log('Session history loaded:', historyMessages.length, 'messages');
-        } else {
-          throw new Error('Failed to load activity history');
-        }
-      } else {
-        throw new Error('Failed to load session overview');
+      // Load overview
+      const overviewData = await apiGet(`/chat/session/${sessionId}/overview/`);
+      
+      if (overviewData.overview) {
+        setProgress(prev => ({
+          ...prev,
+          completed: overviewData.overview.completed_activities || [],
+          visited: overviewData.overview.visited_activities || ['intro']
+        }));
       }
+
+      // Load history
+      const currentActivity = overviewData.current_activity || 'intro';
+      const historyData = await apiGet(`/chat/session/${sessionId}/activity/${currentActivity}/`);
+      
+      const historyMessages = historyData.history?.messages?.map(msg => ({
+        from: msg.message_type,
+        text: msg.message_text,
+        data: msg.message_data || {}
+      })) || [];
+      
+      setMessages(historyMessages);
+      setCurrentSession(sessionId);
+      
+      console.log('Session history loaded:', historyMessages.length, 'messages');
+      
     } catch (error) {
       console.error('Error loading session history:', error);
-      // Jika gagal load history, buat session baru
       await createNewSession();
     }
   };
@@ -499,138 +471,106 @@ const EcombotChat = () => {
         return null;
       }
 
-      // Gunakan endpoint yang sesuai dengan urls.py
-      const response = await fetch(`${API_BASE_URL}/chat/session/send/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader()
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          message_type: messageType,
-          character: character,
-          message_text: messageText,
-          step_id: stepId,
-          message_data: messageData,
-          current_activity: stepId,
-          comic_slug: comicSlug,
-          episode_slug: episodeSlug
-        })
+      // Gunakan apiPost yang otomatis handle refresh
+      const data = await apiPost('/chat/session/send/', {
+        session_id: sessionId,
+        message_type: messageType,
+        character: character,
+        message_text: messageText,
+        step_id: stepId,
+        message_data: messageData,
+        current_activity: stepId,
+        comic_slug: comicSlug,
+        episode_slug: episodeSlug
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Message saved to database:', data);
-        return data;
-      } else {
-        console.error('Failed to save message to database:', response.status);
-        return null;
-      }
+      console.log('✅ Message saved to database:', data);
+      return data;
+      
     } catch (error) {
-      console.error('Error saving message to database:', error);
+      console.error('❌ Error saving message to database:', error);
+      
+      // Jika 401/403, token sudah di-refresh otomatis oleh apiClient
+      // Jika masih gagal, berarti ada masalah lain
+      if (error.message.includes('401') || error.message.includes('403')) {
+        console.warn('⚠️ Authentication failed even after refresh attempt');
+      }
+      
       return null;
     }
   };
 
   // Fungsi untuk menyimpan jawaban ke database - DIUBAH untuk menggunakan endpoint yang benar
-const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
+  const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') => {
     try {
-        const token = localStorage.getItem('access');
-        const sessionId = localStorage.getItem('current_session_id');
-        
-        console.log('=== saveAnswerToDatabase DEBUG ===');
-        console.log('Question Data:', questionData);
-        console.log('Answer length:', answer.length);
-        console.log('Answer Type:', answerType);
-        console.log('Session ID:', sessionId);
-        console.log('Current Step:', currentStep);
-        
-        if (!token || !sessionId) {
-            console.log('No token or session, saving to localStorage');
-            const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
-            savedAnswers.push({
-                question: questionData.text,
-                answer: answer,
-                aspect: getAspectFromStep(currentStep),
-                kegiatan: currentStep,
-                question_id: questionData.id,
-                storage_key: questionData.storage_key,
-                timestamp: new Date().toISOString()
-            });
-            localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
-            return { status: 'saved_locally' };
-        }
-
-        // ⭐⭐ STRUCTURE YANG DIPERBAIKI - SESUAI DENGAN BACKEND ⭐⭐
-        const submitData = {
-            session_id: sessionId,
-            step_id: currentStep,  // Pastikan ini sesuai
-            question_data: {
-                id: questionData.id || `question_${Date.now()}`,
-                storage_key: questionData.storage_key || `storage_${questionData.id}`,
-                text: questionData.text || questionData.question_text || 'Pertanyaan tidak tersedia',
-                type: questionData.type || answerType
-            },
-            answer_text: answer.substring(0, 5000),  // Batasi panjang
-            answer_type: answerType
-        };
-
-        console.log('Submitting answer data to backend:', submitData);
-
-        // Kirim ke backend
-        const response = await fetch(`${API_BASE_URL}/chat/answer/submit/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeader()
-            },
-            body: JSON.stringify(submitData)
-        });
-        
-        console.log('Response status:', response.status);
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Answer saved to database successfully:', data);
-            return data;
-        } else {
-            // Dapatkan detail error
-            let errorMessage = `HTTP ${response.status}: Failed to save answer`;
-            try {
-                const errorData = await response.json();
-                errorMessage = errorData.message || errorMessage;
-                console.error('Error response from backend:', errorData);
-            } catch (e) {
-                console.error('Error parsing error response:', e);
-            }
-            
-            throw new Error(errorMessage);
-        }
-        
-    } catch (error) {
-        console.error('❌ Error saving answer to database:', error);
-        
-        // Fallback to localStorage
+      const token = localStorage.getItem('access');
+      const sessionId = localStorage.getItem('current_session_id');
+      
+      console.log('=== saveAnswerToDatabase DEBUG ===');
+      console.log('Question Data:', questionData);
+      console.log('Answer length:', answer.length);
+      console.log('Session ID:', sessionId);
+      
+      if (!token || !sessionId) {
+        console.log('No token or session, saving to localStorage');
         const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
         savedAnswers.push({
-            question: questionData.text,
-            answer: answer,
-            aspect: getAspectFromStep(currentStep),
-            kegiatan: currentStep,
-            question_id: questionData.id,
-            storage_key: questionData.storage_key,
-            timestamp: new Date().toISOString(),
-            error: error.message
+          question: questionData.text,
+          answer: answer,
+          aspect: getAspectFromStep(currentStep),
+          kegiatan: currentStep,
+          question_id: questionData.id,
+          storage_key: questionData.storage_key,
+          timestamp: new Date().toISOString()
         });
         localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
-        
-        return { 
-            status: 'saved_locally',
-            error: error.message
-        };
+        return { status: 'saved_locally' };
+      }
+
+      const submitData = {
+        session_id: sessionId,
+        step_id: currentStep,
+        question_data: {
+          id: questionData.id || `question_${Date.now()}`,
+          storage_key: questionData.storage_key || `storage_${questionData.id}`,
+          text: questionData.text || questionData.question_text || 'Pertanyaan tidak tersedia',
+          type: questionData.type || answerType
+        },
+        answer_text: answer.substring(0, 5000),
+        answer_type: answerType
+      };
+
+      console.log('Submitting answer data to backend:', submitData);
+
+      // Gunakan apiPost yang otomatis handle refresh
+      const data = await apiPost('/chat/answer/submit/', submitData);
+      
+      console.log('✅ Answer saved to database successfully:', data);
+      return data;
+      
+    } catch (error) {
+      console.error('❌ Error saving answer to database:', error);
+      
+      // Fallback to localStorage
+      const savedAnswers = JSON.parse(localStorage.getItem('user_answers') || '[]');
+      savedAnswers.push({
+        question: questionData.text,
+        answer: answer,
+        aspect: getAspectFromStep(currentStep),
+        kegiatan: currentStep,
+        question_id: questionData.id,
+        storage_key: questionData.storage_key,
+        timestamp: new Date().toISOString(),
+        error: error.message
+      });
+      localStorage.setItem('user_answers', JSON.stringify(savedAnswers));
+      
+      return { 
+        status: 'saved_locally',
+        error: error.message
+      };
     }
-};
+  };
   // Fungsi untuk load pertanyaan reflektif
   const loadReflectiveQuestions = async () => {
     try {
@@ -847,45 +787,38 @@ const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') 
   };
 
   // Fungsi untuk menandai kegiatan sebagai selesai
-const completeActivity = async (stepId) => {  // ⭐⭐ Ubah parameter jadi stepId ⭐⭐
+  const completeActivity = async (stepId) => {
     setProgress(prev => {
-        const completed = [...prev.completed];
-        if (!completed.includes(stepId)) {
-            completed.push(stepId);
-        }
-        return {
-            ...prev,
-            completed,
-            current: stepId
-        };
+      const completed = [...prev.completed];
+      if (!completed.includes(stepId)) {
+        completed.push(stepId);
+      }
+      return {
+        ...prev,
+        completed,
+        current: stepId
+      };
     });
 
-    // Simpan ke database jika user login
     try {
-        const token = localStorage.getItem('access');
-        const sessionId = localStorage.getItem('current_session_id');
+      const token = localStorage.getItem('access');
+      const sessionId = localStorage.getItem('current_session_id');
+      
+      if (token && sessionId) {
+        // Gunakan apiPost yang otomatis handle refresh
+        await apiPost('/chat/activity/complete/', {
+          session_id: sessionId,
+          step_id: stepId,
+          comic_slug: comicSlug,
+          episode_slug: episodeSlug
+        });
         
-        if (token && sessionId) {
-            await fetch(`${API_BASE_URL}/chat/activity/complete/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...getAuthHeader()
-                },
-                body: JSON.stringify({
-                    session_id: sessionId,
-                    step_id: stepId,  // ⭐⭐ GUNAKAN step_id ⭐⭐
-                    comic_slug: comicSlug,
-                    episode_slug: episodeSlug
-                })
-            });
-            
-            console.log(`✅ Step ${stepId} marked as completed`);
-        }
+        console.log(`✅ Step ${stepId} marked as completed`);
+      }
     } catch (error) {
-        console.error('Error completing activity in database:', error);
+      console.error('Error completing activity in database:', error);
     }
-};
+  };
   // Fungsi untuk memeriksa apakah kegiatan dapat diakses
   const canAccessKegiatan = (kegiatanNum) => {
     const targetKegiatan = kegiatanList.find(k => k.num === kegiatanNum);
@@ -1008,27 +941,18 @@ const completeActivity = async (stepId) => {  // ⭐⭐ Ubah parameter jadi step
     try {
       console.log('Processing forum question with LangChain:', question);
       
-      const response = await fetch(`${API_BASE_URL}/ask/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ question }),
-      });
+      // Gunakan apiPost yang otomatis handle refresh
+      const data = await apiPost('/ask/', { question });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
       return data.answer || "Maaf, saya belum bisa menjawab pertanyaan tersebut. Silakan coba tanyakan hal lain.";
+      
     } catch (error) {
       console.error('Error fetching from Django API:', error);
       
       if (error.message.includes('Failed to fetch') || error.message.includes('Network')) {
         return "Maaf, tidak dapat terhubung ke server forum. Pastikan backend Django sedang berjalan.";
       } else if (error.message.includes('500')) {
-        return "Maaf, server mengalami masalah internal. Silakan coba lagi nati.";
+        return "Maaf, server mengalami masalah internal. Silakan coba lagi nanti.";
       } else {
         return "Maaf, terjadi kesalahan saat memproses pertanyaan Anda. Silakan coba lagi atau ketik 'menu sebelumnya' untuk kembali ke alur pembelajaran.";
       }
@@ -1036,72 +960,56 @@ const completeActivity = async (stepId) => {  // ⭐⭐ Ubah parameter jadi step
   };
 
 // FUNGSI BARU: Redirect ke /ecomic dengan halaman terakhir
-const redirectToEcomic = async () => {
-  const token = localStorage.getItem("access");
-  console.debug("redirectToEcomic called", { 
-    comic: comicSlug, 
-    episode: episodeSlug, 
-    tokenPresent: !!token 
-  });
+  const redirectToEcomic = async () => {
+    const token = localStorage.getItem("access");
+    console.debug("redirectToEcomic called", { 
+      comic: comicSlug, 
+      episode: episodeSlug, 
+      tokenPresent: !!token 
+    });
 
-  try {
-    // Tampilkan pesan konfirmasi
-    setMessages(prev => [...prev, { 
-      from: 'bot', 
-      text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman terakhir komik..."
-    }]);
-    
-    // SET HALAMAN TERAKHIR
-    const lastPageIndex = 4; 
-    
-    // Update permission state
-    setPermission(p => ({ 
-      ...p, 
-      finish: true, 
-      last_page: lastPageIndex  // Set langsung ke halaman terakhir
-    }));
-    
-    // Simpan status finish dan halaman terakhir di backend (jika user login)
-    if (token) {
-      try {
-        await fetch(`${API_BASE_URL}/comic-progress/finish/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...getAuthHeader()
-          },
-          body: JSON.stringify({ 
+    try {
+      setMessages(prev => [...prev, { 
+        from: 'bot', 
+        text: "🎉 Selamat! Anda telah menyelesaikan seluruh eksplorasi. Mengarahkan Anda ke halaman terakhir komik..."
+      }]);
+      
+      const lastPageIndex = 4;
+      
+      setPermission(p => ({ 
+        ...p, 
+        finish: true, 
+        last_page: lastPageIndex
+      }));
+      
+      if (token) {
+        try {
+          // Gunakan apiPost yang otomatis handle refresh
+          await apiPost('/comic-progress/finish/', { 
             comic: comicSlug, 
             episode: episodeSlug,
             finish: true,
-            last_page: lastPageIndex  
-          }),
-        });
-        console.log("Finish status saved to backend with last_page:", lastPageIndex);
-      } catch (err) {
-        console.warn("Failed to save finish status:", err);
+            last_page: lastPageIndex
+          });
+          
+          console.log("Finish status saved to backend with last_page:", lastPageIndex);
+        } catch (err) {
+          console.warn("Failed to save finish status:", err);
+        }
       }
-    }
-    
-    // Simpan di localStorage untuk akses cepat - SET KE HALAMAN 4
-    localStorage.setItem(storageKey, String(lastPageIndex));
-    console.log("Saved to localStorage:", storageKey, "=", lastPageIndex);
-    
-    // Redirect setelah delay singkat
-    setTimeout(() => {
-      navigate('/ecomic');
-    }, 2000);
-    
-  } catch (err) {
-    console.error("redirectToEcomic error:", err);
-    if (err.status === 401) {
-      navigate('/login');
-    } else {
-      // Fallback: tetap redirect ke ecomic meski ada error
+      
+      localStorage.setItem(storageKey, String(lastPageIndex));
+      console.log("Saved to localStorage:", storageKey, "=", lastPageIndex);
+      
+      setTimeout(() => {
+        navigate('/ecomic');
+      }, 2000);
+      
+    } catch (err) {
+      console.error("redirectToEcomic error:", err);
       setTimeout(() => navigate('/ecomic'), 2000);
     }
-  }
-}
+  };
 
   // Fungsi untuk memulai sesi pertanyaan
   const startQuestionSession = () => {
