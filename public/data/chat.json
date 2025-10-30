@@ -4,7 +4,7 @@
       "id": "intro",
       "type": "bot_message",
       "character": "Aquano",
-      "message": "<i>Hallo</i>, sudah siap untuk eksplorasi hari ini bersama <i>Ecombot</i>?",
+      "message": "<i>Hallo</i>, sudah siap untuk eksplorasi hari ini bersama ECOMBOT?",
       "next_keywords": ["Siap"]
     },
     "kimia_hijau": {
@@ -12,7 +12,7 @@
       "type": "bot_message",
       "character": "Aquano",
       "title": "Kimia Hijau (<i>Green Chemistry</i>)",
-      "message": "Sebelum membahas tradisi Mapag Hujan, <i>Ecombot</i> akan mengulas terlebih dahulu materi kimia hijau atau <i>green chemistry</i>.\n\nKimia hijau (<i>green chemistry</i>) adalah pendekatan yang bertujuan menjaga lingkungan tetap bersih dengan meminimalkan limbah dan aman dari paparan bahan kimia berbahaya. Ada 12 prinsip kimia hijau yang ditampilkan dalam gambar berikut ini!\n\nKimia hijau memiliki peranan penting dalam mewujudkan lingkungan agar tetap terjaga dan terhindar dari bencana alam, pemanasan global, dan terhindar dari paparan bahan kimia berbahaya.\n\nGimana? Apakah sudah paham dengan peran kimia hijau dan pentingnya kimia hijau? Jika belum, silahkan tanyakan dan diskusikan.",
+      "message": "Sebelum membahas tradisi Mapag Hujan, ECOMBOT akan mengulas terlebih dahulu materi kimia hijau atau <i>green chemistry</i>.\n\nKimia hijau (<i>green chemistry</i>) adalah pendekatan yang bertujuan menjaga lingkungan tetap bersih dengan meminimalkan limbah dan aman dari paparan bahan kimia berbahaya. Ada 12 prinsip kimia hijau yang ditampilkan dalam gambar berikut ini!\n\nKimia hijau memiliki peranan penting dalam mewujudkan lingkungan agar tetap terjaga dan terhindar dari bencana alam, pemanasan global, dan terhindar dari paparan bahan kimia berbahaya.\n\nGimana? Apakah sudah paham dengan peran kimia hijau dan pentingnya kimia hijau? Jika belum, silahkan tanyakan dan diskusikan.",
       "images": [
         {
           "url": "/assets/12-prinsip-kimia-hijau.png",
@@ -25,14 +25,14 @@
       "id": "tanya_ecombot",
       "type": "bot_message",
       "character": "Aquano",
-      "message": "<i>Hallo</i>, ada yang ingin ditanyakan? <i>Ecombot</i> siap membantu kamu",
+      "message": "<i>Hallo</i>, ada yang ingin ditanyakan? ECOMBOT siap membantu kamu",
       "next_keywords": ["Menu sebelumnya"]
     },
     "pre_kegiatan": {
       "id": "pre_kegiatan",
       "type": "bot_message",
       "character": "Aquano",
-      "message": "Luar Biasa, sekarang <i>Ecombot</i> akan memandu kamu mengeksplorasi tradisi Mapag Hujan dan menemukan bagaimana tradisi ini berhubungan dengan lingkungan serta prinsip kimia hijau.",
+      "message": "Luar Biasa, sekarang ECOMBOT akan memandu kamu mengeksplorasi tradisi Mapag Hujan dan menemukan bagaimana tradisi ini berhubungan dengan lingkungan serta prinsip kimia hijau.",
       "next_keywords": ["Mulai Eksplorasi 1", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "kegiatan_1": {
