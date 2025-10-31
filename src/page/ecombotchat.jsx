@@ -2460,9 +2460,7 @@ const processQuestionAnswer = async (input) => {
                     <ArrowRight className="w-4 h-4" />
                   </button>
                   <h2 className="text-4xl font-bold text-lime-700 text-center">Daftar Eksplorasi</h2>
-                  {/* {currentSession && (
-                    <p className="text-xs text-gray-500">Session: {currentSession}</p>
-                  )} */}
+
                 </div>
                 <div className="!p-4 flex flex-col gap-4">
                   {activeKegiatanList.map((kegiatan) => (
