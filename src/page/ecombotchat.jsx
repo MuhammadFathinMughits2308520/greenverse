@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Routes, Route, useParams } from 'react-router-dom';
 import Aquano from "../assets/aquano.webp";
@@ -317,17 +316,49 @@ const EcombotChat = () => {
 
   const currentTitle = getCurrentTitle();
 
-  // Initialize chat session dan load history
+  // PERBAIKAN UTAMA: Initialize chat session - dipanggil setiap kali path berubah
   useEffect(() => {
     const initializeChat = async () => {
-      if (currentChatFlow && messages.length === 0) {
+      console.log('=== INITIALIZE CHAT CALLED ===');
+      console.log('Current path:', location.pathname);
+      console.log('Current step:', currentStep);
+      console.log('Messages length:', messages.length);
+      
+      // Reset state ketika pertama kali masuk ke /ecombot atau refresh
+      if (location.pathname === '/ecombot' || location.pathname === '/ecombot/') {
+        console.log('Resetting to intro state');
+        
+        // Reset state yang diperlukan
+        setCurrentStep('intro');
+        setPreviousSteps(['intro']);
+        setWaitingForAnswer(null);
+        setCurrentQuestions([]);
+        setCurrentQuestionIndex(0);
+        
+        // Tampilkan pesan intro
+        const introMessage = getStepData('intro');
+        if (messages.length === 0 || !messages.some(msg => msg.from === 'bot' && msg.data?.id === 'intro')) {
+          console.log('Setting intro message');
+          setMessages([{ 
+            from: 'bot', 
+            text: introMessage.message,
+            data: introMessage
+          }]);
+          
+          // Simpan ke database jika ada session
+          await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
+        }
+      }
+      
+      // Load session yang ada untuk path lainnya
+      else if (currentChatFlow && messages.length === 0) {
         await startOrLoadSession();
         loadReflectiveQuestions();
       }
     };
     
     initializeChat();
-  }, [currentChatFlow, messages.length]);
+  }, [location.pathname, currentChatFlow, messages.length]);
 
   // Effect untuk auto-start question session ketika currentStep berubah ke step yang memiliki pertanyaan
   useEffect(() => {
