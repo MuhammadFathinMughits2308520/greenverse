@@ -6,7 +6,7 @@ const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const API_BASE_URL = 'https://backendecombot-production.up.railway.app/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 export const useChatFlow = () => {
   const [chatFlow, setChatFlow] = useState(null);
