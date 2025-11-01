@@ -263,7 +263,7 @@ const EcombotChat = () => {
   const kegiatanList = [
     { num: 0, path: '/kimia-hijau', name: 'Kimia Hijau', stepKey: 'kimia_hijau', materi: 'Pengenalan', alwaysAccessible: true },
     { num: 1, path: '/kegiatan-1', name: 'Masalah Sampah dan Banjir', stepKey: 'kegiatan_1', materi: 'Eksplorasi 1', alwaysAccessible: true },
-    { num: 2, path: '/kegiatan-2', name: 'Prinsip Kimia Hijau', stepKey: 'kegiatan_2', materi: 'Eksplorasi 2' },
+    { num: 2, path: '/kegiatan-2', name: 'Tradisi Mapag Hujan', stepKey: 'kegiatan_2', materi: 'Eksplorasi 2' },
     { num: 3, path: '/kegiatan-3', name: 'Aspek Sains (<i>Science</i>)', stepKey: 'kegiatan_3', materi: 'Eksplorasi 3' },
     { num: 4, path: '/kegiatan-4', name: 'Aspek Teknologi (<i>Technology</i>)', stepKey: 'kegiatan_4', materi: 'Eksplorasi 4' },
     { num: 5, path: '/kegiatan-5', name: 'Aspek Robotika (<i>Robotics</i>)', stepKey: 'kegiatan_5', materi: 'Eksplorasi 5' },
