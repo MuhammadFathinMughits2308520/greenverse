@@ -24,16 +24,10 @@ const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Fallback data jika loading gagal - INTRO DIUBAH MENJADI SATU SAJA
+// Fallback data jika loading gagal - HAPUS INTRO DARI FALLBACK
 const fallbackChatFlow = {
   chatbot_flow: {
-    intro: {
-      id: "intro",
-      type: "bot_message",
-      character: "Aquano",
-      message: "<i>Hallo</i>, sudah siap untuk eksplorasi hari ini bersama ECOMBOT?",
-      next_keywords: ["Siap"]
-    },
+    // INTRO DIHAPUS dari fallback - hanya ambil dari chat.json
     kimia_hijau: {
       id: "kimia_hijau",
       type: "bot_message",
@@ -277,10 +271,10 @@ const EcombotChat = () => {
   // Fungsi untuk mendapatkan data step dengan fallback
   const getStepData = (stepKey) => {
     if (!currentChatFlow || !currentChatFlow.chatbot_flow) {
-      return fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
+      return fallbackChatFlow.chatbot_flow[stepKey] || null;
     }
     
-    return currentChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
+    return currentChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow[stepKey] || null;
   };
 
   // Fungsi untuk mendapatkan judul berdasarkan lokasi saat ini
@@ -316,17 +310,22 @@ const EcombotChat = () => {
 
   const currentTitle = getCurrentTitle();
 
-  // Initialize chat session dan load history
+  // Initialize chat session dan load history - PERBAIKAN: Hanya panggil sekali
+  const [isInitialized, setIsInitialized] = useState(false);
+
   useEffect(() => {
     const initializeChat = async () => {
-      if (currentChatFlow && messages.length === 0) {
+      // Hanya inisialisasi sekali dan jika chatFlow sudah tersedia
+      if (!isInitialized && currentChatFlow && messages.length === 0) {
+        console.log('=== INITIALIZING CHAT ===');
         await startOrLoadSession();
         loadReflectiveQuestions();
+        setIsInitialized(true);
       }
     };
     
     initializeChat();
-  }, [currentChatFlow, messages.length]);
+  }, [currentChatFlow, messages.length, isInitialized]); // Tambah dependency isInitialized
 
   // Effect untuk auto-start question session ketika currentStep berubah ke step yang memiliki pertanyaan
   useEffect(() => {
@@ -347,29 +346,38 @@ const EcombotChat = () => {
     }
   }, [currentStep, currentChatFlow]);
 
-  // Fungsi untuk memulai atau memuat sesi chat
+  // Fungsi untuk memulai atau memuat sesi chat - PERBAIKAN: Tambah pengecekan duplikasi
   const startOrLoadSession = async () => {
     try {
       const token = localStorage.getItem('access');
+      
+      // CEGAH DUPILKASI: Jika sudah ada pesan, jangan tambah lagi
+      if (messages.length > 0) {
+        console.log('Session already started, skipping initialization');
+        return;
+      }
+
       if (!token) {
         console.warn('User not logged in, using local session only');
         const introMessage = getStepData('intro');
-        setMessages([{ 
-          from: 'bot', 
-          text: introMessage.message,
-          data: introMessage
-        }]);
+        if (introMessage && !messages.some(msg => msg.from === 'bot' && msg.data?.id === 'intro')) {
+          setMessages([{ 
+            from: 'bot', 
+            text: introMessage.message,
+            data: introMessage
+          }]);
+        }
         
         const savedProgress = localStorage.getItem('chatbot-progress');
-      if (savedProgress) {
-        const parsedProgress = JSON.parse(savedProgress);
-        if (!parsedProgress.visited) {
-          parsedProgress.visited = ['intro'];
+        if (savedProgress) {
+          const parsedProgress = JSON.parse(savedProgress);
+          if (!parsedProgress.visited) {
+            parsedProgress.visited = ['intro'];
+          }
+          setProgress(parsedProgress);
         }
-        setProgress(parsedProgress);
+        return;
       }
-      return; // Keluar tanpa menampilkan pesan
-    }
 
       // Coba load session yang ada atau buat baru
       const sessionId = localStorage.getItem('current_session_id');
@@ -385,11 +393,13 @@ const EcombotChat = () => {
     } catch (error) {
       console.error('Error starting session:', error);
       const introMessage = getStepData('intro');
-    setMessages([{
-     from: 'bot',
-     text: introMessage.message,
-     data: introMessage
-    }]);
+      if (introMessage && !messages.some(msg => msg.from === 'bot' && msg.data?.id === 'intro')) {
+        setMessages([{
+          from: 'bot',
+          text: introMessage.message,
+          data: introMessage
+        }]);
+      }
     }
   };
 
@@ -417,9 +427,11 @@ const EcombotChat = () => {
         setCurrentSession(data.session_id);
         localStorage.setItem('current_session_id', data.session_id);
         
-        // Simpan pesan intro ke database
+        // Simpan pesan intro ke database - HANYA JIKA BELUM ADA
         const introMessage = getStepData('intro');
-        await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
+        if (introMessage && !messages.some(msg => msg.from === 'bot' && msg.data?.id === 'intro')) {
+          await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
+        }
         
       } else {
         throw new Error('Failed to create session');
