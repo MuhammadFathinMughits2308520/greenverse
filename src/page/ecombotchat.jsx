@@ -33,7 +33,7 @@ const fallbackChatFlow = {
       type: "bot_message",
       character: "Aquano",
       message: "Hai, sudah siap untuk eksplorasi hari ini?",
-      next_keywords: ["siap"]
+      next_keywords: ["Siap"]
     },
     kimia_hijau: {
       id: "kimia_hijau",
@@ -276,13 +276,21 @@ const EcombotChat = () => {
   const currentChatFlow = chatFlow || fallbackChatFlow;
 
   // Fungsi untuk mendapatkan data step dengan fallback
-  const getStepData = (stepKey) => {
-    if (!currentChatFlow || !currentChatFlow.chatbot_flow) {
-      return fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
+const getStepData = (stepKey) => {
+  if (!currentChatFlow || !currentChatFlow.chatbot_flow) {
+    return fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
+  }
+  
+  // ⭐⭐ PERBAIKAN: Untuk intro, gunakan yang konsisten
+  if (stepKey === 'intro') {
+    const chatFlowIntro = currentChatFlow.chatbot_flow[stepKey];
+    if (chatFlowIntro) {
+      return chatFlowIntro; // Prioritaskan dari chat.json
     }
-    
-    return currentChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
-  };
+  }
+  
+  return currentChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow[stepKey] || fallbackChatFlow.chatbot_flow.intro;
+};
 
   // Fungsi untuk mendapatkan judul berdasarkan lokasi saat ini
   const getCurrentTitle = () => {
@@ -317,17 +325,24 @@ const EcombotChat = () => {
 
   const currentTitle = getCurrentTitle();
 
-  // Initialize chat session dan load history
-  useEffect(() => {
-    const initializeChat = async () => {
-      if (currentChatFlow && messages.length === 0) {
-        await startOrLoadSession();
-        loadReflectiveQuestions();
-      }
-    };
+// Initialize chat session dan load history
+useEffect(() => {
+  const initializeChat = async () => {
+    // ⭐⭐ PERBAIKAN: Cek jika sudah ada messages, jangan inisialisasi ulang
+    if (messages.length > 0) {
+      console.log('Messages already loaded, skipping initialization');
+      return;
+    }
     
-    initializeChat();
-  }, [currentChatFlow, messages.length]);
+    if (currentChatFlow) {
+      await startOrLoadSession();
+      loadReflectiveQuestions();
+    }
+  };
+  
+  initializeChat();
+}, [currentChatFlow, messages.length]); // ⭐⭐ Tambah dependency messages.length
+
 
   // Effect untuk auto-start question session ketika currentStep berubah ke step yang memiliki pertanyaan
   useEffect(() => {
@@ -348,20 +363,28 @@ const EcombotChat = () => {
     }
   }, [currentStep, currentChatFlow]);
 
-  // Fungsi untuk memulai atau memuat sesi chat
-  const startOrLoadSession = async () => {
-    try {
-      const token = localStorage.getItem('access');
-      if (!token) {
-        console.warn('User not logged in, using local session only');
+const startOrLoadSession = async () => {
+  try {
+    const token = localStorage.getItem('access');
+    
+    // CEK APAKAH SUDAH ADA MESSAGES DI DATABASE/STATE
+    const hasExistingMessages = messages.length > 0;
+    const hasSessionHistory = localStorage.getItem('current_session_id');
+    
+    if (!token) {
+      console.warn('User not logged in, using local session only');
+      
+      // JIKA SUDAH ADA MESSAGES, JANGAN TAMPILKAN INTRO LAGI
+      if (!hasExistingMessages) {
         const introMessage = getStepData('intro');
         setMessages([{ 
           from: 'bot', 
           text: introMessage.message,
           data: introMessage
         }]);
-        
-        const savedProgress = localStorage.getItem('chatbot-progress');
+      }
+      
+      const savedProgress = localStorage.getItem('chatbot-progress');
       if (savedProgress) {
         const parsedProgress = JSON.parse(savedProgress);
         if (!parsedProgress.visited) {
@@ -369,125 +392,177 @@ const EcombotChat = () => {
         }
         setProgress(parsedProgress);
       }
-      return; // Keluar tanpa menampilkan pesan
+      return;
     }
 
-      // Coba load session yang ada atau buat baru
-      const sessionId = localStorage.getItem('current_session_id');
+    const sessionId = localStorage.getItem('current_session_id');
+    
+    if (sessionId) {
+      // LOAD EXISTING SESSION - JANGAN TAMBAH INTRO LAGI
+      await loadSessionHistory(sessionId);
+    } else {
+      // BUAT SESSION BARU - HANYA TAMBAH INTRO JIKA BELUM ADA MESSAGES
+      await createNewSession();
       
-      if (sessionId) {
-        // Load existing session
-        await loadSessionHistory(sessionId);
-      } else {
-        // Buat session baru
-        await createNewSession();
-      }
-      
-    } catch (error) {
-      console.error('Error starting session:', error);
-      const introMessage = getStepData('intro');
-    setMessages([{
-     from: 'bot',
-     text: introMessage.message,
-     data: introMessage
-    }]);
-    }
-  };
-
-  // FUNGSI BARU: Membuat session baru
-  const createNewSession = async () => {
-    try {
-      const token = localStorage.getItem('access');
-      if (!token) return;
-
-      const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...getAuthHeader()
-        },
-        body: JSON.stringify({
-          comic_slug: comicSlug,
-          episode_slug: episodeSlug,
-          current_activity: currentStep
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCurrentSession(data.session_id);
-        localStorage.setItem('current_session_id', data.session_id);
-        
-        // Simpan pesan intro ke database
+      // ⭐⭐ PERBAIKAN: Hanya tambah intro jika benar-benar session baru tanpa history
+      if (!hasExistingMessages && !hasSessionHistory) {
         const introMessage = getStepData('intro');
-        await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
-        
-      } else {
-        throw new Error('Failed to create session');
+        setMessages([{ 
+          from: 'bot', 
+          text: introMessage.message,
+          data: introMessage
+        }]);
       }
-    } catch (error) {
-      console.error('Error creating new session:', error);
-      throw error;
     }
-  };
+    
+  } catch (error) {
+    console.error('Error starting session:', error);
+    
+    // ⭐⭐ PERBAIKAN: Hanya tampilkan intro jika benar-benar kosong
+    if (messages.length === 0) {
+      const introMessage = getStepData('intro');
+      setMessages([{
+        from: 'bot',
+        text: introMessage.message,
+        data: introMessage
+      }]);
+    }
+  }
+};
 
-  // FUNGSI BARU: Memuat history session dari backend
-  const loadSessionHistory = async (sessionId) => {
-    try {
-      const token = localStorage.getItem('access');
-      if (!token) return;
+const createNewSession = async () => {
+  try {
+    const token = localStorage.getItem('access');
+    if (!token) return;
 
-      // Coba load overview dulu untuk mendapatkan current activity
-      const overviewResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
+    const response = await fetch(`${API_BASE_URL}/chat/session/start/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader()
+      },
+      body: JSON.stringify({
+        comic_slug: comicSlug,
+        episode_slug: episodeSlug,
+        current_activity: currentStep
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setCurrentSession(data.session_id);
+      localStorage.setItem('current_session_id', data.session_id);
+      
+      // ⭐⭐ PERBAIKAN: Jangan langsung simpan intro message di sini
+      // Biarkan startOrLoadSession yang menangani
+      console.log('New session created:', data.session_id);
+      
+    } else {
+      throw new Error('Failed to create session');
+    }
+  } catch (error) {
+    console.error('Error creating new session:', error);
+    throw error;
+  }
+};
+
+const loadSessionHistory = async (sessionId) => {
+  try {
+    const token = localStorage.getItem('access');
+    if (!token) return;
+
+    // Load overview dulu untuk mendapatkan current activity
+    const overviewResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/overview/`, {
+      method: 'GET',
+      headers: getAuthHeader()
+    });
+
+    if (overviewResponse.ok) {
+      const overviewData = await overviewResponse.json();
+      
+      // Update progress dari session data
+      if (overviewData.overview) {
+        setProgress(prev => ({
+          ...prev,
+          completed: overviewData.overview.completed_activities || [],
+          visited: overviewData.overview.visited_activities || ['intro']
+        }));
+      }
+
+      // Load history untuk current activity
+      const currentActivity = overviewData.current_activity || 'intro';
+      const historyResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/activity/${currentActivity}/`, {
         method: 'GET',
         headers: getAuthHeader()
       });
 
-      if (overviewResponse.ok) {
-        const overviewData = await overviewResponse.json();
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json();
         
-        // Update progress dari session data
-        if (overviewData.overview) {
-          setProgress(prev => ({
-            ...prev,
-            completed: overviewData.overview.completed_activities || [],
-            visited: overviewData.overview.visited_activities || ['intro']
-          }));
+        // ⭐⭐ PERBAIKAN: Filter pesan duplikat
+        const historyMessages = historyData.history?.messages?.map(msg => ({
+          from: msg.message_type,
+          text: msg.message_text,
+          data: msg.message_data || {}
+        })) || [];
+        
+        // HINDARI DUPLIKASI INTRO: Cek jika sudah ada pesan intro
+        const hasIntro = historyMessages.some(msg => 
+          msg.from === 'bot' && 
+          (msg.text.includes('Hallo') || msg.text.includes('Hai') || msg.text.includes('siap untuk eksplorasi'))
+        );
+        
+        // Jika tidak ada intro dalam history, tambahkan dari chat.json
+        if (!hasIntro && historyMessages.length === 0) {
+          const introMessage = getStepData('intro');
+          historyMessages.push({
+            from: 'bot',
+            text: introMessage.message,
+            data: introMessage
+          });
         }
-
-        // Load history untuk current activity
-        const currentActivity = overviewData.current_activity || 'intro';
-        const historyResponse = await fetch(`${API_BASE_URL}/chat/session/${sessionId}/activity/${currentActivity}/`, {
-          method: 'GET',
-          headers: getAuthHeader()
-        });
-
-        if (historyResponse.ok) {
-          const historyData = await historyResponse.json();
-          
-          // Reconstruct messages dari history
-          const historyMessages = historyData.history?.messages?.map(msg => ({
-            from: msg.message_type,
-            text: msg.message_text,
-            data: msg.message_data || {}
-          })) || [];
-          
-          setMessages(historyMessages);
-          setCurrentSession(sessionId);
-          
-          console.log('Session history loaded:', historyMessages.length, 'messages');
-        } else {
-          throw new Error('Failed to load activity history');
-        }
+        
+        setMessages(historyMessages);
+        setCurrentSession(sessionId);
+        
+        console.log('Session history loaded:', historyMessages.length, 'messages');
       } else {
-        throw new Error('Failed to load session overview');
+        throw new Error('Failed to load activity history');
       }
-    } catch (error) {
-      console.error('Error loading session history:', error);
-      // Jika gagal load history, buat session baru
-      await createNewSession();
+    } else {
+      throw new Error('Failed to load session overview');
     }
-  };
+  } catch (error) {
+    console.error('Error loading session history:', error);
+    // Jika gagal load history, buat session baru
+    await createNewSession();
+  }
+};
+
+// Fungsi untuk mendeteksi apakah pesan adalah intro
+const isIntroMessage = (message) => {
+  if (!message || message.from !== 'bot') return false;
+  
+  const introPatterns = [
+    /Hallo.*siap.*eksplorasi/i,
+    /Hai.*siap.*eksplorasi/i, 
+    /siap untuk eksplorasi/i,
+    /Hallo.*ECOBOT/i
+  ];
+  
+  return introPatterns.some(pattern => pattern.test(message.text));
+};
+
+// Fungsi untuk mendapatkan intro message yang konsisten
+const getConsistentIntroMessage = () => {
+  // Prioritaskan dari chat.json, fallback ke fallbackChatFlow
+  const chatFlowIntro = currentChatFlow?.chatbot_flow?.intro;
+  if (chatFlowIntro) {
+    return chatFlowIntro;
+  }
+  
+  return fallbackChatFlow.chatbot_flow.intro;
+};
 
   // Fungsi untuk menyimpan pesan ke database - DIUBAH untuk menggunakan endpoint yang benar
   const saveMessageToDatabase = async (messageType, character, messageText, stepId, messageData = {}) => {
