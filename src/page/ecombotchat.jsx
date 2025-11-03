@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Routes, Route, useParams } from 'react-router-dom';
 import Aquano from "../assets/aquano.webp";
@@ -31,8 +32,8 @@ const fallbackChatFlow = {
       id: "intro",
       type: "bot_message",
       character: "Aquano",
-      message: "Hallo, sudah siap untuk eksplorasi hari ini bersama Ecombot?",
-      next_keywords: ["Siap"]
+      message: "Hai, sudah siap untuk eksplorasi hari ini?",
+      next_keywords: ["siap"]
     },
     kimia_hijau: {
       id: "kimia_hijau",
@@ -122,7 +123,7 @@ const fallbackChatFlow = {
   },
   navigation: {
     intro: {
-      "Siap": "kimia_hijau"
+      "siap": "kimia_hijau"
     },
     kimia_hijau: {
       "Tanya Ecombot": "tanya_ecombot",
@@ -316,21 +317,17 @@ const EcombotChat = () => {
 
   const currentTitle = getCurrentTitle();
 
-  // Initialize chat session dan load history - DIUBAH: hanya inisialisasi sekali
-  const [isInitialized, setIsInitialized] = useState(false);
-
+  // Initialize chat session dan load history
   useEffect(() => {
     const initializeChat = async () => {
-      if (currentChatFlow && !isInitialized && messages.length === 0) {
-        console.log('=== INITIALIZING CHAT ===');
-        setIsInitialized(true);
+      if (currentChatFlow && messages.length === 0) {
         await startOrLoadSession();
         loadReflectiveQuestions();
       }
     };
     
     initializeChat();
-  }, [currentChatFlow, messages.length, isInitialized]);
+  }, [currentChatFlow, messages.length]);
 
   // Effect untuk auto-start question session ketika currentStep berubah ke step yang memiliki pertanyaan
   useEffect(() => {
@@ -351,42 +348,31 @@ const EcombotChat = () => {
     }
   }, [currentStep, currentChatFlow]);
 
-  // FUNGSI DIPERBAIKI: Untuk memulai atau memuat sesi chat - HANYA TAMPILKAN INTRO SEKALI
+  // Fungsi untuk memulai atau memuat sesi chat
   const startOrLoadSession = async () => {
     try {
       const token = localStorage.getItem('access');
-      
-      // PERBAIKAN: Hanya tambahkan pesan intro jika benar-benar belum ada pesan
-      if (messages.length === 0) {
+      if (!token) {
+        console.warn('User not logged in, using local session only');
         const introMessage = getStepData('intro');
-        console.log('Adding intro message:', introMessage.message);
-        
         setMessages([{ 
           from: 'bot', 
           text: introMessage.message,
           data: introMessage
         }]);
         
-        // Simpan pesan intro ke database jika user login
-        if (token) {
-          await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
-        }
-      }
-
-      if (!token) {
-        console.warn('User not logged in, using local session only');
         const savedProgress = localStorage.getItem('chatbot-progress');
-        if (savedProgress) {
-          const parsedProgress = JSON.parse(savedProgress);
-          if (!parsedProgress.visited) {
-            parsedProgress.visited = ['intro'];
-          }
-          setProgress(parsedProgress);
+      if (savedProgress) {
+        const parsedProgress = JSON.parse(savedProgress);
+        if (!parsedProgress.visited) {
+          parsedProgress.visited = ['intro'];
         }
-        return;
+        setProgress(parsedProgress);
       }
+      return; // Keluar tanpa menampilkan pesan
+    }
 
-      // Coba load session yang ada atau buat baru untuk user login
+      // Coba load session yang ada atau buat baru
       const sessionId = localStorage.getItem('current_session_id');
       
       if (sessionId) {
@@ -399,15 +385,12 @@ const EcombotChat = () => {
       
     } catch (error) {
       console.error('Error starting session:', error);
-      // Hanya tambahkan intro jika belum ada pesan sama sekali
-      if (messages.length === 0) {
-        const introMessage = getStepData('intro');
-        setMessages([{
-          from: 'bot',
-          text: introMessage.message,
-          data: introMessage
-        }]);
-      }
+      const introMessage = getStepData('intro');
+    setMessages([{
+     from: 'bot',
+     text: introMessage.message,
+     data: introMessage
+    }]);
     }
   };
 
@@ -435,7 +418,9 @@ const EcombotChat = () => {
         setCurrentSession(data.session_id);
         localStorage.setItem('current_session_id', data.session_id);
         
-        console.log('New session created:', data.session_id);
+        // Simpan pesan intro ke database
+        const introMessage = getStepData('intro');
+        await saveMessageToDatabase('bot', 'Aquano', introMessage.message, 'intro', introMessage);
         
       } else {
         throw new Error('Failed to create session');
@@ -487,11 +472,7 @@ const EcombotChat = () => {
             data: msg.message_data || {}
           })) || [];
           
-          // PERBAIKAN: Hanya set messages jika belum ada pesan
-          if (messages.length === 0 && historyMessages.length > 0) {
-            setMessages(historyMessages);
-          }
-          
+          setMessages(historyMessages);
           setCurrentSession(sessionId);
           
           console.log('Session history loaded:', historyMessages.length, 'messages');
@@ -503,7 +484,8 @@ const EcombotChat = () => {
       }
     } catch (error) {
       console.error('Error loading session history:', error);
-      // Jika gagal load history, tidak perlu buat session baru karena intro sudah ditampilkan
+      // Jika gagal load history, buat session baru
+      await createNewSession();
     }
   };
 
@@ -650,7 +632,6 @@ const saveAnswerToDatabase = async (questionData, answer, answerType = 'essay') 
         };
     }
 };
-
   // Fungsi untuk load pertanyaan reflektif
   const loadReflectiveQuestions = async () => {
     try {
@@ -906,7 +887,6 @@ const completeActivity = async (stepId) => {  // ⭐⭐ Ubah parameter jadi step
         console.error('Error completing activity in database:', error);
     }
 };
-
   // Fungsi untuk memeriksa apakah kegiatan dapat diakses
   const canAccessKegiatan = (kegiatanNum) => {
     const targetKegiatan = kegiatanList.find(k => k.num === kegiatanNum);
@@ -1162,6 +1142,7 @@ const redirectToEcomic = async () => {
     scrollChat();
   };
 
+  // Fungsi untuk memproses jawaban pertanyaan
   // Fungsi untuk memproses jawaban pertanyaan - VERSI DIPERBAIKI
 const processQuestionAnswer = async (input) => {
     if (!input.trim()) {
