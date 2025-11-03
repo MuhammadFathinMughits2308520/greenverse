@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation, Routes, Route, useParams } from 'react-router-dom';
 import Aquano from "../assets/aquano.webp";
@@ -25,15 +24,15 @@ const getAuthHeader = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Fallback data jika loading gagal
+// Fallback data jika loading gagal - INTRO DIUBAH MENJADI SATU SAJA
 const fallbackChatFlow = {
   chatbot_flow: {
     intro: {
       id: "intro",
       type: "bot_message",
       character: "Aquano",
-      message: "Hai, sudah siap untuk eksplorasi hari ini?",
-      next_keywords: ["siap"]
+      message: "<i>Hallo</i>, sudah siap untuk eksplorasi hari ini bersama ECOMBOT?",
+      next_keywords: ["Siap"]
     },
     kimia_hijau: {
       id: "kimia_hijau",

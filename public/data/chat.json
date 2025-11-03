@@ -19,7 +19,7 @@
           "source": ""
         }
       ],
-      "next_keywords": ["Tanya ECOMBOT", "Sudah"]
+      "next_keywords": ["Tanya Ecombot", "Sudah"]
     },
     "tanya_ecombot": {
       "id": "tanya_ecombot",
@@ -33,7 +33,7 @@
       "type": "bot_message",
       "character": "Aquano",
       "message": "Luar Biasa, sekarang ECOMBOT akan memandu kamu mengeksplorasi tradisi Mapag Hujan dan menemukan bagaimana tradisi ini berhubungan dengan lingkungan serta prinsip kimia hijau.",
-      "next_keywords": ["Mulai Eksplorasi 1", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 1", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "kegiatan_1": {
       "id": "kegiatan_1",
@@ -51,7 +51,7 @@
           "source": "JabarEkspres.com"
         }
       ],
-      "next_keywords": ["Pertanyaan 1", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Pertanyaan 1", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_1": {
       "id": "pertanyaan_1",
@@ -93,7 +93,7 @@
           "source": "www.lampusatu.com"
         }
       ],
-      "next_keywords": ["Pertanyaan 2", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Pertanyaan 2", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_2": {
       "id": "pertanyaan_2",
@@ -117,7 +117,7 @@
       "character": "Aquano",
       "title": "Kegiatan Eksplorasi 3: Aspek Sains (<i>Science</i>)",
       "message": "Mapag Hujan memiliki hubungan erat dengan konsep-konsep ilmiah dalam sains lingkungan. Tradisi ini menunjukkan bagaimana keberadaan sampah di alam dan air hujan saling memengaruhi satu sama lain. Dari sudut pandang sains, Mapag Hujan dapat dipahami melalui kesadaran masyarakat akan pentingnya menjaga kebersihan sungai dan mengelola sampah sebelum musim hujan tiba. Jika sampah tidak dikelola dengan baik, kualitas air dan keseimbangan lingkungan bisa terganggu.\n\n<b>1. Interaksi Air Hujan dengan Lingkungan</b>\nAir hujan yang turun akan berinteraksi dengan material disekitarnya. Jika sungai dipenuhi sampah, air dapat melarutkan senyawa berbahaya seperti plastik, logam berat, dan limbah rumah tangga. Penumpukan sampah menyempitkan aliran air, menyebabkan sungai meluap saat hujan deras dan memicu banjir. Air banjir yang tercemar membawa zat kimia ke tanah dan air tanah, sehingga berisiko bagi kesehatan masyarakat.\n\n<b>2. Pengaruh Sampah terhadap Kualitas Lingkungan</b>\nSampah yang tidak dikelola dengan baik akan mencemari air, udara, dan tanah. Sampah organik membusuk menghasilkan gas seperti metana (CH₄), amonia (NH₃), hidrogen sulfida (H₂S), dan karbon dioksida (CO₂) yang mencemari udara. Limbah meningkatkan <i>BOD</i> (<i>Biological Oxygen Demand</i>) dan <i>COD</i> (<i>Chemical Oxygen Demand</i>), yang dapat menurunkan kadar oksigen terlarut, dan mengganggu kehidupan biota air. Air lindi dari sampah meresap ke tanah, membawa senyawa berbahaya dan logam berat. Mengubah struktur kimia tanah, menurunkan kesuburan, serta mencemari air tanah.",
-      "next_keywords": ["Pertanyaan 3", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Pertanyaan 3", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_3": {
       "id": "pertanyaan_3",
@@ -159,7 +159,7 @@
           "source": "indoplasma.or.id"
         }
       ],
-      "next_keywords": ["Pertanyaan 4", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Pertanyaan 4", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_4": {
       "id": "pertanyaan_4",
@@ -191,7 +191,7 @@
       "character": "Aquano",
       "title": "Kegiatan Eksplorasi 5: Aspek Robotik (<i>Robotics</i>)",
       "message": "Halo! Sekarang kamu memasuki aspek Robotics. Tahukah kamu? Aspek ini menekankan pemanfaatan media robot virtual berbentuk chatbot yang sedang kamu gunakan ini, yaitu ECOMBOT, sebagai pemandu eksplorasi dalam literasi lingkungan. Melalui ECOMBOT, kamu bisa berinteraksi langsung, mengeksplorasi informasi tentang tradisi Mapag Hujan, dan memahami bagaimana menjaga lingkungan secara menyenangkan dan interaktif. Mari lanjutkan untuk eksplorasi berikutnya!",
-      "next_keywords": ["Mulai Eksplorasi 6", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Mulai Eksplorasi 6", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "kegiatan_6": {
       "id": "kegiatan_6",
@@ -199,7 +199,7 @@
       "character": "Aquano",
       "title": "Kegiatan Eksplorasi 6: Aspek Rekayasa (<i>Engineering</i>)",
       "message": "Aspek ini berhubungan dengan cara membuat solusi nyata lewat rekayasa atau teknik sederhana. Dalam kegiatan Mapag Hujan, masyarakat menerapkan sistem drainase alami dengan membuat lubang biopori. Lubang ini membantu air hujan meresap ke tanah dan mencegah banjir, sekaligus mengubah sampah organik jadi kompos yang bermanfaat bagi tanah.",
-      "next_keywords": ["Mari Merancang", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Mari Merancang", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "mari_merancang": {
       "id": "mari_merancang",
@@ -238,7 +238,7 @@
           "source": "www.kotasubang.com"
         }
       ],
-      "next_keywords": ["Ayo Berkreasi", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Ayo Berkreasi", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "ayo_berkreasi": {
       "id": "ayo_berkreasi",
@@ -263,7 +263,7 @@
       "character": "Aquano",
       "title": "Kegiatan Eksplorasi 8: Aspek Matematika (<i>Mathematics</i>)",
       "message": "Aspek ini digunakan untuk menganalisis efektivitas dukungan kegiatan Mapag Hujan dalam mendukung mitigasi banjir dan menjaga keseimbangan lingkungan. \n\nAnalisis kuantitatif memberikan gambaran konkret mengenai hasil dan dampak dari kegiatan tersebut, sebagai contoh, volume genangan banjir Kota Bandung mengalami penurunan signifikan dari lebih dari 99.000 m³ pada tahun 2015 menjadi 36.000 m³ pada tahun 2023. Besar penurunan volume dapat dihitung sebagai:\n\nPersentase penurunan volume genangan = (99.000-36.000)/99.000 × 100% = 63,6%\n\nArtinya, terjadi penurunan volume genangan air sebesar 63,6% dalam kurun waktu delapan tahun, menunjukkan adanya dampak nyata dari program pengendalian banjir dan pembangunan infrastruktur hijau. \n\nMeskipun hasil ini tidak sepenuhnya disebabkan oleh tradisi Mapag Hujan, kegiatan tersebut memiliki peran penting dalam meningkatkan kesadaran dan partisipasi masyarakat terhadap pentingnya menjaga kebersihan lingkungan dan pengelolaan air. Kesadaran kolektif inilah yang menjadi langkah awal dalam mendukung keberhasilan program mitigasi banjir secara berkelanjutan.",
-      "next_keywords": ["Pertanyaan Reflektif", "Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Pertanyaan Reflektif", "Tanya Ecombot", "Menu Sebelumnya"]
     },
     "pertanyaan_reflektif": {
       "id": "pertanyaan_reflektif",
@@ -295,7 +295,7 @@
       "character": "Aquano",
       "title": "Eksplorasi Selesai",
       "message": "Selamat! kamu telah menyelesaikan seluruh eksplorasi ini.\n\nDengan menyelesaikan kegiatan ini, kamu telah belajar tentang tradisi Mapag Hujan, bagaimana tradisi ini membantu mitigasi banjir, mengelola sampah, dan menjaga keseimbangan lingkungan. Selain itu, kamu juga memahami keterkaitan tradisi lokal dengan prinsip kimia hijau, serta pentingnya literasi lingkungan dalam kehidupan sehari-hari. Gunakan pengetahuan ini untuk membuat keputusan yang lebih bijak terhadap lingkungan di rumah, sekolah, atau lingkungan sekitar.",
-      "next_keywords": ["Tanya ECOMBOT", "Menu Sebelumnya"]
+      "next_keywords": ["Tanya Ecombot", "Menu Sebelumnya"]
     }
   },
   "navigation": {
@@ -303,7 +303,7 @@
       "siap": "kimia_hijau"
     },
     "kimia_hijau": {
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "sudah": "pre_kegiatan"
     },
     "tanya_ecombot": {
@@ -311,12 +311,12 @@
     },
     "pre_kegiatan": {
       "Mulai Eksplorasi 1": "kegiatan_1",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kimia_hijau"
     },
     "kegiatan_1": {
       "Pertanyaan 1": "pertanyaan_1",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "pre_kegiatan"
     },
     "pertanyaan_1": {
@@ -325,7 +325,7 @@
     },
     "kegiatan_2": {
       "Pertanyaan 2": "pertanyaan_2",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_1"
     },
     "pertanyaan_2": {
@@ -334,7 +334,7 @@
     },
     "kegiatan_3": {
       "Pertanyaan 3": "pertanyaan_3",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_2"
     },
     "pertanyaan_3": {
@@ -343,7 +343,7 @@
     },
     "kegiatan_4": {
       "Pertanyaan 4": "pertanyaan_4",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_3"
     },
     "pertanyaan_4": {
@@ -352,12 +352,12 @@
     },
     "kegiatan_5": {
       "Mulai Eksplorasi 6": "kegiatan_6",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_4"
     },
     "kegiatan_6": {
       "Mari Merancang": "mari_merancang",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_5"
     },
     "mari_merancang": {
@@ -366,7 +366,7 @@
     },
     "kegiatan_7": {
       "Ayo Berkreasi": "ayo_berkreasi",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_6"
     },
     "ayo_berkreasi": {
@@ -375,7 +375,7 @@
     },
     "kegiatan_8": {
       "Pertanyaan Reflektif": "pertanyaan_reflektif",
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "kegiatan_7"
     },
     "pertanyaan_reflektif": {
@@ -383,7 +383,7 @@
       "Menu Sebelumnya": "kegiatan_8"
     },
     "completion": {
-      "Tanya ECOMBOT": "tanya_ecombot",
+      "Tanya Ecombot": "tanya_ecombot",
       "Menu Sebelumnya": "intro"
     }
   },
