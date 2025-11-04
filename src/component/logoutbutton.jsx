@@ -1,8 +1,8 @@
 import React from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
 function LogoutButton() {
   const navigate = useNavigate();
@@ -11,35 +11,41 @@ function LogoutButton() {
     const accessToken = localStorage.getItem("access");
     const refreshToken = localStorage.getItem("refresh");
 
-    if (!refreshToken) {
-      console.error("Tidak ada token refresh, mungkin belum login");
-      return;
-    }
-
     try {
-      await axios.post(
-        `${API_BASE}/logout/`,
-        { refresh: refreshToken },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      if (refreshToken) {
+        await axios.post(
+          `${API_BASE}/logout/`,
+          { refresh: refreshToken },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+      }
     } catch (err) {
-      console.warn("Gagal logout di server (kemungkinan token sudah kedaluwarsa).");
+      console.warn("Logout di server gagal atau token sudah kedaluwarsa:", err);
     } finally {
-      // Hapus semua data auth dari localStorage
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
+      // 🔹 Hapus semua localStorage
+      localStorage.clear();
 
-      // Kirim event global agar ProtectedRoute tahu user logout
+      // 🔹 Hapus semua sessionStorage (kalau ada)
+      sessionStorage.clear();
+
+      // 🔹 Hapus semua cookies
+      document.cookie.split(";").forEach((cookie) => {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+      });
+
+      // 🔹 Kirim event global agar komponen lain tahu user logout
       window.dispatchEvent(new Event("logout"));
 
-      // Navigasi ke halaman login tanpa bisa kembali
+      // 🔹 Arahkan ke halaman login
       navigate("/login", { replace: true });
 
-      // Opsional: mencegah user tekan tombol back untuk kembali
+      // 🔹 Opsional: cegah user menekan tombol "Back"
       setTimeout(() => {
         window.history.pushState(null, null, window.location.href);
         window.onpopstate = () => window.history.go(1);

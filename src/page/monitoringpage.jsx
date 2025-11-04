@@ -66,15 +66,6 @@ const DashboardFilters = ({ filters, setFilters, onSearch, onReset }) => {
           />
         </div>
         <div className="teacher-filter-item">
-          <label>Nama Komik</label>
-          <input 
-            type="text" 
-            placeholder="Cari nama komik..."
-            value={filters.komik}
-            onChange={(e) => setFilters({...filters, komik: e.target.value})}
-          />
-        </div>
-        <div className="teacher-filter-item">
           <label>Status Komik</label>
           <select 
             value={filters.status_komik}
