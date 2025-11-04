@@ -3,7 +3,6 @@ import { useDarkMode } from '../context/DarkModeContext';
 import '../styles/teacherMonitoring.css';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api';
 
-
 // ==================== KOMPONEN NAVIGASI ====================
 const Navigation = ({ activeTab, setActiveTab, isDark, toggleDarkMode }) => {
   return (
@@ -194,7 +193,7 @@ const DashboardTable = ({ data, loading, pagination, onPageChange }) => {
                     </span>
                   </td>
                   <td className="teacher-date-cell">
-                    {row.terakhir_aktif || '-'}
+                    {row.terakhir_aktif}
                   </td>
                 </tr>
               );
